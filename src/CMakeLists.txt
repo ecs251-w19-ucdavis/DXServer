@@ -1,0 +1,62 @@
+# ┌──────────────────────────────────────────────────────────────────┐
+# │  Configure Qt                                                    │
+# └──────────────────────────────────────────────────────────────────┘
+# Find includes in corresponding build directories
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# Instruct CMake to run moc automatically when needed
+set(CMAKE_AUTOMOC ON)
+# Create code from a list of Qt designer ui files
+set(CMAKE_AUTOUIC ON)
+# Manage Qt resources
+set(CMAKE_AUTORCC ON)
+
+# ┌──────────────────────────────────────────────────────────────────┐
+# │  Configure Source Files                                          │
+# └──────────────────────────────────────────────────────────────────┘
+# Source files
+set (vidi3dquark_SOURCES
+  Communication/MainServer.cpp
+  QuarkScene.cpp
+  Main.cpp)
+
+# Header files
+set (vidi3dquark_HEADERS
+  Communication/MainServer.h)
+
+get_property(_egl_available GLOBAL PROPERTY V3D_USE_EGL)
+if(_egl_available)
+  list(APPEND vidi3dquark_SOURCES Graphics/egl/EGLWindow.cpp)
+else()
+  find_package(glfw3 QUIET)
+  if(TARGET glfw)
+    list(APPEND vidi3dquark_SOURCES Graphics/glfw/GLFWSetup.cpp)
+    list(APPEND vidi3dquark_HEADERS Graphics/glfw/GLFWHeader_Internal.h)
+  else()
+    list(APPEND vidi3dquark_SOURCES Graphics/qt/QtOpenGLWindow.cpp)
+    list(APPEND vidi3dquark_HEADERS Graphics/qt/QtOpenGLWindow.h)
+  endif ()
+endif()
+
+# Create target
+add_executable(vidi3dquark ${vidi3dquark_SOURCES} ${vidi3dquark_HEADERS})
+
+# ┌──────────────────────────────────────────────────────────────────┐
+# │  Configure Targets                                               │
+# └──────────────────────────────────────────────────────────────────┘
+target_v3d_configure(vidi3dquark
+  LINK_PLAIN
+  v3d::vidi3d_core
+  v3d::vidi3d_module_opengl
+  Qt5::Core
+  Qt5::Gui
+  Qt5::Widgets
+  Qt5::WebSockets)
+target_link_v3d_opengl(vidi3dquark GL_CONTEXT EGL)
+if(TARGET glfw)
+  target_link_libraries(vidi3dquark glfw)
+endif()
+
+# ┌──────────────────────────────────────────────────────────────────┐
+# │  Configure Install                                               │
+# └──────────────────────────────────────────────────────────────────┘
+install_v3d_target(vidi3dquark)
