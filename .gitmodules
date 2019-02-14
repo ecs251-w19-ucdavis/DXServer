@@ -1,3 +1,6 @@
 [submodule "external/libvidi3d"]
 	path = external/libvidi3d
 	url = git@github.com:wilsonCernWq/V3D.git
+[submodule "external/webvidi3d"]
+	path = external/webvidi3d
+	url = git@github.com:wilsonCernWq/V3D-Web.git
