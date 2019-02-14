@@ -55,8 +55,3 @@ target_link_v3d_opengl(vidi3dquark GL_CONTEXT EGL)
 if(TARGET glfw)
   target_link_libraries(vidi3dquark glfw)
 endif()
-
-# ┌──────────────────────────────────────────────────────────────────┐
-# │  Configure Install                                               │
-# └──────────────────────────────────────────────────────────────────┘
-#install_v3d_target(vidi3dquark)

@@ -5,7 +5,8 @@
 #ifdef _WIN32
 #define _DATA_ "C:\\Users\\wilson\\Documents\\Work\\ViDi\\data\\vorts1.data"
 #else
-#define _DATA_ "/home/qadwu/Work/data/vidi3d/vorts1.data"
+//#define _DATA_ "/home/qadwu/Work/data/vidi3d/vorts1.data"
+#define _DATA_ "/Users/qwu/Work/projects/vidi/data/vorts1.data"
 #endif
 
 #include <QImage>
