@@ -10,7 +10,7 @@
 // Copyright SCI Institute, University of Utah, 2018
 // ======================================================================== //
 
-#include "QuarkGLHeader.h"
+#include "DXGL.h"
 #include "GLFWHeader_Internal.h"
 
 void error_callback(int error, const char* description)
@@ -18,7 +18,7 @@ void error_callback(int error, const char* description)
     fprintf(stderr, "Error: %s\n", description);
 }
 
-int v3d::quark::QuarkExecute(int argc, char* argv[], const std::function<void()>& render)
+int v3d::dx::DXGL_execute(int argc, char* argv[], const std::function<void()>& render)
 {
     // Initialize GLFW
     glfwSetErrorCallback(error_callback);
@@ -34,7 +34,7 @@ int v3d::quark::QuarkExecute(int argc, char* argv[], const std::function<void()>
     // Create Window
     GLFWwindow *window = nullptr;
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    window = glfwCreateWindow(v3d::quark::winW, v3d::quark::winH, "", nullptr, nullptr);
+    window = glfwCreateWindow(v3d::dx::winW, v3d::dx::winH, "", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         exit(EXIT_FAILURE);

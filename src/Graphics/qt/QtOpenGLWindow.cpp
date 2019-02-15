@@ -15,12 +15,12 @@
 #include <QTimer>
 #include <QWindow>
 
-#include "QuarkGLHeader.h"
+#include "DXGL.h"
 #include "Util/Log.h"
 
-namespace v3d { namespace quark {
+namespace v3d { namespace dx {
 
-int QuarkExecute(int argc, char* argv[], const std::function<void()>& render)
+int DXGL_execute(int argc, char* argv[], const std::function<void()>& render)
 {
     QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QApplication app(argc, argv);

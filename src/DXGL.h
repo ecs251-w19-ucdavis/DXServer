@@ -7,19 +7,21 @@
 //                                                                           //
 //===========================================================================//
 
+// TODO probably we should expose our thread abstraction here
+
 #pragma once
-#ifndef V3D_QUARKGLHEADER_H
-#define V3D_QUARKGLHEADER_H
+#ifndef DXSERVER_DXGL_H
+#define DXSERVER_DXGL_H
 
 #include <cstddef>
 #include <functional>
 
-namespace v3d { namespace quark {
+namespace v3d { namespace dx {
 
 extern int winW, winH;
-int QuarkExecute(int argc, char* argv[], const std::function<void()>& render);
+int DXGL_execute(int argc, char* argv[], const std::function<void()>& render);
 
 }}
 
 
-#endif //V3D_QUARKGLHEADER_H
+#endif //DXSERVER_DXGL_H

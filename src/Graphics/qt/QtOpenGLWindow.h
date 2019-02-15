@@ -11,7 +11,7 @@
 #include <QOpenGLContext>
 #include <QOffscreenSurface>
 
-namespace v3d { namespace quark {
+namespace v3d { namespace dx {
 
 namespace qt
 {

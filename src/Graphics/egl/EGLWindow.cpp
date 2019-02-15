@@ -5,7 +5,7 @@
 #include <EGL/egl.h>
 #include <glad/glad.h>
 
-#include "QuarkGLHeader.h"
+#include "DXGL.h"
 
 static const EGLint configAttribs[] = {
   EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
@@ -26,9 +26,9 @@ static const EGLint pbufferAttribs[] = {
   EGL_NONE,
 };
 
-namespace v3d { namespace quark {
+namespace v3d { namespace dx {
 
-int QuarkExecute(int argc, char *argv[], const std::function<void()> &render)
+int DXGL_execute(int argc, char *argv[], const std::function<void()> &render)
 {
     // 1. Initialize EGL
     EGLDisplay eglDpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);

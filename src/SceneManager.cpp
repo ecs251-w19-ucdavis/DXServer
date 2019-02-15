@@ -27,7 +27,7 @@
 #include "Util/Camera.h"
 #include "Util/SourceCodeManager.h"
 
-#include "QuarkGLHeader.h"
+#include "DXGL.h"
 
 namespace v3d {
 
@@ -215,7 +215,7 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> &&
     auto renderer = std::make_shared<RegularGridPipelineGL>();
     renderer->setScene(scene);
     renderer->setFramebufferObject(fbo->sharedFramebufferObject());
-    renderer->resize(quark::winW, quark::winH);
+    renderer->resize(dx::winW, dx::winH);
 
     // render
     glFinish();
@@ -223,22 +223,22 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> &&
     glFinish();
 
     // get framebuffer image
-    std::vector<unsigned char> buffer(quark::winW * quark::winH * 4);
+    std::vector<unsigned char> buffer(dx::winW * dx::winH * 4);
     GLuint currFbo = GLFramebufferObject::currentDrawBinding();
     fbo->bind();
     V3D_GL_PRINT_ERRORS();
     GLint readBuffer;
     glGetIntegerv(GL_READ_BUFFER, &readBuffer);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
-    glReadPixels(0, 0, quark::winW, quark::winH, GL_BGRA, GL_UNSIGNED_BYTE, &buffer[0]);
+    glReadPixels(0, 0, dx::winW, dx::winH, GL_BGRA, GL_UNSIGNED_BYTE, &buffer[0]);
     glReadBuffer(readBuffer);
     V3D_GL_PRINT_ERRORS();
     GLFramebufferObject::bind(currFbo);
     V3D_GL_PRINT_ERRORS();
-    for (int i = 0; i < quark::winW * quark::winH; i++) buffer[i * 4 + 3] = 255;
+    for (int i = 0; i < dx::winW * dx::winH; i++) buffer[i * 4 + 3] = 255;
 
     // save
-    QImage img = QImage(&buffer[0], quark::winW, quark::winH, QImage::Format_RGB32).mirrored(false, true);
+    QImage img = QImage(&buffer[0], dx::winW, dx::winH, QImage::Format_RGB32).mirrored(false, true);
     img.save("image.PNG", 0, -1);
     std::cout << "save file as image.PNG" << std::endl;
 }
