@@ -23,7 +23,7 @@ set (vidi3d_dxserver_SOURCES
 # Header files
 set (vidi3d_dxserver_HEADERS
   Communication/MainServer.h
-  SceneLoader.h)
+  SceneLoader.h Serializer/SceneDictionary.h)
 
 get_property(_egl_available GLOBAL PROPERTY V3D_USE_EGL)
 if(_egl_available)

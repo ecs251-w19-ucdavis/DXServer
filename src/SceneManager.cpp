@@ -12,6 +12,8 @@
 #include <QImage>
 #include <QFile>
 
+#include "SceneLoader.h"
+
 #include "Util/Library.h"
 #include "Util/JsonParser.h"
 #include "Renderer/IRenderer.h"
@@ -146,17 +148,20 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> &&
     loadAllShaders();
 
     // load data
-    auto dataSrc = std::make_shared<RegularGridLoader>();
-    auto dataOut = std::make_shared<RegularGridDataGL>();
-    dataSrc->setFileName(_DATA_);
-    dataSrc->setOffset(0);
-    dataSrc->setDimensions({128, 128, 128});
-    dataSrc->setType(V3D_FLOAT);
-    dataSrc->setEndian(V3D_LITTLE_ENDIAN);
-    dataSrc->setFileUpperLeft(false);
-    dataSrc->setOutputData(dataOut.get());
-    dataSrc->update();
-    dataOut->loadGL();
+//    auto dataSrc = std::make_shared<RegularGridLoader>();
+//    auto dataOut = std::make_shared<RegularGridDataGL>();
+//    dataSrc->setFileName(_DATA_);
+//    dataSrc->setOffset(0);
+//    dataSrc->setDimensions({128, 128, 128});
+//    dataSrc->setType(V3D_FLOAT);
+//    dataSrc->setEndian(V3D_LITTLE_ENDIAN);
+//    dataSrc->setFileUpperLeft(false);
+//    dataSrc->setOutputData(dataOut.get());
+//    dataSrc->update();
+//    dataOut->loadGL();
+
+    v3d::dx::SceneLoader loader;
+    auto dataOut = std::dynamic_pointer_cast<RegularGridDataGL>(loader.load(argv[1]));
 
     // setup volume
     const ivec3 dim = dataOut->dimensions();
@@ -200,7 +205,7 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> &&
     scene->setTFPreIntegration(false);
     scene->setLighting(true);
     scene->setGlobalLighting(true);
-    scene->lightSource()->setPosition(vec4(0.90037083625793457, 0.43512341380119324, 0, 0));
+//    scene->lightSource()->setPosition(vec4(0.90037083625793457, 0.43512341380119324, 0, 0));
     scene->setEmptySpaceSkipping(false);
     auto camera = std::make_shared<Camera>();
     camera->lookAt(dGridOrigin + dGridExtents * dvec3(0.5, 0.5, 3.0),
