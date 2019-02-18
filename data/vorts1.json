@@ -7,7 +7,7 @@
         "z" : 128
       },
       "endian" : "LITTLE_ENDIAN",
-      "fileName" : "/home/qadwu/Work/data/vidi3d/structured/vorts1.data",
+      "fileName" : "vorts1.data",
       "fileUpperLeft" : false,
       "format" : "REGULAR_GRID_RAW_BINARY",
       "id" : 1,
