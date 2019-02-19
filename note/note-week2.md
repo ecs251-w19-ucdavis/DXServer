@@ -37,7 +37,4 @@ In general,
 * send webserver requests to rendering system
 
 ### Issues
-<<<<<<< HEAD
-=======
 * We didn't use the actual thread for abstraction. Might need to switch to threads if there are more than one GPU.
->>>>>>> 8c8ad1f456b90fd147f84afbb87319a2b4d66fa2
