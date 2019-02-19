@@ -153,8 +153,8 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> &&
 //    auto renderer = std::make_shared<TetraGridPipelineGL>();
 //    renderer->setScene(loader.getSceneTets());
 
-//    auto renderer = loader.getRendererGrid();
-    auto renderer = loader.getRendererTets();
+    auto renderer = loader.getRendererGrid();
+//    auto renderer = loader.getRendererTets();
     renderer->setFramebufferObject(fbo->sharedFramebufferObject());
     renderer->resize(dx::winW, dx::winH);
 
