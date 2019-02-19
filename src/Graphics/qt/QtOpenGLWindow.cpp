@@ -1,6 +1,11 @@
-//
-// Created by wilson on 2019/1/9.
-//
+//===========================================================================//
+//                                                                           //
+// LibViDi3D                                                                 //
+// Copyright(c) 2018 Qi Wu (Wilson)                                          //
+// University of California, Davis                                           //
+// MIT Licensed                                                              //
+//                                                                           //
+//===========================================================================//
 
 #include "QtOpenGLWindow.h"
 

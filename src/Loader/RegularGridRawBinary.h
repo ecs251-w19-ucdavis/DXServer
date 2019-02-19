@@ -8,36 +8,14 @@
 //===========================================================================//
 
 #pragma once
-#ifndef V3D_GRAPHICS_QT_QTOPENGLWINDOW_H
-#define V3D_GRAPHICS_QT_QTOPENGLWINDOW_H
+#ifndef DXSERVER_REGULARGRIDRAWBINARY_H
+#define DXSERVER_REGULARGRIDRAWBINARY_H
 
-#include "Util/GLConfig.h"
+#include "Util/JsonParser.h"
+#include "Scene/IMedium.h"
 
-#include <QWindow>
-#include <QOpenGLContext>
-#include <QOffscreenSurface>
+namespace v3d { namespace load {
+api::V3DMedium RegularGridRawBinary(const JsonValue &json, std::string jsonFileName);
+}}
 
-namespace v3d { namespace dx {
-
-namespace qt
-{
-
-class OpenGLWindow: public QWindow
-{
-    Q_OBJECT
-public:
-    explicit OpenGLWindow(QWindow *parent = nullptr);
-    ~OpenGLWindow() final;
-
-private:
-    void makeCurrent()
-    {
-        _context.makeCurrent(&_offscreenSurface);
-    }
-    QOffscreenSurface _offscreenSurface;
-    QOpenGLContext _context;
-};
-
-}}}
-
-#endif//V3D_GRAPHICS_QT_QTOPENGLWINDOW_H
+#endif //DXSERVER_REGULARGRIDRAWBINARY_H
