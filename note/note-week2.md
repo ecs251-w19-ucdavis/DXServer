@@ -1,5 +1,7 @@
 # Note for Week 2
 
+[link to trello](https://trello.com/invite/daxian2/0d1bdd82285db70339a7885d70934329)
+
 ### What did we do last week
 
 In general, 
