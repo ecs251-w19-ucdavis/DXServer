@@ -21,8 +21,6 @@
 #include "Data/RegularGridLoader.h"
 #include "Scene/Medium/RegularGridDataGL.h"
 #include "Scene/Geometry/RegularGridVolumeGL.h"
-#include "Scene/TransferFunction/TransferFunction.h"
-#include "Scene/TransferFunction/OcclusionTransferFunction.h"
 #include "Renderer/RegularGridSceneGL.h"
 #include "Renderer/RegularGridPipelineGL.h"
 #include "Renderer/FramebufferGL.h"
@@ -160,9 +158,11 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> &&
 //    dataSrc->update();
 //    dataOut->loadGL();
 
-    v3d::dx::SceneLoader loader;
-    auto dataOut = std::dynamic_pointer_cast<RegularGridDataGL>(loader.load(argv[1]));
-
+    v3d::dx::SceneLoader loader(argv[1], dx::winW, dx::winH);
+    loader.loadMedium();
+    loader.loadView();
+#if 0
+    auto dataOut = std::dynamic_pointer_cast<RegularGridDataGL>(loader.loadMedium());
     // setup volume
     const ivec3 dim = dataOut->dimensions();
     const vec3 gridOrigin = dataOut->origin();
@@ -215,10 +215,11 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> &&
     camera->perspective(45.0, camera->aspect(), maxDim * 0.01, maxDim * 10.0);
     scene->setCamera(camera);
     scene->setAllDirty(true);
+#endif
 
     // create renderer
     auto renderer = std::make_shared<RegularGridPipelineGL>();
-    renderer->setScene(scene);
+    renderer->setScene(loader.getSceneGrid());
     renderer->setFramebufferObject(fbo->sharedFramebufferObject());
     renderer->resize(dx::winW, dx::winH);
 

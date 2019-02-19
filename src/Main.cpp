@@ -24,8 +24,7 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> &&
 
 int main(int argc, char* argv[])
 {
-    return dx::DXGL_execute(argc, argv, [&]()
-    {
+    return dx::DXGL_execute(argc, argv, [&]() {
         auto fbo = std::make_shared<FramebufferGL>(dx::winW, dx::winH);
         createScene(&argc, const_cast<const char **>(argv), std::move(fbo));
     });
