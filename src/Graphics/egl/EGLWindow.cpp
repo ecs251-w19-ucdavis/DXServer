@@ -1,7 +1,13 @@
-//
-// Created by qadwu on 1/10/19.
-//
+//===========================================================================//
+//                                                                           //
+// LibViDi3D                                                                 //
+// Copyright(c) 2018 Qi Wu (Wilson)                                          //
+// University of California, Davis                                           //
+// MIT Licensed                                                              //
+//                                                                           //
+//===========================================================================//
 
+#pragma once
 #include <EGL/egl.h>
 #include <glad/glad.h>
 

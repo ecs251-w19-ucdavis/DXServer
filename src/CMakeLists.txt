@@ -16,14 +16,18 @@ set(CMAKE_AUTORCC ON)
 # Source files
 set (vidi3d_dxserver_SOURCES
   Communication/MainServer.cpp
+  Loader/RegularGridRawBinary.cpp
   SceneManager.cpp
-  Main.cpp
-  SceneLoader.cpp)
+  SceneLoader.cpp
+  Main.cpp)
 
 # Header files
 set (vidi3d_dxserver_HEADERS
   Communication/MainServer.h
-  SceneLoader.h Serializer/SceneDictionary.h)
+  Loader/RegularGridRawBinary.h
+  Loader/Common.h
+  Serializer/SceneDictionary.h
+  SceneLoader.h)
 
 get_property(_egl_available GLOBAL PROPERTY V3D_USE_EGL)
 if(_egl_available)

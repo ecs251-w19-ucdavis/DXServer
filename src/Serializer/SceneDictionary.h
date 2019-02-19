@@ -1,7 +1,13 @@
-//
-// Created by Qi Wu on 2019-02-15.
-//
+//===========================================================================//
+//                                                                           //
+// LibViDi3D                                                                 //
+// Copyright(c) 2018 Qi Wu (Wilson)                                          //
+// University of California, Davis                                           //
+// MIT Licensed                                                              //
+//                                                                           //
+//===========================================================================//
 
+#pragma once
 #ifndef DXSERVER_SCENEDICTIONARY_H
 #define DXSERVER_SCENEDICTIONARY_H
 

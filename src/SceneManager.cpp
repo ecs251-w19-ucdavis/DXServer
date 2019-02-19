@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 //
 // Created by qadwu on 1/10/19.
 //
@@ -7,6 +8,16 @@
 #else
 //#define _DATA_ "/home/qadwu/Work/data/vidi3d/vorts1.data"
 #endif
+=======
+//===========================================================================//
+//                                                                           //
+// LibViDi3D                                                                 //
+// Copyright(c) 2018 Qi Wu (Wilson)                                          //
+// University of California, Davis                                           //
+// MIT Licensed                                                              //
+//                                                                           //
+//===========================================================================//
+>>>>>>> df6fef45a36a2d708c8e2500d8eb54b2e5c9dc4d
 
 #include <string>
 #include <QImage>
@@ -15,16 +26,16 @@
 #include "SceneLoader.h"
 
 #include "Util/Library.h"
-#include "Util/JsonParser.h"
+//#include "Util/JsonParser.h"
 #include "Renderer/IRenderer.h"
 
-#include "Data/RegularGridLoader.h"
-#include "Scene/Medium/RegularGridDataGL.h"
-#include "Scene/Geometry/RegularGridVolumeGL.h"
+//#include "Data/RegularGridLoader.h"
+//#include "Scene/Medium/RegularGridDataGL.h"
+//#include "Scene/Geometry/RegularGridVolumeGL.h"
 #include "Renderer/RegularGridSceneGL.h"
 #include "Renderer/RegularGridPipelineGL.h"
 #include "Renderer/FramebufferGL.h"
-#include "Util/Camera.h"
+//#include "Util/Camera.h"
 #include "Util/SourceCodeManager.h"
 
 #include "DXGL.h"
@@ -145,77 +156,10 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> &&
     loadModule();
     loadAllShaders();
 
-    // load data
-//    auto dataSrc = std::make_shared<RegularGridLoader>();
-//    auto dataOut = std::make_shared<RegularGridDataGL>();
-//    dataSrc->setFileName(_DATA_);
-//    dataSrc->setOffset(0);
-//    dataSrc->setDimensions({128, 128, 128});
-//    dataSrc->setType(V3D_FLOAT);
-//    dataSrc->setEndian(V3D_LITTLE_ENDIAN);
-//    dataSrc->setFileUpperLeft(false);
-//    dataSrc->setOutputData(dataOut.get());
-//    dataSrc->update();
-//    dataOut->loadGL();
-
     v3d::dx::SceneLoader loader(argv[1], dx::winW, dx::winH);
-    loader.loadMedium();
-    loader.loadView();
-#if 0
-    auto dataOut = std::dynamic_pointer_cast<RegularGridDataGL>(loader.loadMedium());
-    // setup volume
-    const ivec3 dim = dataOut->dimensions();
-    const vec3 gridOrigin = dataOut->origin();
-    const vec3 gridSpacing = dataOut->spacing();
-    const vec3 gridExtents = vec3(dim - ivec3(1)) * gridSpacing * 0.5f;
-    const vec3 gridCenter = gridOrigin + gridExtents * 0.5f;
-    const auto gridTBox = Box<float>(gridOrigin - gridSpacing * 0.5f, gridOrigin + gridExtents + gridSpacing * 0.5f);
-    const auto gridBBox = Box<float>(gridOrigin, gridOrigin + gridExtents);
-    const dvec2 gridRange(dataOut->getScalarRange<float>());
-    const float gridVoxelSize = length(gridSpacing) / std::sqrt(3.0f);
-
-    dvec3 dGridOrigin(gridOrigin.x, gridOrigin.y, gridOrigin.z);
-    dvec3 dGridSpacing(gridSpacing.x, gridSpacing.y, gridSpacing.z);
-    dvec3 dGridExtents(gridExtents.x, gridExtents.y, gridExtents.z);
-
-    // create a volume
-    auto volume = std::make_shared<v3d::RegularGridVolumeGL>();
-    volume->setMedium(dataOut, 0);
-    volume->setParam("textureBox", gridTBox);
-    volume->setParam("boundingBox", gridBBox);
-    volume->setParam("clippingBox", gridBBox);
-    volume->setParam("scalarMappingRange", gridRange);
-    volume->setParam("sampleDistance", gridVoxelSize / 4.0f);
-    volume->setParam("opacityUnitDistance", gridVoxelSize);
-    volume->setParam("xSlicePosition", gridCenter.x);
-    volume->setParam("ySlicePosition", gridCenter.y);
-    volume->setParam("zSlicePosition", gridCenter.z);
-    volume->commit();
-
-    // setup the transfer function etc
-    auto tfn = TransferFunction::fromRainbowMap();
-    auto otf = std::unique_ptr<OcclusionTransferFunction>(new OcclusionTransferFunction());
-    volume->setTransferFunction(std::move(tfn));
-    volume->setTransferFunction2D(std::move(otf));
-
-    // create toe scene
-    auto scene = std::make_shared<RegularGridSceneGL>();
-    scene->setVolume(volume);
-    scene->setBackgroundColor(vec4(0.0f, 0.0f, 0.0f, 1.0f));
-    scene->setTFPreIntegration(false);
-    scene->setLighting(true);
-    scene->setGlobalLighting(true);
-//    scene->lightSource()->setPosition(vec4(0.90037083625793457, 0.43512341380119324, 0, 0));
-    scene->setEmptySpaceSkipping(false);
-    auto camera = std::make_shared<Camera>();
-    camera->lookAt(dGridOrigin + dGridExtents * dvec3(0.5, 0.5, 3.0),
-                   dGridOrigin + dGridExtents * dvec3(0.5, 0.5, 0.5),
-                   dvec3(0.0, 1.0, 0.0));
-    double maxDim = max(max(dGridExtents.x, dGridExtents.y), dGridExtents.z);
-    camera->perspective(45.0, camera->aspect(), maxDim * 0.01, maxDim * 10.0);
-    scene->setCamera(camera);
-    scene->setAllDirty(true);
-#endif
+    loader.initData();
+    loader.initScene();
+    loader.updateView();
 
     // create renderer
     auto renderer = std::make_shared<RegularGridPipelineGL>();

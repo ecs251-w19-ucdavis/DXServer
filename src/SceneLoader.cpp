@@ -1,151 +1,82 @@
-//
-// Created by Qi Wu on 2019-02-15.
-//
+//===========================================================================//
+//                                                                           //
+// LibViDi3D                                                                 //
+// Copyright(c) 2018 Qi Wu (Wilson)                                          //
+// University of California, Davis                                           //
+// MIT Licensed                                                              //
+//                                                                           //
+//===========================================================================//
 
 #include "SceneLoader.h"
-
 
 #include "Serializer/Dictionary.h"
 #include "Serializer/SceneDictionary.h"
 #include "Serializer/VectorSerializer.h"
 #include "Serializer/VolumeSerializer.h"
 
-//#include "Renderer/IRenderer.h"
-
-#include "Data/RegularGridLoader.h"
-#include "Scene/Medium/RegularGridDataGL.h"
 #include "Scene/Geometry/RegularGridVolumeGL.h"
-//#include "Scene/TransferFunction/TransferFunction.h"
-//#include "Scene/TransferFunction/OcclusionTransferFunction.h"
-//#include "Renderer/RegularGridSceneGL.h"
-//#include "Renderer/RegularGridPipelineGL.h"
-//#include "Renderer/FramebufferGL.h"
+
+#include "Loader/RegularGridRawBinary.h"
 
 using v3d::JsonValue;
 using v3d::JsonParser;
 
-std::string FixSlash(std::string path)
+v3d::dx::SceneLoader::SceneLoader(std::string filename, int W, int H)
+    : _jsonFileName(std::move(filename))
+    , size{W, H}
 {
-#ifdef WIN32
-  std::replace(path.begin(), path.end(), '/', '\\');
-#else
-  std::replace(path.begin(), path.end(), '\\', '/');
-#endif
-  return path;
-}
-std::string PathRelToAbs(std::string filename, std::string headername)
-{
-  if (filename.length() < 2) {
-    throw std::runtime_error("[error] In PathRelToAbs(): filename is too short");
-  }
-  if (filename[0] == '/' || filename[1] == ':') {
-    return FixSlash(filename);;
-  }
-  else {
-    size_t found = headername.find_last_of("/\\");
-    return FixSlash(headername.substr(0, found) + '\\' + filename);
-  }
-}
-namespace v3d { namespace load {
-V3DMedium RegularGridRawBinary(const JsonValue& json, std::string jsonFileName)
-{
-  // output
-  V3DGeometry ret;
-
-  // get common name and id
   using namespace v3d::serializer;
   using namespace v3d::dx::serializer;
-  int         model_id;   // might be useless
-  std::string model_name; // might be useless
-  if (json.contains(ID)) {
-    model_id = json[ID].toInt();
-  }
-  if (json.contains(NAME)) {
-    model_name = json[NAME].toString();
-  }
-
-  // get filename
-  std::string model_filename;
-  int64_t     model_offset;
-  ivec3       model_dimensions;
-  Type        model_type;
-  Endian      model_endian;
-  bool        model_fileul;
-  if (json.contains(FILE_NAME)) {
-    model_filename = PathRelToAbs(json[FILE_NAME].toString(), jsonFileName);
-  } else throw std::runtime_error("[Error] header does not contain grid filename");
-  if (json.contains(OFFSET)) {
-    model_offset = json[OFFSET].toInt64();
-  } else throw std::runtime_error("[Error] header does not contain grid offset");
-  if (json.contains(DIMENSIONS)) {
-    model_dimensions = fromJson<ivec3>(json[DIMENSIONS]);
-  } else throw std::runtime_error("[Error] header does not contain grid dimensions");
-  if (json.contains(TYPE)) {
-    model_type = typeFromJson(json[TYPE]);
-  } else throw std::runtime_error("[Error] header does not contain grid type");
-  if (json.contains(ENDIAN)) {
-    model_endian = endianFromJson(json[ENDIAN]);
-  } else throw std::runtime_error("[Error] header does not contain grid endianness");
-  if (json.contains(FILE_UPPER_LEFT)) {
-    model_fileul = json[FILE_UPPER_LEFT].toBool();
+  JsonParser().load(_jsonFileName, _jsonRoot);
+  if (_jsonRoot.contains(DATA_SOURCE)) {
+    _jsonData = _jsonRoot[DATA_SOURCE];
   } else {
-    model_fileul = false;
+    PING;
   }
-
-  // load data
-  auto loader = std::make_shared<RegularGridLoader>();
-  auto medium = std::make_shared<RegularGridDataGL>();
-  loader->setFileName(model_filename);
-  loader->setOffset(model_offset);
-  loader->setDimensions(model_dimensions);
-  loader->setType(model_type);
-  loader->setEndian(model_endian);
-  loader->setFileUpperLeft(model_fileul);
-  loader->setOutputData(medium.get());
-  loader->update();
-  medium->loadGL();
-
-  // return
-  return medium;
+  if (_jsonRoot.contains(VIEW)) {
+    _jsonView = _jsonRoot[VIEW];
+    _method = _jsonView.get(METHOD_, "").toString();
+  } else {
+    PING;
+  }
 }
-}}
 
-void v3d::dx::SceneLoader::loadMedium()
+void v3d::dx::SceneLoader::initData()
 {
   // setup namespace
   using namespace v3d::serializer;
   using namespace v3d::dx::serializer;
+
   // analysis json file
   if (_jsonData.isNull()) {
     throw std::runtime_error("[Error] empty json node");
   } else {
     const JsonValue& jsonArray = _jsonData;
     if (!jsonArray.isArray()) {
-      throw std::runtime_error("[error] In TetMesh::loadV3d(): Bad JSON format");
+      throw std::runtime_error("[error] In TetMesh::loadV3d(): Bad JSON format, DATA_SOURCE should be an array.");
     }
     for (int i = 0; i < jsonArray.size(); ++i) {
       const JsonValue& jsonData = jsonArray[i];
       if (!jsonData.contains(ID)) {
-        std::cout << "[warning] In TetMesh::loadV3d(): Bad JSON format" << std::endl;
-        continue;
+        std::cout << "[warning] In TetMesh::loadV3d(): Bad JSON format, DATA_ID does not exist." << std::endl;
       }
       std::string format = jsonData.get(FORMAT, "").toString();
       if (format == FOLDER) {
-//        dataSrc = new DataSourceFolder();
+        PING;
       } else if (format == MULTIVARIATE) {
-//        dataSrc = new MultivariateDataSource();
+        PING;
       } else if (format == TIME_VARYING) {
-//        dataSrc = new TimeVaryingDataSource();
+        PING;
       } else if (format == REGULAR_GRID_RAW_BINARY) {
         _data = v3d::load::RegularGridRawBinary(jsonData, _jsonFileName);
 #ifdef V3D_USE_PVM
       } else if (format == REGULAR_GRID_PVM) {
-//        dataSrc = new RegularGridPVMData();
+        PING;
 #endif // V3D_USE_PVM
       } else if (format == TETRAHEDRAL_GRID_RAW_BINARY) {
-//        dataSrc = new TetraGridRawBinaryData();
+        PING;
       } else if (format == TETRAHEDRAL_GRID_FAST) {
-//        dataSrc = new TetraGridFASTData();
+        PING;
       }
       else {
         throw std::runtime_error("[error] In TetMesh::loadV3d(): Unsupported Data Format " + format);
@@ -154,31 +85,25 @@ void v3d::dx::SceneLoader::loadMedium()
   }
 }
 
-void v3d::dx::SceneLoader::loadView()
+/**
+ * @note: we need an initialization because we will frequently update our scene file
+ */
+void v3d::dx::SceneLoader::initScene()
 {
-  // setup namespace
-  using namespace v3d::serializer;
-  using namespace v3d::dx::serializer;
+  // now we create transfer functions
+  _ctf = std::move(TransferFunction::fromRainbowMap());
+  _otf = std::make_shared<OcclusionTransferFunction>();
 
-  // load view
-  if (_jsonView.isNull()) throw std::runtime_error("[Error] empty json node");
-  const auto& view = _jsonView;
-  const auto method = view.get(METHOD_, "").toString();
+  // create camera
+  _camera = std::make_shared<Camera>();
 
-  // load transfer functions
-  loadTF();
-
-  // load camera
-  loadCamera();
-
-  // create volume
-  if (method == "REGULAR_GRID_VOLUME_RAY_CASTING")
+  // now we create volume and scene
+  if (_method == "REGULAR_GRID_VOLUME_RAY_CASTING") // regular grid
   {
-    // regular grid
     auto volume = std::make_shared<v3d::RegularGridVolumeGL>();
+    auto data = std::dynamic_pointer_cast<RegularGridDataGL>(_data);
     {
       // configure volume
-      auto data = std::dynamic_pointer_cast<RegularGridDataGL>(_data);
       volume->setData(data);
       vec3 gridO = data->origin();
       vec3 gridS = data->spacing();
@@ -189,41 +114,34 @@ void v3d::dx::SceneLoader::loadView()
       volume->setClippingBox(volume->boundingBox());
       volume->setDataDirty(true);
       // setup tfn
-      if (_ctf) {
-        volume->setTransferFunction(_ctf);
-        volume->setTransferFunctionDirty(true);
-        volume->setTransferFunctionDirtyCoarse(true);
-      }
-      if (_otf) {
-        volume->setTransferFunction2D(_otf);
-        volume->setTransferFunction2DDirty(true);
-      }
+      volume->setTransferFunction(_ctf);
+      volume->setTransferFunction2D(_otf);
       // data range
       switch (data->type()) {
         case V3D_UNSIGNED_BYTE:
           volume->setScalarMappingRange(dvec2(data->getScalarRange<float>()));
-          break;
+              break;
         case V3D_BYTE:
           volume->setScalarMappingRange(dvec2(data->getScalarRange<char>()));
-          break;
+              break;
         case V3D_UNSIGNED_SHORT:
           volume->setScalarMappingRange(dvec2(data->getScalarRange<unsigned short>()));
-          break;
+              break;
         case V3D_SHORT:
           volume->setScalarMappingRange(dvec2(data->getScalarRange<short>()));
-          break;
+              break;
         case V3D_UNSIGNED_INT:
           volume->setScalarMappingRange(dvec2(data->getScalarRange<unsigned int>()));
-          break;
+              break;
         case V3D_INT:
           volume->setScalarMappingRange(dvec2(data->getScalarRange<int>()));
-          break;
+              break;
         case V3D_FLOAT:
           volume->setScalarMappingRange(dvec2(data->getScalarRange<float>()));
-          break;
+              break;
         case V3D_DOUBLE:
           volume->setScalarMappingRange(data->getScalarRange<double>());
-          break;
+              break;
         default:
           throw std::runtime_error("[Error] unknown volume value range type");
       }
@@ -239,97 +157,108 @@ void v3d::dx::SceneLoader::loadView()
       volume->setXSlicePosition(boxCenter.x);
       volume->setYSlicePosition(boxCenter.y);
       volume->setZSlicePosition(boxCenter.z);
-      // load from json
-      if (view.contains(VOLUME)) {
-        const auto &jsonVol = view[VOLUME];
-        fromJson(jsonVol, *volume);
-      }
-      // finalize
-      _volume = volume;
     }
+    _volume = volume;
 
-    // now we create a scene
-    {
-      // create the scene
-      _sceneGrid = std::make_shared<RegularGridSceneGL>();
-      _sceneGrid->setVolume(volume);
-      _sceneGrid->setBackgroundColor(vec4(0.0f, 0.0f, 0.0f, 1.0f));
-      _sceneGrid->setTFPreIntegration(false);
-      _sceneGrid->setLighting(true);
-      _sceneGrid->setEmptySpaceSkipping(false);
-      _sceneGrid->setCamera(_camera);
-      fromJson(view, *_sceneGrid);
-    }
+    // setup camera
+    dvec3 gridOrigin = (data != nullptr) ? dvec3(data->origin()) : dvec3(0.0);
+    dvec3 gridSpacing = (data != nullptr) ? dvec3(data->spacing()) : dvec3(1.0);
+    dvec3 gridExtent = (data != nullptr) ? (dvec3(data->dimensions() - ivec3(1)) * gridSpacing) : dvec3(1.0);
+    _camera->lookAt(gridOrigin + gridExtent * dvec3(0.5, 0.5, 3.0),
+                    gridOrigin + gridExtent * dvec3(0.5, 0.5, 0.5),
+                    dvec3(0.0, 1.0, 0.0));
+    double maxDim = max(max(gridExtent.x, gridExtent.y), gridExtent.z);
+    _camera->perspective(45.0, _camera->aspect(), maxDim * 0.01, maxDim * 10.0);
+
+    // create the scene
+    _sceneGrid = std::make_shared<RegularGridSceneGL>();
+    _sceneGrid->setVolume(volume);
+    _sceneGrid->setBackgroundColor(vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    _sceneGrid->setTFPreIntegration(false);
+    _sceneGrid->setLighting(true);
+    _sceneGrid->setEmptySpaceSkipping(false);
+    _sceneGrid->setCamera(_camera);
 
   }
-  else if (method == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING")
+  else if (_method == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING")
   {
-
     PING;
-
-  } else throw std::runtime_error("[Error] unknown volume type");
+  }
+  else {
+    throw std::runtime_error("[Error] unknown volume type");
+  }
 }
 
-void v3d::dx::SceneLoader::loadTF()
+void v3d::dx::SceneLoader::updateView(const v3d::JsonValue &input)
+{
+  // setup namespace
+  using namespace v3d::serializer;
+  using namespace v3d::dx::serializer;
+
+  // if view is null, we use the default view value instead
+  const JsonValue &view = input.isNull() ? _jsonView : input;
+
+  // load transfer functions
+  updateTransferFunction(view);
+
+  // load camera
+  updateCamera(view);
+
+  // load volume
+  if (_method == "REGULAR_GRID_VOLUME_RAY_CASTING")
+  {
+    auto volume = std::dynamic_pointer_cast<v3d::RegularGridVolumeGL>(_volume);
+    if (view.contains(VOLUME)) fromJson(view[VOLUME], *volume);
+    fromJson(view, *_sceneGrid);
+  }
+  else if (_method == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING")
+  {
+    PING;
+  }
+  else {
+    throw std::runtime_error("[Error] unknown volume type");
+  }
+}
+
+void v3d::dx::SceneLoader::updateTransferFunction(const v3d::JsonValue & view)
 {
   // setup namespace
   using namespace v3d::serializer;
   using namespace v3d::dx::serializer;
   // load TFN
-  if (_jsonView.isNull()) throw std::runtime_error("[Error] empty json node");
-  const auto& view = _jsonView;
-  const auto method = view.get(METHOD_, "").toString();
   if (view.contains(VOLUME))
   {
-    if (method == "REGULAR_GRID_VOLUME_RAY_CASTING") {
+    const auto &jsonVol = view[VOLUME];
+    if (_method == "REGULAR_GRID_VOLUME_RAY_CASTING") {
       auto volume = std::dynamic_pointer_cast<RegularGridVolumeGL>(_volume);
-      const auto &jsonVol = view[VOLUME];
       if (jsonVol.contains(TRANSFER_FUNCTION)) {
-        _ctf = std::make_shared<TransferFunction>(
-            fromJson<TransferFunction>(jsonVol[TRANSFER_FUNCTION])
-        );
+        *_ctf = fromJson<TransferFunction>(jsonVol[TRANSFER_FUNCTION]);
         _ctf->updateColorMap();
+        volume->setTransferFunctionDirty(true);
+        volume->setTransferFunctionDirtyCoarse(true);
       }
       if (jsonVol.contains(OCCLUSION_TRANSFER_FUNCTION)) {
-        _otf = std::make_shared<OcclusionTransferFunction>(
-            fromJson<OcclusionTransferFunction>(jsonVol[OCCLUSION_TRANSFER_FUNCTION])
-        );
+        *_otf = fromJson<OcclusionTransferFunction>(jsonVol[OCCLUSION_TRANSFER_FUNCTION]);
         _otf->update();
+        volume->setTransferFunction2DDirty(true);
       }
-    } else if (method == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
+    } else if (_method == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
       PING
-    } else throw std::runtime_error("[Error] unknown volume type");
+    } else {
+      throw std::runtime_error("[Error] unknown volume type");
+    }
   }
 }
 
-void v3d::dx::SceneLoader::loadCamera()
+void v3d::dx::SceneLoader::updateCamera(const v3d::JsonValue & view)
 {
   // setup namespace
   using namespace v3d::serializer;
   using namespace v3d::dx::serializer;
   // load camera
-  if (_jsonView.isNull()) throw std::runtime_error("[Error] empty json node");
-  const auto& view = _jsonView;
-  const auto method = view.get(METHOD_, "").toString();
-  if (view.contains(CAMERA)) {
-    _camera = std::make_shared<Camera>(fromJson<Camera>(view[CAMERA]));
+  if (view.contains(CAMERA))
+  {
+    *_camera = fromJson<Camera>(view[CAMERA]);
     _camera->setAspect(size.x / static_cast<float>(size.y));
   }
-}
-
-v3d::dx::SceneLoader::SceneLoader(std::string filename, int W, int H)
-    : _jsonFileName(std::move(filename))
-    , size{W, H}
-{
-  using namespace v3d::serializer;
-  using namespace v3d::dx::serializer;
-  JsonParser().load(_jsonFileName, _jsonRoot);
-  if (_jsonRoot.contains(DATA_SOURCE)) {
-    _jsonData = _jsonRoot[DATA_SOURCE];
-  }
-  if (_jsonRoot.contains(VIEW)) {
-    _jsonView = _jsonRoot[VIEW];
-  }
-//  _ctf = std::move(TransferFunction::fromRainbowMap());
-//  _otf = std::make_shared<OcclusionTransferFunction>();
 }

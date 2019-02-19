@@ -1,6 +1,11 @@
-//
-// Created by Qi Wu on 2019-02-15.
-//
+//===========================================================================//
+//                                                                           //
+// LibViDi3D                                                                 //
+// Copyright(c) 2018 Qi Wu (Wilson)                                          //
+// University of California, Davis                                           //
+// MIT Licensed                                                              //
+//                                                                           //
+//===========================================================================//
 
 #pragma once
 #ifndef DXSERVER_SCENELOADER_H
@@ -29,17 +34,19 @@ namespace v3d { namespace dx {
 class SceneLoader {
 public:
     explicit SceneLoader(std::string filename, int W, int H);
-    void loadMedium();
-    void loadView();
+    void initData();
+    void initScene();
+    void updateView(const JsonValue& input = JsonValue());
+    void updateCamera(const JsonValue&);
+    void updateTransferFunction(const JsonValue&);
 
     std::shared_ptr<RegularGridSceneGL> getSceneGrid() { return _sceneGrid; }
     std::shared_ptr<TetraGridSceneGL>   getSceneTets() { return _sceneTets; }
 
 protected:
-    void loadTF();
-    void loadCamera();
-
     ivec2 size;
+
+    std::string _method;
 
     std::string _jsonFileName;
     JsonValue   _jsonRoot;
