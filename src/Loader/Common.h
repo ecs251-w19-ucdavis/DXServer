@@ -12,6 +12,7 @@
 #define DXSERVER_COMMON_H
 
 #include <string>
+#include <algorithm>
 
 namespace v3d { namespace common {
 
