@@ -29,3 +29,4 @@ In general,
 ##### Wenxi
 
 ### Issues
+* We didn't use the actual thread for abstraction. Might need to switch to threads if there are more than one GPU.
