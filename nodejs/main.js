@@ -29,6 +29,7 @@ const MainLoop = (socket) => {
     PullFromEngine()
   })
   socket.on('disconnect', () => {
+    // delete clients[socket.id]
     // vox.engine.NotifyCloseProject()
     // PullFromEngine()
   })
