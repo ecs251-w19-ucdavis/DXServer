@@ -20,6 +20,8 @@ In general,
 
 ### What are we going to do this week
 ##### Qi
+* together with Yiran, we will be designing system for handling dynamic requests from simulated clients
+* together with Wenxi, we will be setting up the render-side comminicator so that our render-side system can receive requests from many clients.
 
 ##### Yiran
 * create and maintain different requests from clients
