@@ -7,6 +7,7 @@
 //                                                                           //
 //===========================================================================//
 
+#include <string>
 #include <QImage>
 #include <QFile>
 
@@ -179,8 +180,9 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> &&
 
     // save
     QImage img = QImage(&buffer[0], dx::winW, dx::winH, QImage::Format_RGB32).mirrored(false, true);
-    img.save("image.PNG", 0, -1);
-    std::cout << "save file as image.PNG" << std::endl;
+    std::string filename = "image" + std::string(argv[2]) + ".PNG";
+    img.save((const char *)&filename, 0, -1);
+    std::cout << "save file as " << filename << std::endl;
 }
 
 }
