@@ -10,6 +10,9 @@ In general,
 * [WIP added a tetrahedral grid loader](https://github.com/ecs251-w19-ucdavis/DXServer/commit/d9a2472730e4e34a528f04542dbf9ed52f2495bf)
 
 ##### Yiran
+* read and studied the rendering code
+* [set up localized file loader and renderer](https://github.com/ecs251-w19-ucdavis/DXServer/commit/79f3a25c71e8467291f9dd5b884956c5c4d5eac5#diff-25d902c24283ab8cfbac54dfa101ad31)
+* [set up the basic client structure](https://github.com/ecs251-w19-ucdavis/DXServer/commit/2ae6274ebc3c124b329f5513852e7b46523cf3a7#diff-25d902c24283ab8cfbac54dfa101ad31)
 
 ##### Wenxi
 
@@ -17,6 +20,9 @@ In general,
 ##### Qi
 
 ##### Yiran
+* create and maintain different requests from clients
+* send results back to web server - achieve connections
+* figure out what scheduling techniques can be applied
 
 ##### Wenxi
 
