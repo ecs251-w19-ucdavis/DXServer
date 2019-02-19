@@ -25,7 +25,7 @@ In general,
 ### What are we going to do this week
 ##### Qi
 * together with Yiran, we will be designing system for handling dynamic requests from simulated clients
-* together with Wenxi, we will be setting up the render-side comminicator so that our render-side system can receive requests from many clients.
+* together with Wenxi, we will be setting up the render-side communicator so that our render-side system can receive requests from many clients.
 
 ##### Yiran
 * create and maintain different requests from clients
@@ -33,8 +33,8 @@ In general,
 * figure out what scheduling techniques can be applied
 
 ##### Wenxi
-*still try to figure out an efficient approach to sent each client's request to a specific VoxEngine
-*send webserver requests to rendering system
+* still try to figure out an efficient approach to sent each client's request to a specific VoxEngine
+* send webserver requests to rendering system
 
 ### Issues
 <<<<<<< HEAD
