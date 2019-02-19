@@ -17,9 +17,9 @@ In general,
 * [set up the basic client structure](https://github.com/ecs251-w19-ucdavis/DXServer/commit/2ae6274ebc3c124b329f5513852e7b46523cf3a7#diff-25d902c24283ab8cfbac54dfa101ad31)
 
 ##### Wenxi
-*read code and study Node.js, JavaScript
-*Figure an approach to sent each client's request to a specific VoxEngine
-*[Try to read each client's request associated with it's id so that we can create a specific VocEngine for each client's request according to different id](https://github.com/ecs251-w19-ucdavis/DXServer/commit36546c8711a2c594b0f384712db26328656960bc)
+* read code and study Node.js, JavaScript
+* Figure an approach to sent each client's request to a specific VoxEngine
+* [Try to read each client's request associated with it's id so that we can create a specific VocEngine for each client's request according to different id](https://github.com/ecs251-w19-ucdavis/DXServer/commit36546c8711a2c594b0f384712db26328656960bc)
 
 
 ### What are we going to do this week
