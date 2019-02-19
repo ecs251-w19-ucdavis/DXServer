@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-//
-// Created by qadwu on 1/10/19.
-//
-
-#ifdef _WIN32
-#define _DATA_ "C:\\Users\\wilson\\Documents\\Work\\ViDi\\data\\vorts1.data"
-#else
-//#define _DATA_ "/home/qadwu/Work/data/vidi3d/vorts1.data"
-#endif
-=======
 //===========================================================================//
 //                                                                           //
 // LibViDi3D                                                                 //
@@ -17,7 +6,6 @@
 // MIT Licensed                                                              //
 //                                                                           //
 //===========================================================================//
->>>>>>> df6fef45a36a2d708c8e2500d8eb54b2e5c9dc4d
 
 #include <string>
 #include <QImage>
