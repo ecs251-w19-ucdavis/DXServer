@@ -12,6 +12,10 @@ In general,
 ##### Yiran
 
 ##### Wenxi
+*[read code and study Node.js, JavaScript]
+*[Figure an approach to sent each client's request to a specific VoxEngine]
+*[Try to read each client's request associated with it's id so that we can create a specific VocEngine for each client's request according to different id](https://github.com/ecs251-w19-ucdavis/DXServer/commit36546c8711a2c594b0f384712db26328656960bc)
+
 
 ### What are we going to do this week
 ##### Qi
@@ -19,5 +23,7 @@ In general,
 ##### Yiran
 
 ##### Wenxi
+*[still try to figure out an efficient approach to sent each client's request to a specific VoxEngine]
+*[send webserver requests to rendering system]
 
 ### Issues
