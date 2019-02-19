@@ -17,6 +17,10 @@
 #include "Scene/Geometry/RegularGridVolumeGL.h"
 
 #include "Loader/RegularGridRawBinary.h"
+#include "Loader/TetraGridRawBinary.h"
+
+#include "Util/Material.h"
+#include "Renderer/GeometryProperty.h"
 
 using v3d::JsonValue;
 using v3d::JsonParser;
@@ -30,15 +34,11 @@ v3d::dx::SceneLoader::SceneLoader(std::string filename, int W, int H)
   JsonParser().load(_jsonFileName, _jsonRoot);
   if (_jsonRoot.contains(DATA_SOURCE)) {
     _jsonData = _jsonRoot[DATA_SOURCE];
-  } else {
-    PING;
-  }
+  } else { PING; }
   if (_jsonRoot.contains(VIEW)) {
     _jsonView = _jsonRoot[VIEW];
     _method = _jsonView.get(METHOD_, "").toString();
-  } else {
-    PING;
-  }
+  } else { PING; }
 }
 
 void v3d::dx::SceneLoader::initData()
@@ -74,11 +74,10 @@ void v3d::dx::SceneLoader::initData()
         PING;
 #endif // V3D_USE_PVM
       } else if (format == TETRAHEDRAL_GRID_RAW_BINARY) {
-        PING;
+        _data = v3d::load::TetraGridRawBinaryData(jsonData, _jsonFileName);
       } else if (format == TETRAHEDRAL_GRID_FAST) {
         PING;
-      }
-      else {
+      } else {
         throw std::runtime_error("[error] In TetMesh::loadV3d(): Unsupported Data Format " + format);
       }
     }
@@ -98,7 +97,7 @@ void v3d::dx::SceneLoader::initScene()
   _camera = std::make_shared<Camera>();
 
   // now we create volume and scene
-  if (_method == "REGULAR_GRID_VOLUME_RAY_CASTING") // regular grid
+  if (_method == "REGULAR_GRID_VOLUME_RAY_CASTING")
   {
     auto volume = std::make_shared<v3d::RegularGridVolumeGL>();
     auto data = std::dynamic_pointer_cast<RegularGridDataGL>(_data);
@@ -179,10 +178,74 @@ void v3d::dx::SceneLoader::initScene()
     _sceneGrid->setEmptySpaceSkipping(false);
     _sceneGrid->setCamera(_camera);
 
+    // setup renderer
+    _rendererGrid = std::make_shared<RegularGridPipelineGL>();
+    _rendererGrid->setScene(_sceneGrid);
   }
   else if (_method == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING")
   {
-    PING;
+    auto volume = std::make_shared<TetraGridVolumeGL>();
+    auto data = std::dynamic_pointer_cast<TetraGridDataGL>(_data);
+
+    // configure volume
+    volume->setData(data);
+    volume->setBoundingBox(data->grid()->getBoundingBox());
+    vec3 boxDim = volume->boundingBox().size();
+    vec3 boxCenter = volume->boundingBox().center();
+    double maxDim = max(max(boxDim.x, boxDim.y), boxDim.z);
+
+    std::cout << "[debug] "
+              << "boxMin = " << volume->boundingBox().minimum() << ", "
+              << "boxMax = " << volume->boundingBox().maximum()
+              << std::endl;
+
+    dvec2 range(data->getScalarRange<float>());
+
+    // transfer function
+    _ctf = std::move(TransferFunction::fromRainbowMap());
+    volume->setTransferFunction(_ctf);
+
+    // sampling properties
+    volume->setSamplesPerCell(2);
+    volume->setSampleDistance(float(maxDim / 256.0));
+    volume->setScalarMappingRange(range);
+    volume->setOpacityUnitDistance(float(maxDim / 256.0));
+
+    // finalize volume
+    _volume = volume;
+
+    // create a scene
+    _sceneTets = std::make_shared<TetraGridSceneGL>();
+    _sceneTets->setVolume(volume);
+    _sceneTets->setTFPreIntegration(true);
+
+    // boundary geometry property ?
+    Box<float> boundaryClippingBox(volume->boundingBox().minimum() - boxDim * 0.01f,
+                                   volume->boundingBox().maximum() + boxDim * 0.01f);
+    auto boundaryGeometryProperty = std::make_shared<GeometryProperty>();
+    boundaryGeometryProperty->setVisible(false);
+    Material geomMat;
+    geomMat.setAmbient(vec4(0.2f, 0.2f, 0.2f, 1.0f));
+    geomMat.setDiffuse(vec4(0.8f, 0.8f, 0.8f, 1.0f));
+    boundaryGeometryProperty->setFrontMaterial(geomMat);
+    boundaryGeometryProperty->setClippingBox(boundaryClippingBox);
+
+    // create a light
+//    auto lightSource = std::make_shared<LightSource>();
+
+    // set camera
+    _camera->setNear(maxDim * 0.001);
+    _camera->setFar(maxDim * 10.0);
+    _camera->lookAt(dvec3(boxCenter) + dvec3(boxDim) * dvec3(0.0, 0.0, 2.5),
+                    dvec3(boxCenter),
+                    dvec3(0.0, 1.0, 0.0));
+    _sceneTets->setCamera(_camera);
+
+    // set renderer
+    _rendererTets = std::make_shared<TetraGridPipelineGL>();
+    _rendererTets->setScene(_sceneTets);
+    _rendererTets->setBoundaryGeometryProperty(boundaryGeometryProperty);
+    //_rendererTets->setLightSource(_sceneTets->lightSource());
   }
   else {
     throw std::runtime_error("[Error] unknown volume type");
@@ -213,7 +276,9 @@ void v3d::dx::SceneLoader::updateView(const v3d::JsonValue &input)
   }
   else if (_method == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING")
   {
-    PING;
+    auto volume = std::dynamic_pointer_cast<v3d::TetraGridVolumeGL>(_volume);
+    if (view.contains(VOLUME)) fromJson(view[VOLUME], *volume);
+    fromJson(view, *_sceneTets);
   }
   else {
     throw std::runtime_error("[Error] unknown volume type");
@@ -243,7 +308,11 @@ void v3d::dx::SceneLoader::updateTransferFunction(const v3d::JsonValue & view)
         volume->setTransferFunction2DDirty(true);
       }
     } else if (_method == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
-      PING
+      auto volume = std::dynamic_pointer_cast<TetraGridVolumeGL>(_volume);
+      if (jsonVol.contains(TRANSFER_FUNCTION)) {
+        *_ctf = fromJson<TransferFunction>(jsonVol[TRANSFER_FUNCTION]);
+        _ctf->updateColorMap();
+      }
     } else {
       throw std::runtime_error("[Error] unknown volume type");
     }

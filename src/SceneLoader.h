@@ -22,6 +22,9 @@
 #include "Renderer/RegularGridSceneGL.h"
 #include "Renderer/TetraGridSceneGL.h"
 
+#include "Renderer/RegularGridPipelineGL.h"
+#include "Renderer/TetraGridPipelineGL.h"
+
 #include "Util/Camera.h"
 
 #include <string>
@@ -43,6 +46,9 @@ public:
     std::shared_ptr<RegularGridSceneGL> getSceneGrid() { return _sceneGrid; }
     std::shared_ptr<TetraGridSceneGL>   getSceneTets() { return _sceneTets; }
 
+    std::shared_ptr<RegularGridPipelineGL> getRendererGrid() { return _rendererGrid; }
+    std::shared_ptr<TetraGridPipelineGL>   getRendererTets() { return _rendererTets; }
+
 protected:
     ivec2 size;
 
@@ -63,6 +69,9 @@ protected:
 
     std::shared_ptr<RegularGridSceneGL> _sceneGrid; // TODO this is a hack! Eventually they should be child classes of
     std::shared_ptr<TetraGridSceneGL>   _sceneTets; // TODO   one common parent
+
+    std::shared_ptr<RegularGridPipelineGL> _rendererGrid;
+    std::shared_ptr<TetraGridPipelineGL>   _rendererTets;
 };
 
 }

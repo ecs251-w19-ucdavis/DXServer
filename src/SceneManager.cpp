@@ -13,16 +13,12 @@
 #include "SceneLoader.h"
 
 #include "Util/Library.h"
-//#include "Util/JsonParser.h"
-#include "Renderer/IRenderer.h"
 
-//#include "Data/RegularGridLoader.h"
-//#include "Scene/Medium/RegularGridDataGL.h"
-//#include "Scene/Geometry/RegularGridVolumeGL.h"
-#include "Renderer/RegularGridSceneGL.h"
 #include "Renderer/RegularGridPipelineGL.h"
+#include "Renderer/TetraGridPipelineGL.h"
+
 #include "Renderer/FramebufferGL.h"
-//#include "Util/Camera.h"
+
 #include "Util/SourceCodeManager.h"
 
 #include "DXGL.h"
@@ -149,8 +145,15 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> &&
     loader.updateView();
 
     // create renderer
-    auto renderer = std::make_shared<RegularGridPipelineGL>();
-    renderer->setScene(loader.getSceneGrid());
+
+//    auto renderer = std::make_shared<RegularGridPipelineGL>();
+//    renderer->setScene(loader.getSceneGrid());
+
+//    auto renderer = std::make_shared<TetraGridPipelineGL>();
+//    renderer->setScene(loader.getSceneTets());
+
+//    auto renderer = loader.getRendererGrid();
+    auto renderer = loader.getRendererTets();
     renderer->setFramebufferObject(fbo->sharedFramebufferObject());
     renderer->resize(dx::winW, dx::winH);
 

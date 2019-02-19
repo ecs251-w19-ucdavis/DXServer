@@ -15,19 +15,21 @@ set(CMAKE_AUTORCC ON)
 # └──────────────────────────────────────────────────────────────────┘
 # Source files
 set (vidi3d_dxserver_SOURCES
-  Communication/MainServer.cpp
-  Loader/RegularGridRawBinary.cpp
+  Main.cpp
   SceneManager.cpp
   SceneLoader.cpp
-  Main.cpp)
+  Communication/MainServer.cpp
+  Loader/RegularGridRawBinary.cpp
+  Loader/TetraGridRawBinary.cpp)
 
 # Header files
 set (vidi3d_dxserver_HEADERS
+  SceneLoader.h
   Communication/MainServer.h
-  Loader/RegularGridRawBinary.h
-  Loader/Common.h
   Serializer/SceneDictionary.h
-  SceneLoader.h)
+  Loader/Common.h
+  Loader/RegularGridRawBinary.h
+  Loader/TetraGridRawBinary.h)
 
 get_property(_egl_available GLOBAL PROPERTY V3D_USE_EGL)
 if(_egl_available)
