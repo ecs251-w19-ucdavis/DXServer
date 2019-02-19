@@ -20,7 +20,8 @@ set (vidi3d_dxserver_SOURCES
   SceneLoader.cpp
   Communication/MainServer.cpp
   Loader/RegularGridRawBinary.cpp
-  Loader/TetraGridRawBinary.cpp)
+  Loader/TetraGridRawBinary.cpp
+  Client.cpp)
 
 # Header files
 set (vidi3d_dxserver_HEADERS
@@ -29,7 +30,8 @@ set (vidi3d_dxserver_HEADERS
   Serializer/SceneDictionary.h
   Loader/Common.h
   Loader/RegularGridRawBinary.h
-  Loader/TetraGridRawBinary.h)
+  Loader/TetraGridRawBinary.h
+  Client.h)
 
 get_property(_egl_available GLOBAL PROPERTY V3D_USE_EGL)
 if(_egl_available)
