@@ -44,7 +44,7 @@ namespace v3d{
 	    // save
 	    QImage img = QImage(&buffer[0], dx::winW, dx::winH, QImage::Format_RGB32).mirrored(false, true);
 	    std::string filename = "image" + std::to_string(id) + ".PNG";
-	    img.save((const char *)&filename, 0, -1);
+	    img.save(filename.c_str(), 0, -1);
 	    std::cout << "save file as " << filename << std::endl;
 	}
 }	
