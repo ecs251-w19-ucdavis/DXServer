@@ -54,6 +54,11 @@ int main(int argc, char* argv[])
 	// args[1](argv[2], 2);
 	// pthread_create(&t1, NULL, &RenderFunction, &args[0]);
 	// pthread_create(&t2, NULL, &RenderFunction, &args[1]);
+
+//    MainServer server(8080);
+//    server.open();
+//    while (true) {}
+
     return dx::DXGL_execute(argc, argv, [&]() {
         auto fbo = std::make_shared<FramebufferGL>(dx::winW, dx::winH);
         createScene(&argc, const_cast<const char **>(argv), fbo);
