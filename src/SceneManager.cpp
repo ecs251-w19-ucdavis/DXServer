@@ -15,8 +15,8 @@
 
 #include "Util/Library.h"
 
-#include "Renderer/RegularGridPipelineGL.h"
-#include "Renderer/TetraGridPipelineGL.h"
+#include "Engine/RegularGridPipelineGL.h"
+#include "Engine/TetraGridPipelineGL.h"
 
 #include "Renderer/FramebufferGL.h"
 
@@ -24,6 +24,8 @@
 
 #include "DXGL.h"
 #include "Client.h"
+
+#define MULTI_CLIENT_MODE 1
 
 namespace v3d {
 
@@ -141,68 +143,54 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fb
     loadModule();
     loadAllShaders();
 
-    Client *Clients;
-    Clients = (Client *)malloc(2 * sizeof(Client));
+#if MULTI_CLIENT_MODE
+
+    Client Clients[2];
     Clients[0].Init(argv[1], 0);
     Clients[1].Init(argv[2], 1);
     Clients[0].RenderScene(fbo);
     Clients[1].RenderScene(fbo);
 
+#else
 
+    v3d::dx::SceneLoader loader(argv[1], dx::winW, dx::winH);
+    loader.initData();
+    loader.initScene();
+    loader.updateView();
 
-    // v3d::dx::SceneLoader loader1(argv[1], dx::winW, dx::winH);
-    // loader1.initData();
-    // loader1.initScene();
-    // loader1.updateView();
+    // create renderer
+    //auto renderer = loader.getRendererGrid();
+    auto renderer = loader.getRendererTets();
+    renderer->setFramebufferObject(fbo->sharedFramebufferObject());
+    renderer->resize(dx::winW, dx::winH);
 
-    // v3d::dx::SceneLoader loader2(argv[2], dx::winW, dx::winH);
-    // loader2.initData();
-    // loader2.initScene();
-    // loader2.updateView();
+    // render
+    glFinish();
+    renderer->render();
+    glFinish();
 
-    // // create renderer1
-    // auto renderer1 = std::make_shared<RegularGridPipelineGL>();
-    // renderer1->setScene(loader1.getSceneGrid());
-    // renderer1->setFramebufferObject(fbo->sharedFramebufferObject());
-    // renderer1->resize(dx::winW, dx::winH);
+    // get framebuffer image
+    std::vector<unsigned char> buffer(dx::winW * dx::winH * 4);
+    GLuint currFbo = GLFramebufferObject::currentDrawBinding();
+    fbo->bind();
+    V3D_GL_PRINT_ERRORS();
+    GLint readBuffer;
+    glGetIntegerv(GL_READ_BUFFER, &readBuffer);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glReadPixels(0, 0, dx::winW, dx::winH, GL_BGRA, GL_UNSIGNED_BYTE, &buffer[0]);
+    glReadBuffer(readBuffer);
+    V3D_GL_PRINT_ERRORS();
+    GLFramebufferObject::bind(currFbo);
+    V3D_GL_PRINT_ERRORS();
+    for (int i = 0; i < dx::winW * dx::winH; i++) buffer[i * 4 + 3] = 255;
 
-    // // create renderer1
-    // auto renderer2 = std::make_shared<RegularGridPipelineGL>();
-    // renderer2->setScene(loader2.getSceneGrid());
-    // renderer2->setFramebufferObject(fbo->sharedFramebufferObject());
-    // renderer2->resize(dx::winW, dx::winH);
+    // save
+    QImage img = QImage(&buffer[0], dx::winW, dx::winH, QImage::Format_RGB32).mirrored(false, true);
+    img.save("image.PNG", 0, -1);
+    std::cout << "save file as " << "image.PNG" << std::endl;
 
-    // // render
-    // glFinish();
-    // renderer1->render();
-    // glFinish();
+#endif
 
-    // // render
-    // glFinish();
-    // renderer2->render();
-    // glFinish();
-
-    // // get framebuffer image
-    // std::vector<unsigned char> buffer(dx::winW * dx::winH * 4);
-    // //GLuint currFbo = GLFramebufferObject::currentDrawBinding();
-    // fbo->bind();
-    // V3D_GL_PRINT_ERRORS();
-    // GLint readBuffer;
-    // glGetIntegerv(GL_READ_BUFFER, &readBuffer);
-    // glReadBuffer(GL_COLOR_ATTACHMENT0);
-    // glReadPixels(0, 0, dx::winW, dx::winH, GL_BGRA, GL_UNSIGNED_BYTE, &buffer[0]);
-    // glReadBuffer(readBuffer);
-    // V3D_GL_PRINT_ERRORS();
-    // //GLFramebufferObject::bind(currFbo);
-    // V3D_GL_PRINT_ERRORS();
-    // //for (int i = 0; i < dx::winW * dx::winH; i++) buffer[i * 4 + 3] = 255;
-
-    // // save
-    // QImage img = QImage(&buffer[0], dx::winW, dx::winH, QImage::Format_RGB32).mirrored(false, true);
-    // // std::string filename = "image" + std::string(argv[2]) + ".PNG";
-    // // img.save((const char *)&filename, 0, -1);
-    // img.save("image.PNG", 0, -1);
-    // std::cout << "save file as " << "image.PNG" << std::endl;
 }
 
 }

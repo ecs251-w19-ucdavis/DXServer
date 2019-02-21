@@ -19,11 +19,11 @@
 #include "Scene/TransferFunction/TransferFunction.h"
 #include "Scene/TransferFunction/OcclusionTransferFunction.h"
 
-#include "Renderer/RegularGridSceneGL.h"
-#include "Renderer/TetraGridSceneGL.h"
+#include "Scene/RegularGridSceneGL.h"
+#include "Scene/TetraGridSceneGL.h"
 
-#include "Renderer/RegularGridPipelineGL.h"
-#include "Renderer/TetraGridPipelineGL.h"
+#include "Engine/RegularGridPipelineGL.h"
+#include "Engine/TetraGridPipelineGL.h"
 
 #include "Util/Camera.h"
 

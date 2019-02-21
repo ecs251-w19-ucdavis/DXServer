@@ -10,13 +10,13 @@
 
 #include "Util/Library.h"
 //#include "Util/JsonParser.h"
-#include "Renderer/IRenderer.h"
+#include "Engine/IRenderer.h"
 
 //#include "Data/RegularGridLoader.h"
 //#include "Scene/Medium/RegularGridDataGL.h"
 //#include "Scene/Geometry/RegularGridVolumeGL.h"
-#include "Renderer/RegularGridSceneGL.h"
-#include "Renderer/RegularGridPipelineGL.h"
+#include "Scene/RegularGridSceneGL.h"
+#include "Engine/RegularGridPipelineGL.h"
 #include "Renderer/FramebufferGL.h"
 //#include "Util/Camera.h"
 #include "Util/SourceCodeManager.h"
