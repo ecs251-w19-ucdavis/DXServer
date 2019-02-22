@@ -37,9 +37,9 @@ class VoxClient {
 
   set OnConnect (func) {
     // Create an array to store clients
-    clients = {}
+    // clients = {}
     this._io.on('connection', (socket) => {
-      clients[socket.id] = socket
+      // clients[socket.id] = socket
       console.log('client connection' + socket.id)
       // console.log('client connection')
       func(socket)

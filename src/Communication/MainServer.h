@@ -32,10 +32,11 @@ protected:
 
 public slots:
     void onNewConnection();
-    void closed();
+    void onServerClosure();
+    void onClientClosure();
     void processTextMessage(QString message);
     void processBinaryMessage(QByteArray message);
-    void socketDisconnected();
+
     void notifyProjectOpened(std::string projFileName, int clientId);
     void notifyProjectClosed(int clientId);
 

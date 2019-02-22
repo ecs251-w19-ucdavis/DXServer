@@ -6,7 +6,7 @@ let PullFromEngine = () => {
   vox.engine1.NotifyRequestFrame(null)
 }
 
-for(let i = 0; i < 2; ++i) {
+// for(let i = 0; i < 2; ++i) {
   /* TODO what if there are multiple sockets connecting */
 const MainLoop = (socket) => {
   
@@ -14,21 +14,21 @@ const MainLoop = (socket) => {
   // setup engine
   //
   
-  vox.engine[i].OnFrame = (frame) => {
-    vox.client[i].Broadcast('hasNewFrame', frame)
+  vox.engine.OnFrame = (frame) => {
+    vox.client.Broadcast('hasNewFrame', frame)
   }
-  vox.engine[i].OnGetScene = (scene) => {
+  vox.engine.OnGetScene = (scene) => {
     console.log('has new scene')
     socket.emit('hasNewScene', scene)
   }
-  vox.engine[i].OnQueryDatabase = (database) => {
+  vox.engine.OnQueryDatabase = (database) => {
     socket.emit('queryDatabase', database)
   }
   //
   // setup socket
   //
   socket.on('selectData', (data) => {
-    vox.engine[i].NotifyOpenProject(data.label)
+    vox.engine.NotifyOpenProject(data.label)
     PullFromEngine()
   })
   socket.on('disconnect', () => {
@@ -37,13 +37,13 @@ const MainLoop = (socket) => {
     // PullFromEngine()
   })
   socket.on('requestFrame', (params) => {
-    vox.engine[i].NotifyRequestFrame(params)
+    vox.engine.NotifyRequestFrame(params)
     // PullFromEngine()
   })
   //
   // Start the process
   //
-  vox.engine[i].CallQueryDatabase()
+  vox.engine.CallQueryDatabase()
   PullFromEngine()
 }
 
@@ -52,14 +52,14 @@ const MainLoop = (socket) => {
  */
 
 /* We have to run the server first */
-vox.client[i].OnConnect = MainLoop
-vox.engine[i].OnConnect = () => {
-  vox.client[i].serve(4000)
+vox.client.OnConnect = MainLoop
+vox.engine.OnConnect = () => {
+  vox.client.serve(4000)
 }
-vox.engine[i].OnProjectOpened = () => {
+vox.engine.OnProjectOpened = () => {
   console.log('opened')
   PullFromEngine()
 }
-vox.engine[i].connect(process.argv.length > 2 ? process.argv[2] : 'localhost')
+vox.engine.connect(process.argv.length > 2 ? process.argv[2] : 'localhost')
 }
 

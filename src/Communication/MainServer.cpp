@@ -23,7 +23,7 @@ void MainServer::open()
         log() << ("[Server] Render server listening on port " + QString("%1").arg(_port, 0, 10)).toStdString()
               << std::endl;
         connect(_webSocketServer, &QWebSocketServer::newConnection, this, &MainServer::onNewConnection);
-        connect(_webSocketServer, &QWebSocketServer::closed, this, &MainServer::closed);
+        connect(_webSocketServer, &QWebSocketServer::closed, this, &MainServer::onServerClosure);
     }
 }
 
@@ -94,14 +94,27 @@ void MainServer::onNewConnection() {
 
     connect(socket, &QWebSocket::textMessageReceived, this, &MainServer::processTextMessage);
     connect(socket, &QWebSocket::binaryMessageReceived, this, &MainServer::processBinaryMessage);
-    connect(socket, &QWebSocket::disconnected, this, &MainServer::socketDisconnected);
+    connect(socket, &QWebSocket::disconnected, this, &MainServer::onClientClosure);
 
     _clients.insert(_nextClientId, socket);
     ++_nextClientId;
 }
 
-void MainServer::closed() {
+void MainServer::onServerClosure() {
     log() << "[Server] Connection closed" << std::endl;
+}
+
+void MainServer::onClientClosure() {
+    QWebSocket* client = qobject_cast<QWebSocket*>(sender());
+    log() << "[Server] Socket disconnected" << std::endl;
+    if (client) {
+
+        int key = _clients.key(client, 0);
+        if (_clients.contains(key))
+            _clients.remove(key);
+
+        client->deleteLater();
+    }
 }
 
 void MainServer::processTextMessage(QString message) {
@@ -229,19 +242,6 @@ void MainServer::processTextMessage(QString message) {
 
 void MainServer::processBinaryMessage(QByteArray message) {
     log() << "[Server] Binary Message ignored" << std::endl;
-}
-
-void MainServer::socketDisconnected() {
-    QWebSocket* client = qobject_cast<QWebSocket*>(sender());
-    log() << "[Server] Socket disconnected" << std::endl;
-    if (client) {
-
-        int key = _clients.key(client, 0);
-        if (_clients.contains(key))
-            _clients.remove(key);
-
-        client->deleteLater();
-    }
 }
 
 void MainServer::notifyProjectOpened(std::string projFileName, int clientId) {

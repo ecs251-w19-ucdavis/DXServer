@@ -11,11 +11,12 @@ set(V3D_CXX_STANDARD 11)
 add_subdirectory(external/libvidi3d)
 
 find_package(Qt5 REQUIRED
-  Core
-  OpenGL
-  Gui
-  Widgets
-  WebSockets)
+  Core OpenGL Gui
+  Widgets WebSockets)
+if(NOT TARGET Threads::Threads)
+  find_package(Threads)
+endif()
+
 include(external/libvidi3d/cmake/ConfigureOpenGL.cmake)
 
 add_subdirectory(src)
