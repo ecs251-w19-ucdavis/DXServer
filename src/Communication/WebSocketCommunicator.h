@@ -8,12 +8,14 @@
 
 /* TODO is there a light weight WebSocket library for doing this ? */
 /**
- *
+ * This comminicator solves two problems:
+ * 1) how to receive requests and pass them to render engine
+ * 2) how to retrieve results from the render engine and pass them to web-server
  */
-class MainServer : public QObject {
+class WebSocketCommunicator : public QObject {
     Q_OBJECT
 public:
-    explicit MainServer(quint16 port, QObject* parent = nullptr);
+    explicit WebSocketCommunicator(quint16 port, QObject* parent = nullptr);
 
     void open();
     void close();

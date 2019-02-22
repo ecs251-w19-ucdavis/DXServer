@@ -25,16 +25,17 @@
 
 namespace v3d { namespace dx {
 
+// we have to make the window static so that the lifetime of this qt window
+// can be identical to the lifetime of the program !
+static std::shared_ptr<qt::OpenGLWindow> window;
+
 int DXGL_execute(int argc, char* argv[], const std::function<void()>& render)
 {
-    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
-    QApplication app(argc, argv);
-    qt::OpenGLWindow window;
-	QTimer::singleShot(0, &app, [=]() {
+    window = std::make_shared<qt::OpenGLWindow>();
+	QTimer::singleShot(0, QApplication::instance(), [&]() {
 		render();
-		QApplication::quit();
 	});
-    return app.exec();
+	return 0;
 };
 
 namespace qt {

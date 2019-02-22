@@ -1,4 +1,4 @@
-#include "MainServer.h"
+#include "WebSocketCommunicator.h"
 
 #include <QBuffer>
 #include <QImage>
@@ -9,25 +9,25 @@
 using namespace v3d;
 
 
-MainServer::MainServer(quint16 port, QObject *parent)
+WebSocketCommunicator::WebSocketCommunicator(quint16 port, QObject *parent)
     : QObject(parent)
     , _port(port)
 {
 }
 
-void MainServer::open()
+void WebSocketCommunicator::open()
 {
     auto sslMode = _secureMode ? QWebSocketServer::SecureMode : QWebSocketServer::NonSecureMode;
     _webSocketServer = new QWebSocketServer(QStringLiteral("Vidi3D Render Server"), sslMode, this);
     if (_webSocketServer->listen(QHostAddress::Any, _port)) {
         log() << ("[Server] Render server listening on port " + QString("%1").arg(_port, 0, 10)).toStdString()
               << std::endl;
-        connect(_webSocketServer, &QWebSocketServer::newConnection, this, &MainServer::onNewConnection);
-        connect(_webSocketServer, &QWebSocketServer::closed, this, &MainServer::onServerClosure);
+        connect(_webSocketServer, &QWebSocketServer::newConnection, this, &WebSocketCommunicator::onNewConnection);
+        connect(_webSocketServer, &QWebSocketServer::closed, this, &WebSocketCommunicator::onServerClosure);
     }
 }
 
-void MainServer::close() {
+void WebSocketCommunicator::close() {
     if (_webSocketServer == nullptr) {
         return;
     }
@@ -36,14 +36,14 @@ void MainServer::close() {
     _webSocketServer = nullptr;
 }
 
-void MainServer::sendScene(JsonValue scene, int64_t id, int clientId) {
+void WebSocketCommunicator::sendScene(JsonValue scene, int64_t id, int clientId) {
     if (!_clients.contains(clientId))
         return;
     QWebSocket* client = _clients[clientId];
     rpcReply(client, scene, JsonValue(id));
 }
 
-void MainServer::sendFrame(QImage img, int clientId) {
+void WebSocketCommunicator::sendFrame(QImage img, int clientId) {
     if (!_clients.contains(clientId))
         return;
     QWebSocket* client = _clients[clientId];
@@ -61,11 +61,11 @@ void MainServer::sendFrame(QImage img, int clientId) {
     rpcNotify(client, "frame", params);
 }
 
-void MainServer::test() {
+void WebSocketCommunicator::test() {
     emit openProjectRequested("D:/Shih/Dropbox/Work/Cpp/V3D/libvidi3d/src/App/build-vidi3d-Desktop_Qt_5_9_1_MSVC2017_64bit-Release/Vorts_test6.json", 0);
 }
 
-void MainServer::rpcNotify(QWebSocket* target, const std::string& method, const JsonValue& params) {
+void WebSocketCommunicator::rpcNotify(QWebSocket* target, const std::string& method, const JsonValue& params) {
     JsonValue json;
     json["jsonrpc"] = "2.0";
     json["method"] = method;
@@ -75,7 +75,7 @@ void MainServer::rpcNotify(QWebSocket* target, const std::string& method, const 
     target->sendTextMessage(msg);
 }
 
-void MainServer::rpcReply(QWebSocket* target, const JsonValue& result, const JsonValue& id) {
+void WebSocketCommunicator::rpcReply(QWebSocket* target, const JsonValue& result, const JsonValue& id) {
     JsonValue json;
     json["jsonrpc"] = "2.0";
     json["result"] = result;
@@ -84,27 +84,27 @@ void MainServer::rpcReply(QWebSocket* target, const JsonValue& result, const Jso
     target->sendTextMessage(msg);
 }
 
-QWebSocket* MainServer::getClient(int clientId) {
+QWebSocket* WebSocketCommunicator::getClient(int clientId) {
     return _clients.contains(clientId) ? _clients[clientId] : nullptr;
 }
 
-void MainServer::onNewConnection() {
+void WebSocketCommunicator::onNewConnection() {
     log() << "new connection" << std::endl;
     QWebSocket* socket = _webSocketServer->nextPendingConnection();
 
-    connect(socket, &QWebSocket::textMessageReceived, this, &MainServer::processTextMessage);
-    connect(socket, &QWebSocket::binaryMessageReceived, this, &MainServer::processBinaryMessage);
-    connect(socket, &QWebSocket::disconnected, this, &MainServer::onClientClosure);
+    connect(socket, &QWebSocket::textMessageReceived, this, &WebSocketCommunicator::processTextMessage);
+    connect(socket, &QWebSocket::binaryMessageReceived, this, &WebSocketCommunicator::processBinaryMessage);
+    connect(socket, &QWebSocket::disconnected, this, &WebSocketCommunicator::onClientClosure);
 
     _clients.insert(_nextClientId, socket);
     ++_nextClientId;
 }
 
-void MainServer::onServerClosure() {
+void WebSocketCommunicator::onServerClosure() {
     log() << "[Server] Connection closed" << std::endl;
 }
 
-void MainServer::onClientClosure() {
+void WebSocketCommunicator::onClientClosure() {
     QWebSocket* client = qobject_cast<QWebSocket*>(sender());
     log() << "[Server] Socket disconnected" << std::endl;
     if (client) {
@@ -117,7 +117,7 @@ void MainServer::onClientClosure() {
     }
 }
 
-void MainServer::processTextMessage(QString message) {
+void WebSocketCommunicator::processTextMessage(QString message) {
     QWebSocket* client = qobject_cast<QWebSocket*>(sender());
     int clientId = _clients.key(client, 0);
 
@@ -240,11 +240,11 @@ void MainServer::processTextMessage(QString message) {
     }
 }
 
-void MainServer::processBinaryMessage(QByteArray message) {
+void WebSocketCommunicator::processBinaryMessage(QByteArray message) {
     log() << "[Server] Binary Message ignored" << std::endl;
 }
 
-void MainServer::notifyProjectOpened(std::string projFileName, int clientId) {
+void WebSocketCommunicator::notifyProjectOpened(std::string projFileName, int clientId) {
     log() << "[Server] Project opened: " << projFileName << std::endl;
 
     QWebSocket* client = getClient(clientId);
@@ -255,7 +255,7 @@ void MainServer::notifyProjectOpened(std::string projFileName, int clientId) {
     rpcNotify(client, "projectOpened", params);
 }
 
-void MainServer::notifyProjectClosed(int clientId) {
+void WebSocketCommunicator::notifyProjectClosed(int clientId) {
     log() << "[Server] Project closed" << std::endl;
 
     QWebSocket* client = getClient(clientId);

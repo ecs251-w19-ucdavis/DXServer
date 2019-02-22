@@ -18,7 +18,7 @@ set (vidi3d_dxserver_SOURCES
   Main.cpp
   SceneManager.cpp
   SceneLoader.cpp
-  Communication/MainServer.cpp
+  Communication/WebSocketCommunicator.cpp
   Loader/RegularGridRawBinary.cpp
   Loader/TetraGridRawBinary.cpp
   Client.cpp)
@@ -26,7 +26,7 @@ set (vidi3d_dxserver_SOURCES
 # Header files
 set (vidi3d_dxserver_HEADERS
   SceneLoader.h
-  Communication/MainServer.h
+  Communication/WebSocketCommunicator.h
   Serializer/SceneDictionary.h
   Loader/Common.h
   Loader/RegularGridRawBinary.h
@@ -35,12 +35,14 @@ set (vidi3d_dxserver_HEADERS
 
 get_property(_egl_available GLOBAL PROPERTY V3D_USE_EGL)
 set(_extra_libs )
+set(_extra_defs )
 if(_egl_available)
   list(APPEND vidi3d_dxserver_SOURCES Graphics/egl/EGLWindow.cpp)
 else()
   list(APPEND vidi3d_dxserver_SOURCES Graphics/qt/QtOpenGLWindow.cpp)
   list(APPEND vidi3d_dxserver_HEADERS Graphics/qt/QtOpenGLWindow.h)
-  set(_extra_libs Qt5::OpenGL Qt5::Widgets)
+  list(APPEND _extra_libs Qt5::OpenGL Qt5::Widgets)
+  list(APPEND _extra_defs USE_QT_OPENGL)
 endif()
 
 # Create target
@@ -59,3 +61,4 @@ target_v3d_configure(vidi3d_dxserver
   Threads::Threads
   ${_extra_libs})
 target_link_v3d_opengl(vidi3d_dxserver GL_CONTEXT EGL)
+target_compile_definitions(vidi3d_dxserver PRIVATE ${_extra_defs})

@@ -19,7 +19,7 @@
 // that corresponds to this .cpp/.cc file).
 #include "DXGL.h"
 #include "Client.h"
-#include "Communication/MainServer.h"
+#include "Communication/WebSocketCommunicator.h"
 
 // Other headers from the same project, as needed.
 #include "Util/Library.h"
@@ -27,7 +27,11 @@
 
 // Headers from other non-standard, non-system libraries (for example, Qt,
 // Eigen, etc).
+#ifndef USE_QT_OPENGL
 #include <QCoreApplication>
+#else
+#include <QApplication>
+#endif
 
 // Headers from other "almost-standard" libraries (for example, Boost)
 
@@ -74,9 +78,15 @@ int main(int argc, char* argv[])
   // pthread_create(&t1, NULL, &RenderFunction, &args[0]);
   // pthread_create(&t2, NULL, &RenderFunction, &args[1]);
 
+#ifndef USE_QT_OPENGL
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QCoreApplication app(argc, argv);
-    MainServer server(8080);
+#else
+    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+    QApplication app(argc, argv);
+#endif
+
+    WebSocketCommunicator server(8080);
     server.open();
 
     dx::DXGL_execute(argc, argv, [&]() {
@@ -85,5 +95,4 @@ int main(int argc, char* argv[])
     });
 
     return app.exec();
-
-  }
+}
