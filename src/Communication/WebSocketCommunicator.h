@@ -61,7 +61,7 @@ signals:
      * @param request
      * @param resolve
      */
-    void newRequest(int clientId, int type, v3d::JsonValue request, const std::function<void(v3d::JsonValue)>& resolve);
+    void newRequest(int clientId, int type, v3d::JsonValue request, std::function<void(v3d::JsonValue)> resolve);
 //    void openProjectRequested(std::string projFileName, int clientId);
 //    void closeProjectRequested(int clientId);
 //    void getSceneRequested(int64_t id, int clientId);

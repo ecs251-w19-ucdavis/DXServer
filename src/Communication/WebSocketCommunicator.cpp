@@ -38,7 +38,7 @@ void v3d::dx::WebSocketCommunicator::close()
 
 void v3d::dx::WebSocketCommunicator::connectToRequestSlot(const QObject* _receiver)
 {
-    const RequestHandler* receiver = qobject_cast<const RequestHandler*>(_receiver);
+    const auto* receiver = qobject_cast<const RequestHandler*>(_receiver);
     connect(this, &v3d::dx::WebSocketCommunicator::newRequest, receiver, &RequestHandler::handleNewRequest);
 }
 

@@ -17,8 +17,10 @@ namespace v3d { namespace dx {
  */
 class RequestHandler : public QObject {
     Q_OBJECT
+    using response_t = std::function<void(v3d::JsonValue)>;
 public:
-//    void handle_QueryDatabase(std::string projFileName, int clientId);
+    RequestHandler(const std::string& database = "database.json");
+    void handleQueryDatabase(int clientId, v3d::JsonValue& output);
 //    void handle_OpenProjectRequested(std::string projFileName, int clientId);
 //    void handle_CloseProjectRequested(int clientId);
 //    void handle_GetSceneRequested(int64_t id, int clientId);
@@ -27,9 +29,10 @@ public:
 public slots: // <- NOTE don't forget this slots keyword defined by Qt
     // This is an example for implementing a QObject slot
     // For more information, check https://doc.qt.io/qt-5/signalsandslots.html
-    void handleNewRequest(int clientId, int type, v3d::JsonValue request,
-                          const std::function<void(v3d::JsonValue)>& resolve);
+    void handleNewRequest(int clientId, int type, v3d::JsonValue request, response_t resolve);
 
+private:
+    v3d::JsonValue _jsonDatabase;
 };
 
 }}
