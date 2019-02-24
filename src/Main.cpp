@@ -18,8 +18,9 @@
 // The prototype/interface header for this implementation (ie, the .h/.hh file
 // that corresponds to this .cpp/.cc file).
 #include "Graphics/DXGL.h"
-#include "Workspace.h"
 #include "Communication/WebSocketCommunicator.h"
+#include "Workspace.h"
+#include "RequestHandler.h"
 
 // Other headers from the same project, as needed.
 #include "Util/Library.h"
@@ -85,8 +86,11 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 #endif
 
-    WebSocketCommunicator server(8080);
+    dx::RequestHandler request;
+
+    dx::WebSocketCommunicator server(8080);
     server.open();
+    server.connectToRequestSlot(&request);
 
     dx::DXGL_create(); // load modules, load all shaders
     dx::DXGL_execute(argc, argv, [&]() {
