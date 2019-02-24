@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
     WebSocketCommunicator server(8080);
     server.open();
 
-    dx::DXGL_create();
+    dx::DXGL_create(); // load modules, load all shaders
     dx::DXGL_execute(argc, argv, [&]() {
         auto fbo = std::make_shared<FramebufferGL>(dx::winW, dx::winH);
         startWorkspace(&argc, const_cast<const char **>(argv), fbo);
