@@ -21,7 +21,7 @@ set (vidi3d_dxserver_SOURCES
   Communication/WebSocketCommunicator.cpp
   Loader/RegularGridRawBinary.cpp
   Loader/TetraGridRawBinary.cpp
-  Client.cpp DXGL.cpp)
+  Client.cpp Graphics/DXGL.cpp)
 
 # Header files
 set (vidi3d_dxserver_HEADERS

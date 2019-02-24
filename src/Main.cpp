@@ -17,7 +17,7 @@
 
 // The prototype/interface header for this implementation (ie, the .h/.hh file
 // that corresponds to this .cpp/.cc file).
-#include "DXGL.h"
+#include "Graphics/DXGL.h"
 #include "Client.h"
 #include "Communication/WebSocketCommunicator.h"
 

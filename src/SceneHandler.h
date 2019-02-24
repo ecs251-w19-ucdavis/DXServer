@@ -78,7 +78,6 @@ protected:
     std::shared_ptr<TetraGridPipelineGL>   _rendererTets;
 };
 
-}
-}
+}}
 
 #endif //DXSERVER_SCENELOADER_H

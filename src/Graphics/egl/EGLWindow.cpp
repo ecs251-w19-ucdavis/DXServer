@@ -7,7 +7,7 @@
 //                                                                           //
 //===========================================================================//
 
-#include "DXGL.h"
+#include "Graphics/DXGL.h"
 
 #include <EGL/egl.h>
 #include <glad/glad.h>
