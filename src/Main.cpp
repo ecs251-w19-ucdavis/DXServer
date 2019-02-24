@@ -18,8 +18,7 @@
 // The prototype/interface header for this implementation (ie, the .h/.hh file
 // that corresponds to this .cpp/.cc file).
 #include "Graphics/DXGL.h"
-#include "Client.h"
-#include "SceneManager.h"
+#include "Workspace.h"
 #include "Communication/WebSocketCommunicator.h"
 
 // Other headers from the same project, as needed.
@@ -92,7 +91,7 @@ int main(int argc, char* argv[])
     dx::DXGL_create();
     dx::DXGL_execute(argc, argv, [&]() {
         auto fbo = std::make_shared<FramebufferGL>(dx::winW, dx::winH);
-        createScene(&argc, const_cast<const char **>(argv), fbo);
+        startWorkspace(&argc, const_cast<const char **>(argv), fbo);
     });
 
     return app.exec();

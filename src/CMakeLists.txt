@@ -20,10 +20,11 @@ set (vidi3d_dxserver_SOURCES
   Loader/TetraGridRawBinary.cpp
   Communication/WebSocketCommunicator.cpp
   Main.cpp
-  SceneManager.cpp
-  SceneHandler.cpp
+  Workspace.cpp
   Client.cpp
-  EventQueue.cpp)
+  EventQueue.cpp
+  SceneHandler.cpp
+  RequestHandler.cpp)
 
 # Header files
 set (vidi3d_dxserver_HEADERS
@@ -33,10 +34,11 @@ set (vidi3d_dxserver_HEADERS
   Loader/TetraGridRawBinary.h
   Serializer/SceneDictionary.h
   Communication/WebSocketCommunicator.h
-  SceneManager.h
-  SceneHandler.h
+  Workspace.h
   Client.h
-  EventQueue.h)
+  EventQueue.h
+  SceneHandler.h
+  RequestHandler.h)
 
 get_property(_egl_available GLOBAL PROPERTY V3D_USE_EGL)
 set(_extra_libs )
