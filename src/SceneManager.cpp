@@ -1,19 +1,4 @@
-//===========================================================================//
-//                                                                           //
-// LibViDi3D                                                                 //
-// Copyright(c) 2018 Qi Wu (Wilson)                                          //
-// University of California, Davis                                           //
-// MIT Licensed                                                              //
-//                                                                           //
-//===========================================================================//
-
-#include "SceneHandler.h"
-
-#include "Client.h"
-#include "Renderer/FramebufferGL.h"
-
-#include <string>
-#include <QImage>
+#include "SceneManager.h"
 
 #define MULTI_CLIENT_MODE 1
 

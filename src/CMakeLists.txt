@@ -33,6 +33,7 @@ set (vidi3d_dxserver_HEADERS
   Loader/TetraGridRawBinary.h
   Serializer/SceneDictionary.h
   Communication/WebSocketCommunicator.h
+  SceneManager.h
   SceneHandler.h
   Client.h
   EventQueue.h)
