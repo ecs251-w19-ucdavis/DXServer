@@ -10,8 +10,7 @@ using namespace v3d;
 
 
 WebSocketCommunicator::WebSocketCommunicator(quint16 port, QObject *parent)
-    : QObject(parent)
-    , _port(port)
+    : QObject(parent), _port(port)
 {
 }
 
@@ -41,7 +40,7 @@ void WebSocketCommunicator::sendScene(JsonValue scene, int64_t id, int clientId)
 {
     if (!_clients.contains(clientId))
         return;
-    QWebSocket* client = _clients[clientId];
+    QWebSocket *client = _clients[clientId];
     rpcReply(client, scene, JsonValue(id));
 }
 
@@ -49,7 +48,7 @@ void WebSocketCommunicator::sendFrame(QImage img, int clientId)
 {
     if (!_clients.contains(clientId))
         return;
-    QWebSocket* client = _clients[clientId];
+    QWebSocket *client = _clients[clientId];
 
     QByteArray ba;
     QBuffer buf(&ba);
@@ -64,11 +63,15 @@ void WebSocketCommunicator::sendFrame(QImage img, int clientId)
     rpcNotify(client, "frame", params);
 }
 
-void WebSocketCommunicator::test() {
-    emit openProjectRequested("D:/Shih/Dropbox/Work/Cpp/V3D/libvidi3d/src/App/build-vidi3d-Desktop_Qt_5_9_1_MSVC2017_64bit-Release/Vorts_test6.json", 0);
+void WebSocketCommunicator::test()
+{
+    emit openProjectRequested(
+        "D:/Shih/Dropbox/Work/Cpp/V3D/libvidi3d/src/App/build-vidi3d-Desktop_Qt_5_9_1_MSVC2017_64bit-Release/Vorts_test6.json",
+        0);
 }
 
-void WebSocketCommunicator::rpcNotify(QWebSocket* target, const std::string& method, const JsonValue& params) {
+void WebSocketCommunicator::rpcNotify(QWebSocket *target, const std::string &method, const JsonValue &params)
+{
     JsonValue json;
     json["jsonrpc"] = "2.0";
     json["method"] = method;
@@ -78,7 +81,8 @@ void WebSocketCommunicator::rpcNotify(QWebSocket* target, const std::string& met
     target->sendTextMessage(msg);
 }
 
-void WebSocketCommunicator::rpcReply(QWebSocket* target, const JsonValue& result, const JsonValue& id) {
+void WebSocketCommunicator::rpcReply(QWebSocket *target, const JsonValue &result, const JsonValue &id)
+{
     JsonValue json;
     json["jsonrpc"] = "2.0";
     json["result"] = result;
@@ -87,13 +91,15 @@ void WebSocketCommunicator::rpcReply(QWebSocket* target, const JsonValue& result
     target->sendTextMessage(msg);
 }
 
-QWebSocket* WebSocketCommunicator::getClient(int clientId) {
+QWebSocket *WebSocketCommunicator::getClient(int clientId)
+{
     return _clients.contains(clientId) ? _clients[clientId] : nullptr;
 }
 
-void WebSocketCommunicator::onNewConnection() {
+void WebSocketCommunicator::onNewConnection()
+{
     log() << "new connection" << std::endl;
-    QWebSocket* socket = _webSocketServer->nextPendingConnection();
+    QWebSocket *socket = _webSocketServer->nextPendingConnection();
 
     connect(socket, &QWebSocket::textMessageReceived, this, &WebSocketCommunicator::processTextMessage);
     connect(socket, &QWebSocket::binaryMessageReceived, this, &WebSocketCommunicator::processBinaryMessage);
@@ -103,12 +109,14 @@ void WebSocketCommunicator::onNewConnection() {
     ++_nextClientId;
 }
 
-void WebSocketCommunicator::onServerClosure() {
+void WebSocketCommunicator::onServerClosure()
+{
     log() << "[Server] Connection closed" << std::endl;
 }
 
-void WebSocketCommunicator::onClientClosure() {
-    QWebSocket* client = qobject_cast<QWebSocket*>(sender());
+void WebSocketCommunicator::onClientClosure()
+{
+    QWebSocket *client = qobject_cast<QWebSocket *>(sender());
     log() << "[Server] Socket disconnected" << std::endl;
     if (client) {
 
@@ -120,8 +128,9 @@ void WebSocketCommunicator::onClientClosure() {
     }
 }
 
-void WebSocketCommunicator::processTextMessage(QString message) {
-    QWebSocket* client = qobject_cast<QWebSocket*>(sender());
+void WebSocketCommunicator::processTextMessage(QString message)
+{
+    QWebSocket *client = qobject_cast<QWebSocket *>(sender());
     int clientId = _clients.key(client, 0);
 
     if (client == nullptr || !_clients.contains(clientId)) {
@@ -134,7 +143,8 @@ void WebSocketCommunicator::processTextMessage(QString message) {
     JsonValue json;
     try {
         json = JsonParser().parse(message.toStdString());
-    } catch (std::exception&) {
+    }
+    catch (std::exception &) {
         log() << "[error] Invalid JSON message" << std::endl;
         return;
     }
@@ -145,86 +155,93 @@ void WebSocketCommunicator::processTextMessage(QString message) {
 
     if (method == "queryDatabase") {
 
-	const std::string dsFileName = "./database.json";
+        const std::string dsFileName = "./database.json";
 
-	std::ifstream dsFile(dsFileName);
-	if (!dsFile.is_open()) {
-	    log() << "[error] cannot open database meta-information file "
-		  << "'"
-		  << dsFileName 
-		  << "'" << std::endl;
-	    return;
-	}
-	std::string dsString((std::istreambuf_iterator<char>(dsFile)), 
-			     std::istreambuf_iterator<char>());
+        std::ifstream dsFile(dsFileName);
+        if (!dsFile.is_open()) {
+            log() << "[error] cannot open database meta-information file "
+                  << "'"
+                  << dsFileName
+                  << "'" << std::endl;
+            return;
+        }
+        std::string dsString((std::istreambuf_iterator<char>(dsFile)),
+                             std::istreambuf_iterator<char>());
 
-	//log() << dsString << std::endl;
+        //log() << dsString << std::endl;
 
-	JsonValue dsJson;
-	try {
-	    dsJson = JsonParser().parse(dsString);
-	} catch (std::exception&) {
-	    log() << "[error] Invalid JSON file '" << dsFileName << "'" << std::endl;
-	    return;
-	}
-	
-	log() << "[Database] start reading database meta-info" << std::endl;
+        JsonValue dsJson;
+        try {
+            dsJson = JsonParser().parse(dsString);
+        }
+        catch (std::exception &) {
+            log() << "[error] Invalid JSON file '" << dsFileName << "'" << std::endl;
+            return;
+        }
 
-	if (dsJson.isArray()) {
-	    JsonValue::Array &dsArray = dsJson.toArray();
-	    for (auto &ds : dsArray) {
-	        //log() << '\t' << ds["data"] << std::endl;
-		QImage img;
-		if (img.load(ds["preview"].toString().c_str())) {
-		    QByteArray ba;
-		    QBuffer buf(&ba);
-		    buf.open(QIODevice::WriteOnly);
-		    img.save(&buf, "JPG");
-		    buf.close();
-		    QByteArray base64 = ba.toBase64();  
-		    ds["preview"] = "data:image/jpeg;base64," + base64.toStdString();
-		} else {
-		    log() << "[error] failed to load data preview image "
-			  << "'"
-			  << ds["preview"] 
-			  << "'"
-			  << std::endl;
-		    return;
-		}
-	    }
-	} else {
-	    log() << "[error] wrong database file" << std::endl;
-	    return;
-	}
+        log() << "[Database] start reading database meta-info" << std::endl;
 
-	log() << "[Database] finished reading database meta-info" << std::endl;
+        if (dsJson.isArray()) {
+            JsonValue::Array &dsArray = dsJson.toArray();
+            for (auto &ds : dsArray) {
+                //log() << '\t' << ds["data"] << std::endl;
+                QImage img;
+                if (img.load(ds["preview"].toString().c_str())) {
+                    QByteArray ba;
+                    QBuffer buf(&ba);
+                    buf.open(QIODevice::WriteOnly);
+                    img.save(&buf, "JPG");
+                    buf.close();
+                    QByteArray base64 = ba.toBase64();
+                    ds["preview"] = "data:image/jpeg;base64," + base64.toStdString();
+                }
+                else {
+                    log() << "[error] failed to load data preview image "
+                          << "'"
+                          << ds["preview"]
+                          << "'"
+                          << std::endl;
+                    return;
+                }
+            }
+        }
+        else {
+            log() << "[error] wrong database file" << std::endl;
+            return;
+        }
 
-	int64_t id = json.get("id", -1).toInt64();
-	rpcReply(client, dsJson, JsonValue(id));
+        log() << "[Database] finished reading database meta-info" << std::endl;
 
-    } else if (method == "openProject") {
+        int64_t id = json.get("id", -1).toInt64();
+        rpcReply(client, dsJson, JsonValue(id));
+
+    }
+    else if (method == "openProject") {
 
         std::string projFileName;
         if (json.contains("params") &&
-                json["params"].isObject() &&
-                json["params"].contains("fileName") &&
-                json["params"]["fileName"].isString()) {
+            json["params"].isObject() &&
+            json["params"].contains("fileName") &&
+            json["params"]["fileName"].isString()) {
             projFileName = json["params"]["fileName"].toString();
         }
         if (!projFileName.empty()) {
             emit openProjectRequested(projFileName, clientId);
         }
 
-    } else if (method == "closeProject") {
+    }
+    else if (method == "closeProject") {
 
         emit closeProjectRequested(clientId);
 
-    } else if (method == "getScene") {
+    }
+    else if (method == "getScene") {
 
         int64_t id = json.get("id", -1).toInt64();
         emit getSceneRequested(id, clientId);
 
-    } else if (method == "requestFrame") {
+    }
+    else if (method == "requestFrame") {
 
         // sample message:
         //  {
@@ -243,14 +260,16 @@ void WebSocketCommunicator::processTextMessage(QString message) {
     }
 }
 
-void WebSocketCommunicator::processBinaryMessage(QByteArray message) {
+void WebSocketCommunicator::processBinaryMessage(QByteArray message)
+{
     log() << "[Server] Binary Message ignored" << std::endl;
 }
 
-void WebSocketCommunicator::notifyProjectOpened(std::string projFileName, int clientId) {
+void WebSocketCommunicator::notifyProjectOpened(std::string projFileName, int clientId)
+{
     log() << "[Server] Project opened: " << projFileName << std::endl;
 
-    QWebSocket* client = getClient(clientId);
+    QWebSocket *client = getClient(clientId);
     if (client == nullptr)
         return;
     JsonValue params;
@@ -258,10 +277,11 @@ void WebSocketCommunicator::notifyProjectOpened(std::string projFileName, int cl
     rpcNotify(client, "projectOpened", params);
 }
 
-void WebSocketCommunicator::notifyProjectClosed(int clientId) {
+void WebSocketCommunicator::notifyProjectClosed(int clientId)
+{
     log() << "[Server] Project closed" << std::endl;
 
-    QWebSocket* client = getClient(clientId);
+    QWebSocket *client = getClient(clientId);
     if (client == nullptr)
         return;
     rpcNotify(client, "projectClosed", JsonValue());

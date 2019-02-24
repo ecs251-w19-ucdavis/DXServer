@@ -8,7 +8,7 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fb
 {
 #if MULTI_CLIENT_MODE
 
-    Client Clients[2];
+    dx::Client Clients[2];
     Clients[0].Init(argv[1], 0);
     Clients[1].Init(argv[2], 1);
     Clients[0].RenderScene(fbo);

@@ -1,13 +1,13 @@
 #pragma once
-#ifndef CLIENT_H
-#define CLIENT_H
+#ifndef DXSERVER_CLIENT_H
+#define DXSERVER_CLIENT_H
 
 #include "SceneHandler.h"
 #include "Renderer/FramebufferGL.h"
 #include <string>
 #include <queue>
 
-namespace v3d{
+namespace v3d { namespace dx {
 
 class Client {
 public:
@@ -32,4 +32,7 @@ private:
 // };
 }
 
-#endif
+
+}
+
+#endif //DXSERVER_CLIENT_H
