@@ -20,7 +20,7 @@
 #include <QTimer>
 #include <QWindow>
 
-#include "DXGL.h"
+#include "Graphics/DXGL.h"
 #include "Util/Log.h"
 
 namespace v3d { namespace dx {

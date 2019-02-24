@@ -13,19 +13,11 @@
 
 #include "SceneHandler.h"
 
-#include "DXGL.h"
 #include "Client.h"
-
-#include "Util/Library.h"
-
-#include "Util/SourceCodeManager.h"
 #include "Renderer/FramebufferGL.h"
-//#include "Engine/RegularGridPipelineGL.h"
-//#include "Engine/TetraGridPipelineGL.h"
 
 #include <string>
 #include <QImage>
-#include <QFile>
 
 namespace v3d {
     void loadModule();
