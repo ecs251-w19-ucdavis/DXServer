@@ -25,6 +25,7 @@ set (vidi3d_dxserver_SOURCES
 
 # Header files
 set (vidi3d_dxserver_HEADERS
+  SceneManager.h
   SceneLoader.h
   Communication/WebSocketCommunicator.h
   Serializer/SceneDictionary.h

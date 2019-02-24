@@ -1,29 +1,4 @@
-//===========================================================================//
-//                                                                           //
-// LibViDi3D                                                                 //
-// Copyright(c) 2018 Qi Wu (Wilson)                                          //
-// University of California, Davis                                           //
-// MIT Licensed                                                              //
-//                                                                           //
-//===========================================================================//
-
-#include <string>
-#include <QImage>
-#include <QFile>
-
-#include "SceneLoader.h"
-
-#include "Util/Library.h"
-
-#include "Engine/RegularGridPipelineGL.h"
-#include "Engine/TetraGridPipelineGL.h"
-
-#include "Renderer/FramebufferGL.h"
-
-#include "Util/SourceCodeManager.h"
-
-#include "DXGL.h"
-#include "Client.h"
+#include "SceneManager.h"
 
 #define MULTI_CLIENT_MODE 1
 

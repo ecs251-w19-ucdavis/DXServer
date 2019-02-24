@@ -19,6 +19,7 @@
 // that corresponds to this .cpp/.cc file).
 #include "DXGL.h"
 #include "Client.h"
+#include "SceneManager.h"
 #include "Communication/WebSocketCommunicator.h"
 
 // Other headers from the same project, as needed.
@@ -45,7 +46,6 @@ using namespace v3d;
 
 namespace v3d {
 namespace dx { int winW = 800, winH = 800; }
-void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fbo);
 }
 
 // class Args{
