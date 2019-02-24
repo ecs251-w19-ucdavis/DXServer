@@ -27,7 +27,8 @@ void WebSocketCommunicator::open()
     }
 }
 
-void WebSocketCommunicator::close() {
+void WebSocketCommunicator::close()
+{
     if (_webSocketServer == nullptr) {
         return;
     }
@@ -36,14 +37,16 @@ void WebSocketCommunicator::close() {
     _webSocketServer = nullptr;
 }
 
-void WebSocketCommunicator::sendScene(JsonValue scene, int64_t id, int clientId) {
+void WebSocketCommunicator::sendScene(JsonValue scene, int64_t id, int clientId)
+{
     if (!_clients.contains(clientId))
         return;
     QWebSocket* client = _clients[clientId];
     rpcReply(client, scene, JsonValue(id));
 }
 
-void WebSocketCommunicator::sendFrame(QImage img, int clientId) {
+void WebSocketCommunicator::sendFrame(QImage img, int clientId)
+{
     if (!_clients.contains(clientId))
         return;
     QWebSocket* client = _clients[clientId];

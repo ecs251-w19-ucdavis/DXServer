@@ -7,7 +7,7 @@
 //                                                                           //
 //===========================================================================//
 
-#include "SceneLoader.h"
+#include "SceneHandler.h"
 
 #include "Serializer/Dictionary.h"
 #include "Serializer/SceneDictionary.h"
@@ -25,23 +25,29 @@
 using v3d::JsonValue;
 using v3d::JsonParser;
 
-v3d::dx::SceneLoader::SceneLoader(std::string filename, int W, int H)
-    : _jsonFileName(std::move(filename))
-    , size{W, H}
+v3d::dx::SceneHandler::SceneHandler(std::string project_name, fbo_t framebuffer_object,
+                                  int initial_width, int initial_height)
+    : _size{initial_width, initial_height}
+    , _fbo(std::move(framebuffer_object))
+    , _jsonFileName(std::move(project_name))
 {
   using namespace v3d::serializer;
   using namespace v3d::dx::serializer;
   JsonParser().load(_jsonFileName, _jsonRoot);
   if (_jsonRoot.contains(DATA_SOURCE)) {
     _jsonData = _jsonRoot[DATA_SOURCE];
-  } else { PING; }
+  } else {
+    throw std::runtime_error("[Error] thr project JSON does not contain a data specification, please fix this.");
+  }
   if (_jsonRoot.contains(VIEW)) {
     _jsonView = _jsonRoot[VIEW];
-    _method = _jsonView.get(METHOD_, "").toString();
-  } else { PING; }
+    _jsonViewMethod = _jsonView.get(METHOD_, "").toString();
+  } else {
+    throw std::runtime_error("[Error] thr project JSON does not contain a view specification, please fix this.");
+  }
 }
 
-void v3d::dx::SceneLoader::initData()
+void v3d::dx::SceneHandler::initData()
 {
   // setup namespace
   using namespace v3d::serializer;
@@ -87,7 +93,7 @@ void v3d::dx::SceneLoader::initData()
 /**
  * @note: we need an initialization because we will frequently update our scene file
  */
-void v3d::dx::SceneLoader::initScene()
+void v3d::dx::SceneHandler::initScene()
 {
   // now we create transfer functions
   _ctf = std::move(TransferFunction::fromRainbowMap());
@@ -97,8 +103,8 @@ void v3d::dx::SceneLoader::initScene()
   _camera = std::make_shared<Camera>();
 
   // now we create volume and scene
-  if (_method == "REGULAR_GRID_VOLUME_RAY_CASTING")
-  {
+  if (_jsonViewMethod == "REGULAR_GRID_VOLUME_RAY_CASTING") {
+
     auto volume = std::make_shared<v3d::RegularGridVolumeGL>();
     auto data = std::dynamic_pointer_cast<RegularGridDataGL>(_data);
     {
@@ -180,10 +186,11 @@ void v3d::dx::SceneLoader::initScene()
 
     // setup renderer
     _rendererGrid = std::make_shared<RegularGridPipelineGL>();
+    _rendererGrid->setFramebufferObject(_fbo->sharedFramebufferObject());
     _rendererGrid->setScene(_sceneGrid);
-  }
-  else if (_method == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING")
-  {
+
+  } else if (_jsonViewMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
+
     auto volume = std::make_shared<TetraGridVolumeGL>();
     auto data = std::dynamic_pointer_cast<TetraGridDataGL>(_data);
 
@@ -230,9 +237,6 @@ void v3d::dx::SceneLoader::initScene()
     boundaryGeometryProperty->setFrontMaterial(geomMat);
     boundaryGeometryProperty->setClippingBox(boundaryClippingBox);
 
-    // create a light
-//    auto lightSource = std::make_shared<LightSource>();
-
     // set camera
     _camera->setNear(maxDim * 0.001);
     _camera->setFar(maxDim * 10.0);
@@ -243,16 +247,16 @@ void v3d::dx::SceneLoader::initScene()
 
     // set renderer
     _rendererTets = std::make_shared<TetraGridPipelineGL>();
+    _rendererTets->setFramebufferObject(_fbo->sharedFramebufferObject());
     _rendererTets->setScene(_sceneTets);
     _rendererTets->setBoundaryGeometryProperty(boundaryGeometryProperty);
-    //_rendererTets->setLightSource(_sceneTets->lightSource());
-  }
-  else {
+
+  } else {
     throw std::runtime_error("[Error] unknown volume type");
   }
 }
 
-void v3d::dx::SceneLoader::updateView(const v3d::JsonValue &input)
+void v3d::dx::SceneHandler::updateView(const v3d::JsonValue &input)
 {
   // setup namespace
   using namespace v3d::serializer;
@@ -268,13 +272,13 @@ void v3d::dx::SceneLoader::updateView(const v3d::JsonValue &input)
   updateCamera(view);
 
   // load volume
-  if (_method == "REGULAR_GRID_VOLUME_RAY_CASTING")
+  if (_jsonViewMethod == "REGULAR_GRID_VOLUME_RAY_CASTING")
   {
     auto volume = std::dynamic_pointer_cast<v3d::RegularGridVolumeGL>(_volume);
     if (view.contains(VOLUME)) fromJson(view[VOLUME], *volume);
     fromJson(view, *_sceneGrid);
   }
-  else if (_method == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING")
+  else if (_jsonViewMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING")
   {
     auto volume = std::dynamic_pointer_cast<v3d::TetraGridVolumeGL>(_volume);
     if (view.contains(VOLUME)) fromJson(view[VOLUME], *volume);
@@ -285,7 +289,54 @@ void v3d::dx::SceneLoader::updateView(const v3d::JsonValue &input)
   }
 }
 
-void v3d::dx::SceneLoader::updateTransferFunction(const v3d::JsonValue & view)
+void v3d::dx::SceneHandler::updateRenderer()
+{
+  if (_rendererGrid) {
+    _rendererGrid->resize(_size.x, _size.y);
+  } else if (_rendererTets) {
+    _rendererTets->resize(_size.x, _size.y);
+  }
+}
+
+void v3d::dx::SceneHandler::resize(int w, int h)
+{
+  _size.x = w;
+  _size.y = h;
+  updateRenderer();
+}
+
+void v3d::dx::SceneHandler::render()
+{
+  glFinish();
+  if (_rendererGrid) {
+    _rendererGrid->render();
+  } else if (_rendererTets) {
+    _rendererTets->render();
+  }
+  glFinish();
+}
+
+std::shared_ptr<std::vector<uint8_t>> v3d::dx::SceneHandler::copyRenderedImage(bool fix_alpha) const
+{
+  auto buffer = std::make_shared<std::vector<uint8_t>>(size_t(_size.x) * size_t(_size.y) * size_t(4));
+  GLuint currFbo = GLFramebufferObject::currentDrawBinding();
+  _fbo->bind();
+  V3D_GL_PRINT_ERRORS();
+  GLint readBuffer;
+  glGetIntegerv(GL_READ_BUFFER, &readBuffer);
+  glReadBuffer(GL_COLOR_ATTACHMENT0);
+  glReadPixels(0, 0, _size.x, _size.y, GL_BGRA, GL_UNSIGNED_BYTE, &(*buffer)[0]);
+  glReadBuffer(GLenum(readBuffer));
+  V3D_GL_PRINT_ERRORS();
+  GLFramebufferObject::bind(currFbo);
+  V3D_GL_PRINT_ERRORS();
+  if (fix_alpha) {
+    for (int i = 0; i < _size.x * _size.y; i++) (*buffer)[i * 4 + 3] = 255;
+  }
+  return std::move(buffer);
+}
+
+void v3d::dx::SceneHandler::updateTransferFunction(const v3d::JsonValue & view)
 {
   // setup namespace
   using namespace v3d::serializer;
@@ -294,7 +345,7 @@ void v3d::dx::SceneLoader::updateTransferFunction(const v3d::JsonValue & view)
   if (view.contains(VOLUME))
   {
     const auto &jsonVol = view[VOLUME];
-    if (_method == "REGULAR_GRID_VOLUME_RAY_CASTING") {
+    if (_jsonViewMethod == "REGULAR_GRID_VOLUME_RAY_CASTING") {
       auto volume = std::dynamic_pointer_cast<RegularGridVolumeGL>(_volume);
       if (jsonVol.contains(TRANSFER_FUNCTION)) {
         *_ctf = fromJson<TransferFunction>(jsonVol[TRANSFER_FUNCTION]);
@@ -307,7 +358,7 @@ void v3d::dx::SceneLoader::updateTransferFunction(const v3d::JsonValue & view)
         _otf->update();
         volume->setTransferFunction2DDirty(true);
       }
-    } else if (_method == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
+    } else if (_jsonViewMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
       auto volume = std::dynamic_pointer_cast<TetraGridVolumeGL>(_volume);
       if (jsonVol.contains(TRANSFER_FUNCTION)) {
         *_ctf = fromJson<TransferFunction>(jsonVol[TRANSFER_FUNCTION]);
@@ -319,7 +370,7 @@ void v3d::dx::SceneLoader::updateTransferFunction(const v3d::JsonValue & view)
   }
 }
 
-void v3d::dx::SceneLoader::updateCamera(const v3d::JsonValue & view)
+void v3d::dx::SceneHandler::updateCamera(const v3d::JsonValue & view)
 {
   // setup namespace
   using namespace v3d::serializer;
@@ -328,6 +379,6 @@ void v3d::dx::SceneLoader::updateCamera(const v3d::JsonValue & view)
   if (view.contains(CAMERA))
   {
     *_camera = fromJson<Camera>(view[CAMERA]);
-    _camera->setAspect(size.x / static_cast<float>(size.y));
+    _camera->setAspect(_size.x / static_cast<float>(_size.y));
   }
 }

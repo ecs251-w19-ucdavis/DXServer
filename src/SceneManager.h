@@ -11,23 +11,21 @@
 #ifndef SCENEMANAGER_H
 #define SCENEMANAGER_H
 
-#include <string>
-#include <QImage>
-#include <QFile>
-
-#include "SceneLoader.h"
-
-#include "Util/Library.h"
-
-#include "Engine/RegularGridPipelineGL.h"
-#include "Engine/TetraGridPipelineGL.h"
-
-#include "Renderer/FramebufferGL.h"
-
-#include "Util/SourceCodeManager.h"
+#include "SceneHandler.h"
 
 #include "DXGL.h"
 #include "Client.h"
+
+#include "Util/Library.h"
+
+#include "Util/SourceCodeManager.h"
+#include "Renderer/FramebufferGL.h"
+//#include "Engine/RegularGridPipelineGL.h"
+//#include "Engine/TetraGridPipelineGL.h"
+
+#include <string>
+#include <QImage>
+#include <QFile>
 
 namespace v3d {
     void loadModule();

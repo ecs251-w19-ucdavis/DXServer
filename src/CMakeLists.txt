@@ -17,7 +17,7 @@ set(CMAKE_AUTORCC ON)
 set (vidi3d_dxserver_SOURCES
   Main.cpp
   SceneManager.cpp
-  SceneLoader.cpp
+  SceneHandler.cpp
   Communication/WebSocketCommunicator.cpp
   Loader/RegularGridRawBinary.cpp
   Loader/TetraGridRawBinary.cpp
@@ -26,7 +26,7 @@ set (vidi3d_dxserver_SOURCES
 # Header files
 set (vidi3d_dxserver_HEADERS
   SceneManager.h
-  SceneLoader.h
+  SceneHandler.h
   Communication/WebSocketCommunicator.h
   Serializer/SceneDictionary.h
   Loader/Common.h

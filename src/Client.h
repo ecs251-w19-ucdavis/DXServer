@@ -6,7 +6,7 @@
 #include <QImage>
 #include <QFile>
 
-#include "SceneLoader.h"
+#include "SceneHandler.h"
 
 #include "Util/Library.h"
 //#include "Util/JsonParser.h"
