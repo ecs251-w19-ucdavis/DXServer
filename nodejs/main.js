@@ -2,8 +2,8 @@
 const vox = require('./module/index')
 
 let PullFromEngine = () => {
-  vox.engine1.CallGetScene()
-  vox.engine1.NotifyRequestFrame(null)
+  vox.engine.CallGetScene()
+  vox.engine.NotifyRequestFrame(null)
 }
 
 // for(let i = 0; i < 2; ++i) {
@@ -61,5 +61,3 @@ vox.engine.OnProjectOpened = () => {
   PullFromEngine()
 }
 vox.engine.connect(process.argv.length > 2 ? process.argv[2] : 'localhost')
-}
-

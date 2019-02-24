@@ -2,7 +2,7 @@
 
 #include "Graphics/DXGL.h"
 
-void v3d::Client::RenderScene(std::shared_ptr<FramebufferGL> fbo)
+void v3d::dx::Client::RenderScene(std::shared_ptr<FramebufferGL> fbo)
 {
 	// create renderer
 	v3d::dx::SceneHandler handler(filename, std::move(fbo), dx::winW, dx::winH);
