@@ -8,8 +8,8 @@
 //===========================================================================//
 
 #pragma once
-#ifndef SCENEMANAGER_H
-#define SCENEMANAGER_H
+#ifndef DXSERVER_WORKSPACE_H
+#define DXSERVER_WORKSPACE_H
 
 #include "SceneHandler.h"
 
@@ -20,7 +20,7 @@
 #include <QImage>
 
 namespace v3d {
-    void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fbo);
+void startWorkspace(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fbo);
 }
 
-#endif
+#endif // DXSERVER_WORKSPACE_H

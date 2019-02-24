@@ -1,10 +1,10 @@
-#include "SceneManager.h"
+#include "Workspace.h"
 
 #define MULTI_CLIENT_MODE 1
 
 namespace v3d {
 
-void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fbo)
+void startWorkspace(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fbo)
 {
 #if MULTI_CLIENT_MODE
 
