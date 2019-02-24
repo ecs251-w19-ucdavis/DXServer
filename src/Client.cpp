@@ -2,6 +2,16 @@
 
 #include "Graphics/DXGL.h"
 
+
+
+// void Client::ParseRequest(int request)
+// {
+// 	switch(request) {
+// 		case 0: // initialize
+// 			PING;
+// 	}
+// }
+
 void v3d::dx::Client::RenderScene(std::shared_ptr<FramebufferGL> fbo)
 {
 	// create renderer
