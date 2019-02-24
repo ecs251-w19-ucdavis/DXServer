@@ -7,23 +7,21 @@
 //                                                                           //
 //===========================================================================//
 
-#include <string>
-#include <QImage>
-#include <QFile>
-
 #include "SceneLoader.h"
-
-#include "Util/Library.h"
-
-#include "Engine/RegularGridPipelineGL.h"
-#include "Engine/TetraGridPipelineGL.h"
-
-#include "Renderer/FramebufferGL.h"
-
-#include "Util/SourceCodeManager.h"
 
 #include "DXGL.h"
 #include "Client.h"
+
+#include "Util/Library.h"
+
+#include "Util/SourceCodeManager.h"
+#include "Renderer/FramebufferGL.h"
+//#include "Engine/RegularGridPipelineGL.h"
+//#include "Engine/TetraGridPipelineGL.h"
+
+#include <string>
+#include <QImage>
+#include <QFile>
 
 #define MULTI_CLIENT_MODE 1
 
@@ -138,7 +136,7 @@ void loadAllShaders()
     }
 }
 
-void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fbo)
+void createScene(int *argc, const char **argv, const std::shared_ptr<FramebufferGL>& fbo)
 {
     loadModule();
     loadAllShaders();
@@ -153,21 +151,14 @@ void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fb
 
 #else
 
-    v3d::dx::SceneLoader loader(argv[1], dx::winW, dx::winH);
+    v3d::dx::SceneLoader loader(argv[1], fbo, dx::winW, dx::winH);
     loader.initData();
     loader.initScene();
     loader.updateView();
-
-    // create renderer
-    //auto renderer = loader.getRendererGrid();
-    auto renderer = loader.getRendererTets();
-    renderer->setFramebufferObject(fbo->sharedFramebufferObject());
-    renderer->resize(dx::winW, dx::winH);
+    loader.updateRenderer();
 
     // render
-    glFinish();
-    renderer->render();
-    glFinish();
+    loader.render();
 
     // get framebuffer image
     std::vector<unsigned char> buffer(dx::winW * dx::winH * 4);

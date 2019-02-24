@@ -3,10 +3,11 @@
 namespace v3d{
 	void Client::RenderScene(std::shared_ptr<FramebufferGL> fbo)
 	{
-		v3d::dx::SceneLoader loader(filename, dx::winW, dx::winH);
+		v3d::dx::SceneLoader loader(filename, std::move(fbo), dx::winW, dx::winH);
 	    loader.initData();
 	    loader.initScene();
 	    loader.updateView();
+	    loader.updateRenderer();
 
 	    // create renderer
 
@@ -16,15 +17,13 @@ namespace v3d{
 	//    auto renderer = std::make_shared<TetraGridPipelineGL>();
 	//    renderer->setScene(loader.getSceneTets());
 
-	    auto renderer = loader.getRendererGrid();
-	//    auto renderer = loader.getRendererTets();
-	    renderer->setFramebufferObject(fbo->sharedFramebufferObject());
-	    renderer->resize(dx::winW, dx::winH);
+//	    auto renderer = loader.getRendererGrid();
+//	//    auto renderer = loader.getRendererTets();
+//	    renderer->setFramebufferObject(fbo->sharedFramebufferObject());
+//	    renderer->resize(dx::winW, dx::winH);
 
 	    // render
-	    glFinish();
-	    renderer->render();
-	    glFinish();
+	    loader.render();
 
 	    // get framebuffer image
 	    std::vector<unsigned char> buffer(dx::winW * dx::winH * 4);

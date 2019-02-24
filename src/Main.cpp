@@ -45,7 +45,7 @@ using namespace v3d;
 
 namespace v3d {
 namespace dx { int winW = 800, winH = 800; }
-void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fbo);
+void createScene(int *argc, const char **argv, const std::shared_ptr<FramebufferGL>& fbo);
 }
 
 // class Args{
