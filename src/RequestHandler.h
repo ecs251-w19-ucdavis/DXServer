@@ -6,6 +6,8 @@
 #ifndef DXSERVER_REQUESTHANDLER_H
 #define DXSERVER_REQUESTHANDLER_H
 
+#include "SceneHandler.h"
+
 #include "Util/JsonParser.h"
 
 #include <QObject>
@@ -19,12 +21,12 @@ class RequestHandler : public QObject {
     Q_OBJECT
     using response_t = std::function<void(v3d::JsonValue)>;
 public:
-    RequestHandler(const std::string& database = "database.json");
+    explicit RequestHandler(const std::string& database = "database.json");
     void handleQueryDatabase(int clientId, v3d::JsonValue& output);
-//    void handle_OpenProjectRequested(std::string projFileName, int clientId);
-//    void handle_CloseProjectRequested(int clientId);
-//    void handle_GetSceneRequested(int64_t id, int clientId);
-//    void handle_FrameRequested(v3d::JsonValue scene, int clientId);
+    void handleOpenProjectRequested(std::string projFileName, int clientId);
+    void handleCloseProjectRequested(int clientId);
+    void handleGetSceneRequested(int64_t id, int clientId);
+    void handleFrameRequested(const v3d::JsonValue& scene, int clientId);
 
 public slots: // <- NOTE don't forget this slots keyword defined by Qt
     // This is an example for implementing a QObject slot
@@ -33,6 +35,11 @@ public slots: // <- NOTE don't forget this slots keyword defined by Qt
 
 private:
     v3d::JsonValue _jsonDatabase;
+
+    /** TODO This is just an experimental implementation, we should change it to a client list instead. The length
+     *       of the client list should be identical to the length in WebSocketCommunicator
+     */
+//    std::shared_ptr<SceneHandler> engine;
 };
 
 }}

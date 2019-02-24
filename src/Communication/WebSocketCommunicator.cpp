@@ -102,15 +102,16 @@ void v3d::dx::WebSocketCommunicator::onClientClosure()
 
 void v3d::dx::WebSocketCommunicator::processTextMessage(QString message)
 {
-    QWebSocket *client = qobject_cast<QWebSocket *>(sender());
+    // compute client Id
+    auto *client = qobject_cast<QWebSocket *>(sender());
     int clientId = _clients.key(client, 0);
-
     if (client == nullptr || !_clients.contains(clientId)) {
         log() << "[Server] Message received from invalid client" << std::endl;
         return;
     }
     log() << "[Server] Message received from client " << clientId << ": " << message.toStdString() << std::endl;
 
+    // parse the message into a JSON
     JsonValue json;
     try {
         json = JsonParser().parse(message.toStdString());
@@ -120,13 +121,14 @@ void v3d::dx::WebSocketCommunicator::processTextMessage(QString message)
         return;
     }
 
+    // handle different requests
     std::string method = json.get("method", "").toString();
     log() << "message received " << method << std::endl;
-
     if (method == "queryDatabase") {
 
         int64_t id = json.get("id", -1).toInt64();
         emit newRequest(clientId, 0, json, [=] (v3d::JsonValue result) {
+            log() << "resolved" << std::endl;
             sendDatabase(result, id, clientId);
         });
 
@@ -164,14 +166,15 @@ void v3d::dx::WebSocketCommunicator::processTextMessage(QString message)
     }
     else if (method == "requestFrame") {
 
-//        // sample message:
-//        //  {
-//        //    "jsonrpc": "2.0",
-//        //    "method": "requestFrame",
-//        //    "params": {
-//        //      "scene": {...}
-//        //    }
-//        //  }
+        // sample message:
+        //  {
+        //    "jsonrpc": "2.0",
+        //    "method": "requestFrame",
+        //    "params": {
+        //      "scene": {...}
+        //    }
+        //  }
+
 //        JsonValue scene;
 //        if (json.contains("params") && json["params"].isObject() && json["params"].contains("scene")) {
 //            scene = json["params"]["scene"];

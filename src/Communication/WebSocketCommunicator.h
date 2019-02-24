@@ -18,7 +18,7 @@ namespace v3d { namespace dx {
 
 class WebSocketCommunicator : public QObject {
     Q_OBJECT
-//    using RequestSlot = std::function<void(int, int, v3d::JsonValue, const std::function<void(v3d::JsonValue)>&)>;
+    using response_t = std::function<void(v3d::JsonValue)>;
 public:
     explicit WebSocketCommunicator(quint16 port, QObject* parent = nullptr);
 
@@ -33,6 +33,7 @@ public:
      */
     void connectToRequestSlot(const QObject* receiver);
 
+    // enable if needed
 //    bool isConnected() const { return (_webSocketServer != nullptr) && !_clients.empty(); }
 
 protected:
@@ -55,17 +56,15 @@ public slots:
 
 signals:
     /**
-     * Signal the arrival of a new request
+     * Signal the arrival of a new request. In this function, we should only use pass-by-value rather than
+     * pass-by reference because we are async. We don't know if the parent function still exists when running
+     * this function.
      * @param clientId
-     * @param type The type of a requst: 0 means the request is a call, 1 means the request is a notification
-     * @param request
-     * @param resolve
+     * @param type The type of a requst: 0 means the request is a call, 1 means the request is a notification.
+     * @param request A copy of the original JSON request.
+     * @param resolve A functional to send the reply for each request.
      */
-    void newRequest(int clientId, int type, v3d::JsonValue request, std::function<void(v3d::JsonValue)> resolve);
-//    void openProjectRequested(std::string projFileName, int clientId);
-//    void closeProjectRequested(int clientId);
-//    void getSceneRequested(int64_t id, int clientId);
-//    void frameRequested(v3d::JsonValue scene, int clientId);
+    void newRequest(int clientId, int type, v3d::JsonValue request, response_t resolve);
 
 private:
     bool _secureMode = false;

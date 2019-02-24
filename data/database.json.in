@@ -1,0 +1,10 @@
+[
+    {
+        "data" : "@DX_DATA_NATIVE_PATH@engine.json",
+        "preview" : "@DX_DATA_NATIVE_PATH@engine.png"
+    },
+    {
+        "data" : "@DX_DATA_NATIVE_PATH@vorts1.json",
+        "preview" : "@DX_DATA_NATIVE_PATH@vorts1.png"
+    }
+]
