@@ -32,15 +32,16 @@ using v3d::api::V3DGeometry;
 
 namespace v3d { namespace dx {
 
-class SceneLoader {
+class SceneHandler {
     using fbo_t = std::shared_ptr<FramebufferGL>;
 public:
-    explicit SceneLoader(std::string project_name, fbo_t framebuffer_object, int initial_width, int initial_height);
+    explicit SceneHandler(std::string project_name, fbo_t framebuffer_object, int initial_width, int initial_height);
     void initData();
     void initScene();
     void updateView(const JsonValue& input = JsonValue());
     void updateRenderer();
     void render();
+    std::shared_ptr<std::vector<uint8_t>> copyRenderedImage(bool fix_alpha = true) const;
 
     void resize(int w, int h); // TODO I am not sure we need to resize framebuffer in code
 
