@@ -20,9 +20,7 @@
 #include <QImage>
 
 namespace v3d {
-    void loadModule();
-    QString loadFile(const QString &fileName);
-    void loadAllShaders();void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fbo);
+    void createScene(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fbo);
 }
 
 #endif
