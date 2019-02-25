@@ -28,6 +28,11 @@ include(external/libvidi3d/cmake/ConfigureOpenGL.cmake)
 add_subdirectory(src)
 
 # ┌──────────────────────────────────────────────────────────────────┐
+# │  Configure DX Test                                               │
+# └──────────────────────────────────────────────────────────────────┘
+add_subdirectory(test)
+
+# ┌──────────────────────────────────────────────────────────────────┐
 # │  Others                                                          │
 # └──────────────────────────────────────────────────────────────────┘
 file(TO_NATIVE_PATH "${PROJECT_SOURCE_DIR}/data/" DX_DATA_NATIVE_PATH)
