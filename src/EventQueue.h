@@ -37,7 +37,7 @@ class EventQueue : public QObject {
 public: 
     std::vector<Event>::iterator FindClientType(int clientId, int type);
 public slots:
-    void newRequest(int clientId, int type, v3d::JsonValue request, response_t resolve);
+    void AddNewRequest(int clientId, int type, v3d::JsonValue request, response_t resolve);
 signals:
     void handleRequestFrame(int clientId, int type, v3d::JsonValue request, response_t resolve);
     void handleOpenProject(int clientId, int type, v3d::JsonValue request, response_t resolve);

@@ -10,10 +10,11 @@ namespace v3d {
         Event::Event(int ClientId, int type, v3d::JsonValue request, response_t resolve)
         : _ClientId(ClientId), _type(type), _request(request), _resolve(resolve)
         {}
-        void EventQueue::newRequest(int ClientId, int type, v3d::JsonValue request, response_t resolve)
+        void EventQueue::AddNewRequest(int ClientId, int type, v3d::JsonValue request, response_t resolve)
         {
             Event newEvent(ClientId, type, request, resolve);
             std::string method = request.get("method", "").toString();
+            std::cout << "new request received from client " << ClientId << ": " << method << std::endl;
             switch(type) 
             {
             case 0: // a call

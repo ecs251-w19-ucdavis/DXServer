@@ -39,8 +39,8 @@ void v3d::dx::WebSocketCommunicator::close()
 
 void v3d::dx::WebSocketCommunicator::connectToRequestSlot(const QObject* _receiver)
 {
-    const auto* receiver = qobject_cast<const RequestHandler*>(_receiver);
-    connect(this, &v3d::dx::WebSocketCommunicator::newRequest, receiver, &RequestHandler::handleNewRequest);
+    const auto* receiver = qobject_cast<const EventQueue*>(_receiver);
+    connect(this, &v3d::dx::WebSocketCommunicator::newRequest, receiver, &EventQueue::AddNewRequest);
 }
 
 void v3d::dx::WebSocketCommunicator::rpcNotify(QWebSocket *target, const std::string &method, const JsonValue &params)
@@ -160,6 +160,7 @@ void v3d::dx::WebSocketCommunicator::processTextMessage(QString message)
     else if (method == "getScene") {
 
         int64_t id = json.get("id", -1).toInt64();
+        std::cout << "emitting signals" << std::endl;
         emit newRequest(clientId, 0, json, [=] (v3d::JsonValue scene) {
             sendScene(scene, id, clientId);
         });
