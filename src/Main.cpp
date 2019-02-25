@@ -70,14 +70,6 @@ namespace dx { int winW = 800, winH = 800; }
 
 int main(int argc, char* argv[])
 {
-  // pthread_t t1, t2;
-  // Args *args;
-  // args = (Args *)malloc(2 * sizeof(Args));
-  // args[0](argv[1], 1);
-  // args[1](argv[2], 2);
-  // pthread_create(&t1, NULL, &RenderFunction, &args[0]);
-  // pthread_create(&t2, NULL, &RenderFunction, &args[1]);
-
 #ifndef USE_QT_OPENGL
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QCoreApplication app(argc, argv);

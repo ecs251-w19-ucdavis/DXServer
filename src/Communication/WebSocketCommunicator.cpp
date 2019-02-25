@@ -1,6 +1,7 @@
 #include "WebSocketCommunicator.h"
 
 #include "RequestHandler.h"
+#include "EventQueue.h"
 
 #include "Util/Log.h"
 
