@@ -22,6 +22,7 @@ const SocketIO = require('socket.io')
  * @api public
  */
 class VoxClient {
+  // clients = {1 : null, 2 : null}
   constructor () {
     this._app = Express()
     this._http = Http.Server(this._app)
@@ -35,14 +36,19 @@ class VoxClient {
     })
   }
 
+  clients = new Map()
+
   set OnConnect (func) {
-    // Create an array to store clients
-    // clients = {}
     this._io.on('connection', (socket) => {
       // clients[socket.id] = socket
-      console.log('client connection' + socket.id)
-      // console.log('client connection')
+      if(clients[socket] == null) {
+        clients[socket] = 1
+      } else {
+        clients[socket] = parseInt(clients[socket]) + 1
+      }
+      console.log('client connection')
       func(socket)
+      // func(socket)
     })
   }
 

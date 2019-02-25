@@ -10,7 +10,10 @@
 const VoxClient = require('./VoxClient')
 const VoxEngine = require('./VoxEngine')
 
-module.exports = {
-  client: new VoxClient(),
-  engine: new VoxEngine()
-};
+  module.exports = {
+    
+    client: new VoxClient(),
+    engine: new VoxEngine()
+  };
+
+
