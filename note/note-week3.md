@@ -3,7 +3,8 @@
 [link to trello](https://trello.com/invite/daxian2/0d1bdd82285db70339a7885d70934329)
 
 ## Commits:
-**Qi** [DEBUG: re-enable the communication between the web-server and the redner-side-communicator by refactoring the position of `QApplication`](https://github.com/ecs251-w19-ucdavis/DXServer/commit/4ce24bd13b5a1df396b46c86d02a1c97c05dcfba)
+**Qi** 
+* [DEBUG: re-enable the communication between the web-server and the redner-side-communicator by refactoring the position of `QApplication`](https://github.com/ecs251-w19-ucdavis/DXServer/commit/4ce24bd13b5a1df396b46c86d02a1c97c05dcfba)
 
 **Qi** [improve abstraction by hiding some framebuffer operations inside the `SceneHandler`](https://github.com/ecs251-w19-ucdavis/DXServer/commit/abf2f716431485f9d0cf093a34bdf0c86920a6fb)
 
