@@ -11,6 +11,10 @@
 
 **Qi** [add CMake code to dynamically generate the database.json file](https://github.com/ecs251-w19-ucdavis/DXServer/commit/bf396901b6d1c68908105a999bf293a0daace7bb)
 
+**Yiran** [implemented the initial design of an EventQueue (RequestQueue)](https://github.com/ecs251-w19-ucdavis/DXServer/commit/2a052398b74509f643cfbf3b977d1f994dfb0826)
+
+**Yiran**
+
 ## Topic Discussed
 
 #### RequestQueue (RQ) System Design
