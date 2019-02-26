@@ -71,7 +71,7 @@ QWebSocket *v3d::dx::WebSocketCommunicator::getClient(int clientId)
 
 void v3d::dx::WebSocketCommunicator::onNewConnection()
 {
-    log() << "new connection" << std::endl;
+    log() << "new connection " << _nextClientId << std::endl;
     QWebSocket *socket = _webSocketServer->nextPendingConnection();
 
     connect(socket, &QWebSocket::textMessageReceived, this, &WebSocketCommunicator::processTextMessage);
@@ -92,11 +92,8 @@ void v3d::dx::WebSocketCommunicator::onClientClosure()
     QWebSocket *client = qobject_cast<QWebSocket *>(sender());
     log() << "[Server] Socket disconnected" << std::endl;
     if (client) {
-
         int key = _clients.key(client, 0);
-        if (_clients.contains(key))
-            _clients.remove(key);
-
+        if (_clients.contains(key)) { _clients.remove(key); }
         client->deleteLater();
     }
 }

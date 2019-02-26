@@ -38,7 +38,7 @@ class VoxWebserver {
 
   set OnConnect (func) {
     this._io.on('connection', (socket) => {
-      console.log('client connection')
+      console.log('client connection', socket.id)
       func(socket)
     })
   }

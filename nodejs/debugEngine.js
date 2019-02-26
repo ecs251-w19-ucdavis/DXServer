@@ -1,9 +1,21 @@
 /* eslint-disable no-console */
 const vox = require('./module/index')
-vox.engine.OnConnect = () => {
+
+let en0 = new vox.VoxEngine()
+en0.OnConnect = () => {
     console.log('connect')
-    vox.engine._rpcCall('getScene', {}, 2, (data) => {
-	console.log(data)
+    en0._rpcCall('getScene', {}, 2, (data) => {
+        console.log('engine 0', data)
+    })
+    en0._rpcNotify('requestFrame', {})
+}
+en0.connect('localhost')
+
+let en1 = new vox.VoxEngine()
+en1.OnConnect = () => {
+    console.log('connect')
+    en1._rpcCall('getScene', {}, 2, (data) => {
+        console.log('engine 1', data)
     })
 }
-vox.engine.connect(process.argv.length > 2 ? process.argv[2] : 'localhost')
+en1.connect('localhost')
