@@ -187,6 +187,11 @@ class VoxEngine {
       console.log('Connection Error')
     }
   }
+
+  close () {
+    this._engine.onclose = () => {}
+    this._engine.close()
+  }
 }
 
 /**

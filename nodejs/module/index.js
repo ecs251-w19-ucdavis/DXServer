@@ -7,13 +7,14 @@
 
 'use strict'
 
-const VoxClient = require('./VoxClient')
-const VoxEngine = require('./VoxEngine')
-
-  module.exports = {
-    
-    client: new VoxClient(),
-    engine: new VoxEngine()
-  };
-
-
+const VoxWebserver = require('./VoxClient')
+const AsyncLock = require('async-lock')
+module.exports = {
+  VoxEngine: require('./VoxEngine'),
+  // fields
+  webserver: new VoxWebserver(),
+  clients: new Map(),
+  engines: new Map(),
+  next: 1,
+  lock: new AsyncLock()
+};

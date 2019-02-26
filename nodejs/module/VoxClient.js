@@ -21,7 +21,7 @@ const SocketIO = require('socket.io')
  * @return {class}
  * @api public
  */
-class VoxClient {
+class VoxWebserver {
   // clients = {1 : null, 2 : null}
   constructor () {
     this._app = Express()
@@ -36,19 +36,10 @@ class VoxClient {
     })
   }
 
-  clients = new Map()
-
   set OnConnect (func) {
     this._io.on('connection', (socket) => {
-      // clients[socket.id] = socket
-      if(clients[socket] == null) {
-        clients[socket] = 1
-      } else {
-        clients[socket] = parseInt(clients[socket]) + 1
-      }
       console.log('client connection')
       func(socket)
-      // func(socket)
     })
   }
 
@@ -60,4 +51,4 @@ class VoxClient {
 /**
  * Expose `VoxEngine class`.
  */
-module.exports = VoxClient
+module.exports = VoxWebserver
