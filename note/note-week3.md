@@ -81,3 +81,14 @@ Then the requests are aggregated into a queue `RequestQueue`. Currently in our p
 **Qi**: We need to define invariants when scheduling requests. 
 1. For one client, the order of requests to **execute** should be the same as the requests’ receiving order after compression.
 2. There is no ordering guarantees between requests for different clients.
+
+#### Communication between the Web-Server & the Render-Communicator
+
+**Wenxi**: In order to realize the communication correctly between multiple Web-Server and Render-Communicator, first, we create a map to store a socket associated with a client id, and create another map to store the client id associated with an engine, which includes requests of the a client. Then, every time there is a connection with a new client, we store the client in the map and create a new engine with the client. If the client disconnects, we delete the client id in the map and simultaneously delete the engine associated with the client. 
+
+**Qi**: We realized that we should maintain a list of engines and list of sockets globally.
+
+**Problem**: “Duplicated” Connection each time when we start a connection from a web-client, we will first saw a connection being established, and then a second connection will be established again. We are not sure what is happening.
+
+**TODO**: We already designed a structure that can realize the connection between Web-server and Render-Communicator but still need to modify the connection section since every connection always appear twice.
+
