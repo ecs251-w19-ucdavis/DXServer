@@ -15,7 +15,7 @@
 **Yiran** 
 * [implemented the initial design of an EventQueue (RequestQueue)](https://github.com/ecs251-w19-ucdavis/DXServer/commit/2a052398b74509f643cfbf3b977d1f994dfb0826)
 
-* [add eventqueue to connection] (https://github.com/ecs251-w19-ucdavis/DXServer/commit/2437e50c48fff1e786d621acb44970eeba02955e)
+* [add eventqueue to connection](https://github.com/ecs251-w19-ucdavis/DXServer/commit/2437e50c48fff1e786d621acb44970eeba02955e)
 
 ## Topic Discussed
 
