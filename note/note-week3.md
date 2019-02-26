@@ -64,13 +64,15 @@ Then the requests are aggregated into a queue `RequestQueue`. Currently in our p
 
 
 **Problems**:  
-	* There might be dependencies between requests. We need a mechanism to maintain this dependencies. For example a OP should happen before a RF, GS or CP. 
+* There might be dependencies between requests. We need a mechanism to maintain this dependencies. For example a OP should happen before a RF, GS or CP. 
 
 * **Qi**: One way to solve this problem is to implement add an atomic request counter for each client. When a new request is being pushed into the queue, the request will remember an expected request count. If the request’s expected count equals to the current request count of that particular client, we say this request is ready for execution and it can be executed whenever the handler will be available. Once the request has been executed, we increment the request counter by one.
 
-	* Some requests can be executed in parallel. For example loading a data can happen in parallel with rendering a frame for a different client. Therefore it requires us to main two handlers running on two threads. One thread focuses on GPU rendering while the other focuses on all the CPU-based tasks. 
+* Some requests can be executed in parallel. For example loading a data can happen in parallel with rendering a frame for a different client. Therefore it requires us to main two handlers running on two threads. One thread focuses on GPU rendering while the other focuses on all the CPU-based tasks. 
 	
-	* **Qi**’s explanation for above problem: For example, OP is an operation consists of loading the data and initializing it in OpenGL. So it makes sense to internally divide the request into a `loadData` sub-request and a `initGL` sub-request. Those two requests can run on different threads but there is a dependency between them: for one client, `loadData` should happen before `initGL`.
+* **Qi**’s explanation for above problem: For example, OP is an operation consists of loading the data and initializing it in OpenGL. So it makes sense to internally divide the request into a `loadData` sub-request and a `initGL` sub-request. Those two requests can run on different threads but there is a dependency between them: for one client, `loadData` should happen before `initGL`.
+
+* **Yiran**: We can implement scheduling only for GPU related requests, and run CPU related requests concurrently.
 
 **Qi**: We need to define invariants when scheduling requests. 
 1. For one client, the order of requests to **execute** should be the same as the requests’ receiving order after compression.
