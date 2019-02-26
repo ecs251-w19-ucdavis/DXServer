@@ -6,9 +6,9 @@
 **Qi** 
 * [DEBUG: re-enable the communication between the web-server and the redner-side-communicator by refactoring the position of `QApplication`](https://github.com/ecs251-w19-ucdavis/DXServer/commit/4ce24bd13b5a1df396b46c86d02a1c97c05dcfba)
 
-**Qi** [improve abstraction by hiding some framebuffer operations inside the `SceneHandler`](https://github.com/ecs251-w19-ucdavis/DXServer/commit/abf2f716431485f9d0cf093a34bdf0c86920a6fb)
+* [improve abstraction by hiding some framebuffer operations inside the `SceneHandler`](https://github.com/ecs251-w19-ucdavis/DXServer/commit/abf2f716431485f9d0cf093a34bdf0c86920a6fb)
 
-**Qi** [experiment a way to emit signals from the communicator and making it being received by a different component](https://github.com/ecs251-w19-ucdavis/DXServer/commit/bf396901b6d1c68908105a999bf293a0daace7bb)
+* [experiment a way to emit signals from the communicator and making it being received by a different component](https://github.com/ecs251-w19-ucdavis/DXServer/commit/bf396901b6d1c68908105a999bf293a0daace7bb)
 
 **Qi** [add CMake code to dynamically generate the database.json file](https://github.com/ecs251-w19-ucdavis/DXServer/commit/bf396901b6d1c68908105a999bf293a0daace7bb)
 
