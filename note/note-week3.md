@@ -17,6 +17,9 @@
 
 * [added eventqueue to connection](https://github.com/ecs251-w19-ucdavis/DXServer/commit/2437e50c48fff1e786d621acb44970eeba02955e)
 
+**Wenxi** 
+* [added a map to store clients id and a map to store engines which every engine is associated with a specific client id](https://github.com/ecs251-w19-ucdavis/DXServer/commit/a2684a8eebd5504f854f2dcc195460b11cddf9de)
+
 ## Topic Discussed
 
 #### RequestQueue (RQ) System Design
