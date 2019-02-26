@@ -48,10 +48,10 @@
 
 ```c
 struct Request {
-int client_id;
-int request_type;
-JsonValue request;
-std::function<void(JsonValue)> resolve;
+	int client_id;
+	int request_type;
+	JsonValue request;
+	std::function<void(JsonValue)> resolve;
 };
 ```
 Here RequestType has two values: 
