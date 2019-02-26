@@ -38,12 +38,13 @@
 * **Yiran**: We define a `Request` in the `RequestQueue` (RQ) as a structure
 ```c
 struct Request {
-int client_id;
-int request_type;
-JsonValue request;
-std::function<void(JsonValue)> resolve;
+    int client_id;
+    int request_type;
+    JsonValue request;
+    std::function<void(JsonValue)> resolve;
 };
 ```
+
 Here RequestType has two values: 
 * 0 for **`call`** 
 * 1 for **`notification`** 
@@ -56,7 +57,7 @@ Then the requests are aggregated into a queue `RequestQueue`. Currently in our p
 * **Problems**:  
 	* There might be dependencies between requests. We need a mechanism to maintain this dependencies. For example a OP should happen before a RF, GS or CP. 
 
-**Qi**: One way to solve this problem is to implement add an atomic request counter for each client. When a new request is being pushed into the queue, the request will remember an expected request count. If the request’s expected count equals to the current request count of that particular client, we say this request is ready for execution and it can be executed whenever the handler will be available. Once the request has been executed, we increment the request counter by one.
+	* **Qi**: One way to solve this problem is to implement add an atomic request counter for each client. When a new request is being pushed into the queue, the request will remember an expected request count. If the request’s expected count equals to the current request count of that particular client, we say this request is ready for execution and it can be executed whenever the handler will be available. Once the request has been executed, we increment the request counter by one.
 
 	* Some requests can be executed in parallel. For example loading a data can happen in parallel with rendering a frame for a different client. Therefore it requires us to main two handlers running on two threads. One thread focuses on GPU rendering while the other focuses on all the CPU-based tasks. 
 	
