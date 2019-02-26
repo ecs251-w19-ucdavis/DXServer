@@ -10,11 +10,12 @@
 
 * [experiment a way to emit signals from the communicator and making it being received by a different component](https://github.com/ecs251-w19-ucdavis/DXServer/commit/bf396901b6d1c68908105a999bf293a0daace7bb)
 
-**Qi** [add CMake code to dynamically generate the database.json file](https://github.com/ecs251-w19-ucdavis/DXServer/commit/bf396901b6d1c68908105a999bf293a0daace7bb)
+* [add CMake code to dynamically generate the database.json file](https://github.com/ecs251-w19-ucdavis/DXServer/commit/bf396901b6d1c68908105a999bf293a0daace7bb)
 
-**Yiran** [implemented the initial design of an EventQueue (RequestQueue)](https://github.com/ecs251-w19-ucdavis/DXServer/commit/2a052398b74509f643cfbf3b977d1f994dfb0826)
+**Yiran** 
+* [implemented the initial design of an EventQueue (RequestQueue)](https://github.com/ecs251-w19-ucdavis/DXServer/commit/2a052398b74509f643cfbf3b977d1f994dfb0826)
 
-**Yiran**
+* [add eventqueue to connection] (https://github.com/ecs251-w19-ucdavis/DXServer/commit/2437e50c48fff1e786d621acb44970eeba02955e)
 
 ## Topic Discussed
 
