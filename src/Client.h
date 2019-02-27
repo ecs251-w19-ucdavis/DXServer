@@ -27,8 +27,7 @@ private:
 // class ClientQueue {
 // public:
 // private:
-// 	queue<Client> 
-
+// 	queue<Client>
 // };
 }
 
