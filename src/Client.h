@@ -9,32 +9,23 @@
 
 #include <string>
 #include <queue>
+#include <atomic>
 
-namespace v3d { namespace dx {
+namespace v3d {
+namespace dx {
 
 class Client {
 public:
-	void Init(const char *_filename, int _id)
-	{
-		filename = _filename;
-		id = _id;
-	}
-	// void ParseRequest(int request);
+    Client() : _client_id{-1}, _counter(0) {}
+	void Init(const std::string& fname, size_t client_id);
 	void RenderScene(std::shared_ptr<FramebufferGL> fbo);
 private:
-	// bool 
-	const char *filename;
-	int id;
+    int64_t _client_id;
+	std::atomic<size_t> _counter;
+    std::shared_ptr<v3d::dx::SceneHandler> _handler;
 };
 
-// class ClientQueue {
-// public:
-// private:
-// 	queue<Client>
-// };
 }
-
-
 }
 
 #endif //DXSERVER_CLIENT_H

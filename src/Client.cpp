@@ -12,8 +12,14 @@
 // 	}
 // }
 
+void v3d::dx::Client::Init(const std::string& fname, size_t client_id)
+{
+    _handler
+}
+
 void v3d::dx::Client::RenderScene(std::shared_ptr<FramebufferGL> fbo)
 {
+
 	// create renderer
 	v3d::dx::SceneHandler handler(filename, std::move(fbo), dx::winW, dx::winH);
 	handler.initData();
