@@ -7,6 +7,7 @@
 
 #include <QWebSocket>
 #include <QWebSocketServer>
+#include <QImage>
 
 #include <functional>
 

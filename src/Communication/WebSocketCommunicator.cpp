@@ -6,7 +6,6 @@
 #include "Util/Log.h"
 
 #include <QBuffer>
-#include <QImage>
 
 using namespace v3d;
 

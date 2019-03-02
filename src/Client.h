@@ -4,6 +4,9 @@
 
 #include "SceneHandler.h"
 #include "Renderer/FramebufferGL.h"
+
+#include <QImage>
+
 #include <string>
 #include <queue>
 
