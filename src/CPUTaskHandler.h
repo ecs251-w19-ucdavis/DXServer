@@ -21,10 +21,10 @@ public:
 
 private:
     void loadDatabase(const std::string& database);
-    void handleQueryDatabase(int clientId, v3d::JsonValue& output);
+    void handleQueryDatabase(api::client_id_t clientId, api::json_t& output);
 
 private:
-    v3d::JsonValue _jsonDatabase;
+    api::json_t _jsonDatabase;
 
     /** TODO This is just an experimental implementation, we should change it to a client list instead. The length
      *       of the client list should be identical to the length in WebSocketCommunicator

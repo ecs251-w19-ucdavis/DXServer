@@ -11,8 +11,6 @@
 #ifndef V3D_MAIN_SERVER_H
 #define V3D_MAIN_SERVER_H
 
-#include "Util/JsonParser.h"
-
 #include "RequestQueue.h"
 
 #include <QWebSocket>
@@ -90,7 +88,7 @@ signals:
      * @param request A copy of the original JSON request.
      * @param resolve A functional to send the reply for each request.
      */
-    void newRequest(int clientId, int type, v3d::JsonValue request, api::response_t resolve);
+    void newRequest(api::client_id_t clientId, int type, api::json_t request, api::response_t resolve);
 
 private:
     bool _secureMode = false;

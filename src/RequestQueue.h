@@ -31,6 +31,7 @@ class Request;
 class RequestQueues;
 
 namespace api {
+using json_t = v3d::JsonValue;
 using response_t = std::function<void(v3d::JsonValue)>;
 using request_t  = std::shared_ptr<Request>;
 using queues_t   = std::shared_ptr<RequestQueues>;
@@ -47,22 +48,21 @@ RequestQueues* raw();
 class Request {
 
 public:
-    Request(api::client_id_t client_id, int type, v3d::JsonValue request, api::response_t resolve);
+    Request(api::client_id_t id, api::client_id_t exp, int type, api::json_t request, api::response_t resolve);
     int              getType()     const { return _type; }
-    api::client_id_t getClientId() const { return _client_id; }
-    JsonValue        getRequest()  const { return _request; }
+    api::client_id_t getClientId() const { return _id; }
+    api::json_t      getRequest()  const { return _request; }
     api::response_t  getResolve()  const { return _resolve; }
     bool isReady() const
     {
-        PING; // TODO we need to finish one implementation here
-        return _expectation == -1;
+        return _exp == clients::get(_id)->currCounterValue(); // TODO is this implementation correct ?
     }
 private:
     int _type;
-    api::client_id_t _expectation; // expected counter value
-    api::client_id_t _client_id;
-    JsonValue _request;
-    api::response_t _resolve;
+    api::client_id_t _id; // client id
+    api::client_id_t _exp; // expected counter value
+    api::json_t      _request;
+    api::response_t  _resolve;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,11 @@ private:
 class RequestQueues : public QObject {
     Q_OBJECT
 public: 
-    void SetClientCounter();
+    //void SetClientCounter();
+
+    int dequeueCPU(api::client_id_t &client_id, api::json_t& request, api::response_t& resolve);
+    int dequeueGPU(api::client_id_t &client_id, api::json_t& request, api::response_t& resolve);
+
 public slots: // <- NOTE don't forget this slots keyword defined by Qt
     // This is an example for implementing a QObject slot
     // For more information, check https://doc.qt.io/qt-5/signalsandslots.html
@@ -81,15 +85,12 @@ public slots: // <- NOTE don't forget this slots keyword defined by Qt
      * @param request
      * @param resolve
      */
-    void EnqueueRequest(int client_id, int type, v3d::JsonValue request, api::response_t resolve);
+    void EnqueueRequest(api::client_id_t client_id, int type, api::json_t json, api::response_t resolve);
 
-    int dequeueCPU(api::client_id_t &client_id, v3d::JsonValue& request, api::response_t& resolve);
-    int dequeueGPU(api::client_id_t &client_id, v3d::JsonValue& request, api::response_t& resolve);
 private:
-    int dequeue(std::deque<Request>&, api::client_id_t &client_id, v3d::JsonValue&, api::response_t&);
-
+    int dequeue(std::deque<api::request_t>&, api::client_id_t &client_id, api::json_t&, api::response_t&);
     std::mutex _lock;
-    std::deque<Request> QueueCPU, QueueGPU;
+    std::deque<api::request_t> QueueCPU, QueueGPU;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

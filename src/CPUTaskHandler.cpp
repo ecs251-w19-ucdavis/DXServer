@@ -21,7 +21,7 @@ void CPUTaskHandler::processNextRequest()
 {
     api::client_id_t id;
     api::response_t resolve;
-    JsonValue json;
+    api::json_t json;
 
     // get the
     queues::get()->dequeueCPU(id, json, resolve);
@@ -30,9 +30,10 @@ void CPUTaskHandler::processNextRequest()
 
     if (method == "queryDatabase") {
 
-        v3d::JsonValue output;
+        api::json_t output;
         handleQueryDatabase(id, output);
         resolve(output);
+        clients::get(id)->incrementCurrCounter();
 
     } else {
 
@@ -62,7 +63,7 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
 
     // convert preview image into base64 string
     if (_jsonDatabase.isArray()) {
-        JsonValue::Array &dsArray = _jsonDatabase.toArray();
+        api::json_t::Array &dsArray = _jsonDatabase.toArray();
         for (auto &ds : dsArray) {
             QImage img;
             if (img.load(ds["preview"].toString().c_str())) {
@@ -84,7 +85,7 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
     }
 }
 
-void CPUTaskHandler::handleQueryDatabase(int clientId, v3d::JsonValue &output)
+void CPUTaskHandler::handleQueryDatabase(api::client_id_t clientId, api::json_t &output)
 {
     if (!_jsonDatabase.isNull()) { output = _jsonDatabase; } // make a copy
 }
