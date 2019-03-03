@@ -11,13 +11,21 @@
 
 #include "Graphics/DXGL.h"
 
-void v3d::dx::Client::init(const std::string& fname, int w, int h)
+#include <vector>
+#include <memory>
+
+using namespace v3d::dx;
+
+// TODO we need a lock
+static std::vector<api::client_t> client_queue;
+
+void details::Client::init(const std::string& fname, int w, int h)
 {
 	_fbo = std::make_shared<FramebufferGL>(w, h);
     _handler = std::make_shared<Engine>(fname, _fbo, w, h);
 }
 
-void v3d::dx::Client::render()
+void details::Client::render()
 {
 	// create renderer
 	_handler->initData();
@@ -36,4 +44,23 @@ void v3d::dx::Client::render()
 	std::string filename = "image" + std::to_string(_id) + ".PNG";
 	img.save(filename.c_str(), nullptr, -1);
 	std::cout << "save file as " << filename << std::endl;
+}
+
+api::client_t clientlist::append() {
+	auto id = static_cast<api::client_id_t>(client_queue.size());
+	auto client = std::make_shared<details::Client>();
+	client->setId(id);
+	client_queue.push_back(client);
+	return client;
+}
+
+int clientlist::remove(api::client_id_t)
+{
+	PING;
+	return 0;
+}
+
+api::client_t clientlist::get(api::client_id_t id)
+{
+	return client_queue[id];
 }

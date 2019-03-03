@@ -28,7 +28,7 @@ namespace dx {
 class Request {
     using response_t = std::function<void(v3d::JsonValue)>;
 public:
-    Request(int ClientId, int type, v3d::JsonValue request, response_t resolve);
+    Request(int client_id, int type, v3d::JsonValue request, response_t resolve);
     int     getRequestType() const { return _type; }
     int64_t getClientId()    const { return _client_id; }
     //bool IsValid() {return _expectation == RequestCounters[_client_id]};

@@ -17,7 +17,7 @@ namespace v3d { namespace dx {
 /**
  * This class suppose to handle requests from the event queue. This class will open and run in a different thread.
  */
-class RequestHandler : public QObject {
+class [[deprecated]] RequestHandler : public QObject {
     Q_OBJECT
     using response_t = std::function<void(v3d::JsonValue)>;
 public:

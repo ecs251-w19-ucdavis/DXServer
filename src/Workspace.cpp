@@ -22,13 +22,12 @@ void startWorkspace(int *argc, const char **argv)
 {
 #if MULTI_CLIENT_MODE
 
-    dx::Client clients[2];
-    clients[0].setId(0);
-    clients[1].setId(1);
-    clients[0].init(argv[1], dx::winW, dx::winH);
-    clients[1].init(argv[2], dx::winW, dx::winH);
-    clients[0].render();
-    clients[1].render();
+    auto c0 = dx::clientlist::append();
+    auto c1 = dx::clientlist::append();
+    c0->init(argv[1], dx::winW, dx::winH);
+    c1->init(argv[2], dx::winW, dx::winH);
+    c0->render();
+    c1->render();
 
 #else
 
