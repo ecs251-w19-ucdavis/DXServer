@@ -17,14 +17,11 @@ namespace v3d { namespace dx {
 class CPUTaskHandler {
 public:
     explicit CPUTaskHandler(const std::string& database = "database.json");
+    void processNextRequest();
+
 private:
     void loadDatabase(const std::string& database);
-
     void handleQueryDatabase(int clientId, v3d::JsonValue& output);
-    void handleOpenProjectRequested(std::string projFileName, int clientId);
-    void handleCloseProjectRequested(int clientId);
-    void handleGetSceneRequested(int64_t id, int clientId);
-    void handleFrameRequested(const v3d::JsonValue& scene, int clientId);
 
 private:
     v3d::JsonValue _jsonDatabase;

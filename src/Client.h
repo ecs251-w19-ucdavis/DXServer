@@ -52,7 +52,19 @@ public:
 	void setId(api::client_id_t id) { _id = id; }
 	api::client_id_t getId() const { return _id; }
 	void init(const std::string& fname, int w, int h);
+	void loadGL();
+	void unloadGL();
+	void loadData(const std::string& fname);
+	void getScene();
 	void render();
+
+
+	void handleOpenProjectRequested(std::string projFileName, int clientId);
+	void handleCloseProjectRequested(int clientId);
+	void handleGetSceneRequested(int64_t id, int clientId);
+	void handleFrameRequested(const v3d::JsonValue& scene, int clientId);
+
+
 private:
 	bool initialized = false;
 	api::client_id_t _id = 0; // id == 0 means invalid

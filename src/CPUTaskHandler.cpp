@@ -5,6 +5,7 @@
 #include "CPUTaskHandler.h"
 
 #include "Util/Log.h"
+#include "Client.h"
 
 #include <QBuffer>
 #include <QImage>
@@ -14,6 +15,28 @@ namespace v3d { namespace dx {
 CPUTaskHandler::CPUTaskHandler(const std::string &database)
 {
     loadDatabase(database);
+}
+
+void CPUTaskHandler::processNextRequest()
+{
+    api::client_id_t id;
+    api::response_t resolve;
+    JsonValue json;
+
+    // get the
+    queues::get()->dequeueCPU(id, json, resolve);
+
+    std::string method = json.get("method", "").toString();
+
+    if (method == "queryDatabase") {
+
+        v3d::JsonValue output;
+        handleQueryDatabase(id, output);
+        resolve(output);
+
+    } else {
+
+    }
 }
 
 void CPUTaskHandler::loadDatabase(const std::string& database)
@@ -65,84 +88,5 @@ void CPUTaskHandler::handleQueryDatabase(int clientId, v3d::JsonValue &output)
 {
     if (!_jsonDatabase.isNull()) { output = _jsonDatabase; } // make a copy
 }
-
-void CPUTaskHandler::handleOpenProjectRequested(std::string projFileName, int clientId)
-{
-
-}
-
-void CPUTaskHandler::handleCloseProjectRequested(int clientId)
-{
-
-}
-
-void CPUTaskHandler::handleGetSceneRequested(int64_t id, int clientId)
-{
-
-}
-
-void CPUTaskHandler::handleFrameRequested(const v3d::JsonValue &scene, int clientId)
-{
-
-}
-
-//
-//void v3d::dx::RequestHandler::handleNewRequest(int clientId, int type, v3d::JsonValue json,
-//                                               v3d::dx::RequestHandler::response_t resolve)
-//{
-//    std::string method = json.get("method", "").toString();
-//
-//    if (method == "queryDatabase") {
-//
-//        v3d::JsonValue output;
-//        handleQueryDatabase(clientId, output);
-//        resolve(output);
-//
-//    } else if (method == "openProject") {
-//
-//        std::string filename;
-//        if (json.contains("params") &&
-//            json["params"].isObject() &&
-//            json["params"].contains("fileName") &&
-//            json["params"]["fileName"].isString())
-//        {
-//            filename = json["params"]["fileName"].toString();
-//        }
-//        if (!filename.empty())
-//        {
-//            // enable this once the implementation has been done
-//            // no input required, so passing a dummy v3d::JsonValue instead
-////            resolve(v3d::JsonValue());
-//        }
-//
-//    } else if (method == "closeProject") {
-//
-//        // enable this once the implementation has been done
-//        // no input required, so passing a dummy v3d::JsonValue instead
-////        resolve(v3d::JsonValue());
-//
-//    } else if (method == "getScene") {
-//
-////        int64_t id = json.get("id", -1).toInt64();
-////        emit getSceneRequested(id, clientId);
-//
-//    } else if (method == "requestFrame") {
-//
-////        // sample message:
-////        //  {
-////        //    "jsonrpc": "2.0",
-////        //    "method": "requestFrame",
-////        //    "params": {
-////        //      "scene": {...}
-////        //    }
-////        //  }
-////        JsonValue scene;
-////        if (json.contains("params") && json["params"].isObject() && json["params"].contains("scene")) {
-////            scene = json["params"]["scene"];
-////        }
-////        emit frameRequested(scene, clientId);
-//
-//    }
-//}
 
 }}

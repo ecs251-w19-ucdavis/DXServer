@@ -57,11 +57,11 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 #endif
 
-    dx::RequestQueues request;
+    dx::queues::create();
 
     dx::WebSocketCommunicator server(8080);
     server.open();
-    server.connectToRequestSlot(&request);
+    server.connectToRequestSlot(dx::queues::raw());
 
     dx::DXGL_create(); // load modules, load all shaders
     dx::DXGL_execute(argc, argv, [&]() {

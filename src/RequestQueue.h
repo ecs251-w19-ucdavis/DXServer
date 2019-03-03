@@ -11,6 +11,7 @@
 #ifndef DXSERVER_REQUESTQUEUE_H
 #define DXSERVER_REQUESTQUEUE_H
 
+#include "Client.h"
 #include "Util/JsonParser.h"
 
 #include <QWebSocket>
@@ -20,6 +21,7 @@
 #include <functional>
 #include <deque>
 #include <string>
+#include <mutex>
 
 namespace v3d { namespace dx {
 
@@ -36,7 +38,8 @@ using queues_t   = std::shared_ptr<RequestQueues>;
 
 namespace queues {
 void create();
-api::queues_t ref();
+api::queues_t  get();
+RequestQueues* raw();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,14 +47,20 @@ api::queues_t ref();
 class Request {
 
 public:
-    Request(int client_id, int type, v3d::JsonValue request, api::response_t resolve);
-    int     getRequestType() const { return _type; }
-    int64_t getClientId()    const { return _client_id; }
-    //bool IsValid() {return _expectation == RequestCounters[_client_id]};
+    Request(api::client_id_t client_id, int type, v3d::JsonValue request, api::response_t resolve);
+    int              getType()     const { return _type; }
+    api::client_id_t getClientId() const { return _client_id; }
+    JsonValue        getRequest()  const { return _request; }
+    api::response_t  getResolve()  const { return _resolve; }
+    bool isReady() const
+    {
+        PING; // TODO we need to finish one implementation here
+        return _expectation == -1;
+    }
 private:
     int _type;
-    int64_t _expectation; // expected counter value
-    int64_t _client_id;
+    api::client_id_t _expectation; // expected counter value
+    api::client_id_t _client_id;
     JsonValue _request;
     api::response_t _resolve;
 };
@@ -73,7 +82,13 @@ public slots: // <- NOTE don't forget this slots keyword defined by Qt
      * @param resolve
      */
     void EnqueueRequest(int client_id, int type, v3d::JsonValue request, api::response_t resolve);
-private: 
+
+    int dequeueCPU(api::client_id_t &client_id, v3d::JsonValue& request, api::response_t& resolve);
+    int dequeueGPU(api::client_id_t &client_id, v3d::JsonValue& request, api::response_t& resolve);
+private:
+    int dequeue(std::deque<Request>&, api::client_id_t &client_id, v3d::JsonValue&, api::response_t&);
+
+    std::mutex _lock;
     std::deque<Request> QueueCPU, QueueGPU;
 };
 
