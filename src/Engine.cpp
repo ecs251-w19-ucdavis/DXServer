@@ -7,7 +7,7 @@
 //                                                                           //
 //===========================================================================//
 
-#include "SceneHandler.h"
+#include "Engine.h"
 
 #include "Serializer/Dictionary.h"
 #include "Serializer/SceneDictionary.h"
@@ -25,7 +25,7 @@
 using v3d::JsonValue;
 using v3d::JsonParser;
 
-v3d::dx::SceneHandler::SceneHandler(std::string project_name, fbo_t framebuffer_object,
+v3d::dx::Engine::Engine(std::string project_name, fbo_t framebuffer_object,
                                   int initial_width, int initial_height)
     : _size{initial_width, initial_height}
     , _fbo(std::move(framebuffer_object))
@@ -47,7 +47,7 @@ v3d::dx::SceneHandler::SceneHandler(std::string project_name, fbo_t framebuffer_
   }
 }
 
-void v3d::dx::SceneHandler::initData()
+void v3d::dx::Engine::initData()
 {
   // setup namespace
   using namespace v3d::serializer;
@@ -93,7 +93,7 @@ void v3d::dx::SceneHandler::initData()
 /**
  * @note: we need an initialization because we will frequently update our scene file
  */
-void v3d::dx::SceneHandler::initScene()
+void v3d::dx::Engine::initScene()
 {
   // now we create transfer functions
   _ctf = std::move(TransferFunction::fromRainbowMap());
@@ -256,7 +256,7 @@ void v3d::dx::SceneHandler::initScene()
   }
 }
 
-void v3d::dx::SceneHandler::updateView(const v3d::JsonValue &input)
+void v3d::dx::Engine::updateView(const v3d::JsonValue &input)
 {
   // setup namespace
   using namespace v3d::serializer;
@@ -289,7 +289,7 @@ void v3d::dx::SceneHandler::updateView(const v3d::JsonValue &input)
   }
 }
 
-void v3d::dx::SceneHandler::updateRenderer()
+void v3d::dx::Engine::updateRenderer()
 {
   if (_rendererGrid) {
     _rendererGrid->resize(_size.x, _size.y);
@@ -298,14 +298,14 @@ void v3d::dx::SceneHandler::updateRenderer()
   }
 }
 
-void v3d::dx::SceneHandler::resize(int w, int h)
+void v3d::dx::Engine::resize(int w, int h)
 {
   _size.x = w;
   _size.y = h;
   updateRenderer();
 }
 
-void v3d::dx::SceneHandler::render()
+void v3d::dx::Engine::render()
 {
   glFinish();
   if (_rendererGrid) {
@@ -316,7 +316,7 @@ void v3d::dx::SceneHandler::render()
   glFinish();
 }
 
-std::shared_ptr<std::vector<uint8_t>> v3d::dx::SceneHandler::copyRenderedImage(bool fix_alpha) const
+std::shared_ptr<std::vector<uint8_t>> v3d::dx::Engine::copyRenderedImage(bool fix_alpha) const
 {
   auto buffer = std::make_shared<std::vector<uint8_t>>(size_t(_size.x) * size_t(_size.y) * size_t(4));
   GLuint currFbo = GLFramebufferObject::currentDrawBinding();
@@ -336,7 +336,7 @@ std::shared_ptr<std::vector<uint8_t>> v3d::dx::SceneHandler::copyRenderedImage(b
   return std::move(buffer);
 }
 
-void v3d::dx::SceneHandler::updateTransferFunction(const v3d::JsonValue & view)
+void v3d::dx::Engine::updateTransferFunction(const v3d::JsonValue & view)
 {
   // setup namespace
   using namespace v3d::serializer;
@@ -370,7 +370,7 @@ void v3d::dx::SceneHandler::updateTransferFunction(const v3d::JsonValue & view)
   }
 }
 
-void v3d::dx::SceneHandler::updateCamera(const v3d::JsonValue & view)
+void v3d::dx::Engine::updateCamera(const v3d::JsonValue & view)
 {
   // setup namespace
   using namespace v3d::serializer;

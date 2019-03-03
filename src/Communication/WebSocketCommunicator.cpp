@@ -1,6 +1,6 @@
 #include "WebSocketCommunicator.h"
 
-#include "RequestHandler.h"
+#include "ToBeRemoved/RequestHandler.h"
 #include "RequestQueue.h"
 
 #include "Util/Log.h"

@@ -20,11 +20,10 @@
 #include "Graphics/DXGL.h"
 #include "Communication/WebSocketCommunicator.h"
 #include "Workspace.h"
-#include "RequestHandler.h"
+//#include "ToBeRemoved/RequestHandler.h"
 
 // Other headers from the same project, as needed.
 #include "Util/Library.h"
-#include "Renderer/FramebufferGL.h"
 
 // Headers from other non-standard, non-system libraries (for example, Qt,
 // Eigen, etc).
@@ -48,26 +47,6 @@ namespace v3d {
 namespace dx { int winW = 800, winH = 800; }
 }
 
-// class Args{
-// public:
-// 	Args(std::string _filename, int _id)
-// 	{
-// 		filename = _filename;
-// 		id = _id;
-// 	}
-// 	std::string getFileName()
-// 	{
-// 		return filename;
-// 	}
-// 	std::string getID()
-// 	{
-// 		return id;
-// 	}
-// private:
-// 	std::string filename;
-// 	int id;
-// }
-
 int main(int argc, char* argv[])
 {
 #ifndef USE_QT_OPENGL
@@ -86,8 +65,7 @@ int main(int argc, char* argv[])
 
     dx::DXGL_create(); // load modules, load all shaders
     dx::DXGL_execute(argc, argv, [&]() {
-        auto fbo = std::make_shared<FramebufferGL>(dx::winW, dx::winH);
-        startWorkspace(&argc, const_cast<const char **>(argv), fbo);
+        startWorkspace(&argc, const_cast<const char **>(argv));
     });
 
     return app.exec();

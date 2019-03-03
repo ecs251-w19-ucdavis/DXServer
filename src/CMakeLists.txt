@@ -19,12 +19,11 @@ set (vidi3d_dxserver_SOURCES
   Loader/RegularGridRawBinary.cpp
   Loader/TetraGridRawBinary.cpp
   Communication/WebSocketCommunicator.cpp
-  Main.cpp
   Workspace.cpp
   Client.cpp
   RequestQueue.cpp
-  SceneHandler.cpp
-  RequestHandler.cpp)
+  Engine.cpp
+  Main.cpp)
 
 # Header files
 set (vidi3d_dxserver_HEADERS
@@ -37,8 +36,7 @@ set (vidi3d_dxserver_HEADERS
   Workspace.h
   Client.h
   RequestQueue.h
-  SceneHandler.h
-  RequestHandler.h)
+  Engine.h)
 
 get_property(_egl_available GLOBAL PROPERTY V3D_USE_EGL)
 set(_extra_libs )

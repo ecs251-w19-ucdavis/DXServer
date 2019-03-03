@@ -1,18 +1,25 @@
 #include "Workspace.h"
 
+#include "Client.h"
+#include "Graphics/DXGL.h"
+
+#include <string>
+
 #define MULTI_CLIENT_MODE 1
 
 namespace v3d {
 
-void startWorkspace(int *argc, const char **argv, std::shared_ptr<FramebufferGL> fbo)
+void startWorkspace(int *argc, const char **argv)
 {
 #if MULTI_CLIENT_MODE
 
-    dx::Client Clients[2];
-    Clients[0].Init(argv[1], 0);
-    Clients[1].Init(argv[2], 1);
-    Clients[0].RenderScene(fbo);
-    Clients[1].RenderScene(fbo);
+    dx::Client clients[2];
+    clients[0].setId(0);
+    clients[1].setId(1);
+    clients[0].init(argv[1], dx::winW, dx::winH);
+    clients[1].init(argv[2], dx::winW, dx::winH);
+    clients[0].render();
+    clients[1].render();
 
 #else
 

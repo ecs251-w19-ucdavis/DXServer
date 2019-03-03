@@ -32,10 +32,10 @@ using v3d::api::V3DGeometry;
 
 namespace v3d { namespace dx {
 
-class SceneHandler {
+class Engine {
     using fbo_t = std::shared_ptr<FramebufferGL>;
 public:
-    explicit SceneHandler(std::string project_name, fbo_t framebuffer_object, int initial_width, int initial_height);
+    explicit Engine(std::string project_name, fbo_t framebuffer_object, int initial_width, int initial_height);
     void initData();
     void initScene();
     void updateView(const JsonValue& input = JsonValue());

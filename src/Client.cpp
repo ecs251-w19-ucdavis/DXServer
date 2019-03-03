@@ -2,40 +2,29 @@
 
 #include "Graphics/DXGL.h"
 
-
-
-// void Client::ParseRequest(int request)
-// {
-// 	switch(request) {
-// 		case 0: // initialize
-// 			PING;
-// 	}
-// }
-
-void v3d::dx::Client::Init(const std::string& fname, size_t client_id)
+void v3d::dx::Client::init(const std::string& fname, int w, int h)
 {
-    _handler
+	_fbo = std::make_shared<FramebufferGL>(w, h);
+    _handler = std::make_shared<Engine>(fname, _fbo, w, h);
 }
 
-void v3d::dx::Client::RenderScene(std::shared_ptr<FramebufferGL> fbo)
+void v3d::dx::Client::render()
 {
-
 	// create renderer
-	v3d::dx::SceneHandler handler(filename, std::move(fbo), dx::winW, dx::winH);
-	handler.initData();
-	handler.initScene();
-	handler.updateView();
-	handler.updateRenderer();
+	_handler->initData();
+	_handler->initScene();
+	_handler->updateView();
+	_handler->updateRenderer();
 
 	// render
-	handler.render();
+	_handler->render();
 
 	// get framebuffer image
-	auto buffer = handler.copyRenderedImage();
+	auto buffer = _handler->copyRenderedImage();
 
 	// save
 	QImage img = QImage(&(*buffer)[0], dx::winW, dx::winH, QImage::Format_RGB32).mirrored(false, true);
-	std::string filename = "image" + std::to_string(id) + ".PNG";
-	img.save(filename.c_str(), 0, -1);
+	std::string filename = "image" + std::to_string(_id) + ".PNG";
+	img.save(filename.c_str(), nullptr, -1);
 	std::cout << "save file as " << filename << std::endl;
 }

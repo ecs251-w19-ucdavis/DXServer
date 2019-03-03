@@ -6,7 +6,7 @@
 #ifndef DXSERVER_REQUESTHANDLER_H
 #define DXSERVER_REQUESTHANDLER_H
 
-#include "SceneHandler.h"
+#include "Engine.h"
 
 #include "Util/JsonParser.h"
 
@@ -39,7 +39,7 @@ private:
     /** TODO This is just an experimental implementation, we should change it to a client list instead. The length
      *       of the client list should be identical to the length in WebSocketCommunicator
      */
-//    std::shared_ptr<SceneHandler> engine;
+//    std::shared_ptr<Engine> engine;
 };
 
 }}
