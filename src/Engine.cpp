@@ -25,8 +25,14 @@
 using v3d::JsonValue;
 using v3d::JsonParser;
 
-v3d::dx::Engine::Engine(std::string project_name, fbo_t framebuffer_object,
-                                  int initial_width, int initial_height)
+namespace v3d { namespace dx {
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace details {
+
+Engine::Engine(std::string project_name, fbo_t framebuffer_object,
+               int initial_width, int initial_height)
     : _size{initial_width, initial_height}
     , _fbo(std::move(framebuffer_object))
     , _jsonFileName(std::move(project_name))
@@ -36,18 +42,20 @@ v3d::dx::Engine::Engine(std::string project_name, fbo_t framebuffer_object,
   JsonParser().load(_jsonFileName, _jsonRoot);
   if (_jsonRoot.contains(DATA_SOURCE)) {
     _jsonData = _jsonRoot[DATA_SOURCE];
-  } else {
+  }
+  else {
     throw std::runtime_error("[Error] thr project JSON does not contain a data specification, please fix this.");
   }
   if (_jsonRoot.contains(VIEW)) {
     _jsonView = _jsonRoot[VIEW];
     _jsonViewMethod = _jsonView.get(METHOD_, "").toString();
-  } else {
+  }
+  else {
     throw std::runtime_error("[Error] thr project JSON does not contain a view specification, please fix this.");
   }
 }
 
-void v3d::dx::Engine::initData()
+void Engine::initData()
 {
   // setup namespace
   using namespace v3d::serializer;
@@ -56,34 +64,42 @@ void v3d::dx::Engine::initData()
   // analysis json file
   if (_jsonData.isNull()) {
     throw std::runtime_error("[Error] empty json node");
-  } else {
-    const JsonValue& jsonArray = _jsonData;
+  }
+  else {
+    const JsonValue &jsonArray = _jsonData;
     if (!jsonArray.isArray()) {
       throw std::runtime_error("[error] In TetMesh::loadV3d(): Bad JSON format, DATA_SOURCE should be an array.");
     }
     for (int i = 0; i < jsonArray.size(); ++i) {
-      const JsonValue& jsonData = jsonArray[i];
+      const JsonValue &jsonData = jsonArray[i];
       if (!jsonData.contains(ID)) {
         std::cout << "[warning] In TetMesh::loadV3d(): Bad JSON format, DATA_ID does not exist." << std::endl;
       }
       std::string format = jsonData.get(FORMAT, "").toString();
       if (format == FOLDER) {
         PING;
-      } else if (format == MULTIVARIATE) {
+      }
+      else if (format == MULTIVARIATE) {
         PING;
-      } else if (format == TIME_VARYING) {
+      }
+      else if (format == TIME_VARYING) {
         PING;
-      } else if (format == REGULAR_GRID_RAW_BINARY) {
+      }
+      else if (format == REGULAR_GRID_RAW_BINARY) {
         _data = v3d::load::RegularGridRawBinary(jsonData, _jsonFileName);
 #ifdef V3D_USE_PVM
-      } else if (format == REGULAR_GRID_PVM) {
+      }
+      else if (format == REGULAR_GRID_PVM) {
         PING;
 #endif // V3D_USE_PVM
-      } else if (format == TETRAHEDRAL_GRID_RAW_BINARY) {
+      }
+      else if (format == TETRAHEDRAL_GRID_RAW_BINARY) {
         _data = v3d::load::TetraGridRawBinaryData(jsonData, _jsonFileName);
-      } else if (format == TETRAHEDRAL_GRID_FAST) {
+      }
+      else if (format == TETRAHEDRAL_GRID_FAST) {
         PING;
-      } else {
+      }
+      else {
         throw std::runtime_error("[error] In TetMesh::loadV3d(): Unsupported Data Format " + format);
       }
     }
@@ -93,7 +109,7 @@ void v3d::dx::Engine::initData()
 /**
  * @note: we need an initialization because we will frequently update our scene file
  */
-void v3d::dx::Engine::initScene()
+void Engine::initScene()
 {
   // now we create transfer functions
   _ctf = std::move(TransferFunction::fromRainbowMap());
@@ -189,7 +205,8 @@ void v3d::dx::Engine::initScene()
     _rendererGrid->setFramebufferObject(_fbo->sharedFramebufferObject());
     _rendererGrid->setScene(_sceneGrid);
 
-  } else if (_jsonViewMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
+  }
+  else if (_jsonViewMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
 
     auto volume = std::make_shared<TetraGridVolumeGL>();
     auto data = std::dynamic_pointer_cast<TetraGridDataGL>(_data);
@@ -251,12 +268,13 @@ void v3d::dx::Engine::initScene()
     _rendererTets->setScene(_sceneTets);
     _rendererTets->setBoundaryGeometryProperty(boundaryGeometryProperty);
 
-  } else {
+  }
+  else {
     throw std::runtime_error("[Error] unknown volume type");
   }
 }
 
-void v3d::dx::Engine::updateView(const v3d::JsonValue &input)
+void Engine::updateView(const v3d::JsonValue &input)
 {
   // setup namespace
   using namespace v3d::serializer;
@@ -272,14 +290,12 @@ void v3d::dx::Engine::updateView(const v3d::JsonValue &input)
   updateCamera(view);
 
   // load volume
-  if (_jsonViewMethod == "REGULAR_GRID_VOLUME_RAY_CASTING")
-  {
+  if (_jsonViewMethod == "REGULAR_GRID_VOLUME_RAY_CASTING") {
     auto volume = std::dynamic_pointer_cast<v3d::RegularGridVolumeGL>(_volume);
     if (view.contains(VOLUME)) fromJson(view[VOLUME], *volume);
     fromJson(view, *_sceneGrid);
   }
-  else if (_jsonViewMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING")
-  {
+  else if (_jsonViewMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
     auto volume = std::dynamic_pointer_cast<v3d::TetraGridVolumeGL>(_volume);
     if (view.contains(VOLUME)) fromJson(view[VOLUME], *volume);
     fromJson(view, *_sceneTets);
@@ -289,34 +305,36 @@ void v3d::dx::Engine::updateView(const v3d::JsonValue &input)
   }
 }
 
-void v3d::dx::Engine::updateRenderer()
+void Engine::updateRenderer()
 {
   if (_rendererGrid) {
     _rendererGrid->resize(_size.x, _size.y);
-  } else if (_rendererTets) {
+  }
+  else if (_rendererTets) {
     _rendererTets->resize(_size.x, _size.y);
   }
 }
 
-void v3d::dx::Engine::resize(int w, int h)
-{
-  _size.x = w;
-  _size.y = h;
-  updateRenderer();
-}
+//void Engine::resize(int w, int h)
+//{
+//  _size.x = w;
+//  _size.y = h;
+//  updateRenderer();
+//}
 
-void v3d::dx::Engine::render()
+void Engine::render()
 {
   glFinish();
   if (_rendererGrid) {
     _rendererGrid->render();
-  } else if (_rendererTets) {
+  }
+  else if (_rendererTets) {
     _rendererTets->render();
   }
   glFinish();
 }
 
-std::shared_ptr<std::vector<uint8_t>> v3d::dx::Engine::copyRenderedImage(bool fix_alpha) const
+std::shared_ptr<std::vector<uint8_t>> Engine::copyRenderedImage(bool fix_alpha) const
 {
   auto buffer = std::make_shared<std::vector<uint8_t>>(size_t(_size.x) * size_t(_size.y) * size_t(4));
   GLuint currFbo = GLFramebufferObject::currentDrawBinding();
@@ -336,14 +354,13 @@ std::shared_ptr<std::vector<uint8_t>> v3d::dx::Engine::copyRenderedImage(bool fi
   return std::move(buffer);
 }
 
-void v3d::dx::Engine::updateTransferFunction(const v3d::JsonValue & view)
+void Engine::updateTransferFunction(const v3d::JsonValue &view)
 {
   // setup namespace
   using namespace v3d::serializer;
   using namespace v3d::dx::serializer;
   // load TFN
-  if (view.contains(VOLUME))
-  {
+  if (view.contains(VOLUME)) {
     const auto &jsonVol = view[VOLUME];
     if (_jsonViewMethod == "REGULAR_GRID_VOLUME_RAY_CASTING") {
       auto volume = std::dynamic_pointer_cast<RegularGridVolumeGL>(_volume);
@@ -358,27 +375,34 @@ void v3d::dx::Engine::updateTransferFunction(const v3d::JsonValue & view)
         _otf->update();
         volume->setTransferFunction2DDirty(true);
       }
-    } else if (_jsonViewMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
+    }
+    else if (_jsonViewMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
       auto volume = std::dynamic_pointer_cast<TetraGridVolumeGL>(_volume);
       if (jsonVol.contains(TRANSFER_FUNCTION)) {
         *_ctf = fromJson<TransferFunction>(jsonVol[TRANSFER_FUNCTION]);
         _ctf->updateColorMap();
       }
-    } else {
+    }
+    else {
       throw std::runtime_error("[Error] unknown volume type");
     }
   }
 }
 
-void v3d::dx::Engine::updateCamera(const v3d::JsonValue & view)
+void Engine::updateCamera(const v3d::JsonValue &view)
 {
   // setup namespace
   using namespace v3d::serializer;
   using namespace v3d::dx::serializer;
   // load camera
-  if (view.contains(CAMERA))
-  {
+  if (view.contains(CAMERA)) {
     *_camera = fromJson<Camera>(view[CAMERA]);
     _camera->setAspect(_size.x / static_cast<float>(_size.y));
   }
 }
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+}}

@@ -19,6 +19,7 @@
 #include <QImage>
 
 #include <functional>
+#include <mutex>
 
 /* TODO is there a light weight WebSocket library for doing this ? */
 /**
@@ -32,9 +33,21 @@ class WebSocketCommunicator : public QObject {
     Q_OBJECT
     using response_t = std::function<void(v3d::JsonValue)>;
 public:
+    /**
+     * Constructor
+     * @param port The network port this communicator will be listening to
+     * @param parent Always a nullptr in our application
+     */
     explicit WebSocketCommunicator(quint16 port, QObject* parent = nullptr);
 
+    /**
+     * Open the communicator and start to listen to connections
+     */
     void open();
+
+    /**
+     * Terminate the communicator
+     */
     void close();
 
     /**
@@ -54,12 +67,14 @@ protected:
     QWebSocket* getClient(int clientId);
 
 public slots:
+    // called by websocket
     void onNewConnection();
     void onServerClosure();
     void onClientClosure();
     void processTextMessage(QString message);
     void processBinaryMessage(QByteArray message);
 
+    // call by other components inside this project
     void notifyProjectOpened(std::string projFileName, int clientId);
     void notifyProjectClosed(int clientId);
     void sendScene(v3d::JsonValue scene, int64_t id, int clientId);
@@ -82,8 +97,8 @@ private:
     bool _secureMode = false;
     quint16 _port = 8080;
     QWebSocketServer* _webSocketServer = nullptr;
-
-    // TODO there is no lock for this ?
+    /// @note we do not need a lock here because all Qt slots are running on the same thread
+    /// @note ref: https://doc.qt.io/qt-5/qt.html#ConnectionType-enum
     QHash<int, QWebSocket*> _clients;
     int _nextClientId = 1;
 };

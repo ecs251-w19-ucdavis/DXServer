@@ -19,10 +19,9 @@
 #include <string>
 #include <memory>
 
-///////////////////////////////////////////////////////////////////////////////
+namespace v3d { namespace dx {
 
-namespace v3d {
-namespace dx {
+///////////////////////////////////////////////////////////////////////////////
 
 namespace api { using client_id_t = size_t; };
 
@@ -42,7 +41,7 @@ private:
 	bool initialized = false;
 	api::client_id_t _id = 0; // id == 0 means invalid
 	std::shared_ptr<FramebufferGL> _fbo;
-	std::shared_ptr<dx::Engine> _handler;
+	std::shared_ptr<dx::details::Engine> _handler;
 };
 }
 
@@ -74,7 +73,6 @@ api::client_t get(api::client_id_t);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}
-}
+}}
 
 #endif //DXSERVER_CLIENT_H

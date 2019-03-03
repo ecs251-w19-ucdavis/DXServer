@@ -35,9 +35,7 @@ void v3d::dx::WebSocketCommunicator::open()
 
 void v3d::dx::WebSocketCommunicator::close()
 {
-    if (_webSocketServer == nullptr) {
-        return;
-    }
+    if (_webSocketServer == nullptr) { return; }
     _webSocketServer->close();
     _webSocketServer->deleteLater();
     _webSocketServer = nullptr;
@@ -171,130 +169,10 @@ void v3d::dx::WebSocketCommunicator::processTextMessage(QString message)
     }
     else if (method == "requestFrame") {
 
-        // sample message:
-        //  {
-        //    "jsonrpc": "2.0",
-        //    "method": "requestFrame",
-        //    "params": {
-        //      "scene": {...}
-        //    }
-        //  }
-
-//        JsonValue scene;
-//        if (json.contains("params") && json["params"].isObject() && json["params"].contains("scene")) {
-//            scene = json["params"]["scene"];
-//        }
-//        emit frameRequested(scene, clientId);
         PING;
 
     }
 
-//
-//    if (method == "queryDatabase") {
-//
-//        const std::string dsFileName = "./database.json";
-//
-//        std::ifstream dsFile(dsFileName);
-//        if (!dsFile.is_open()) {
-//            log() << "[error] cannot open database meta-information file "
-//                  << "'"
-//                  << dsFileName
-//                  << "'" << std::endl;
-//            return;
-//        }
-//        std::string dsString((std::istreambuf_iterator<char>(dsFile)),
-//                             std::istreambuf_iterator<char>());
-//
-//        //log() << dsString << std::endl;
-//
-//        JsonValue dsJson;
-//        try {
-//            dsJson = JsonParser().parse(dsString);
-//        }
-//        catch (std::exception &) {
-//            log() << "[error] Invalid JSON file '" << dsFileName << "'" << std::endl;
-//            return;
-//        }
-//
-//        log() << "[Database] start reading database meta-info" << std::endl;
-//
-//        if (dsJson.isArray()) {
-//            JsonValue::Array &dsArray = dsJson.toArray();
-//            for (auto &ds : dsArray) {
-//                //log() << '\t' << ds["data"] << std::endl;
-//                QImage img;
-//                if (img.load(ds["preview"].toString().c_str())) {
-//                    QByteArray ba;
-//                    QBuffer buf(&ba);
-//                    buf.open(QIODevice::WriteOnly);
-//                    img.save(&buf, "JPG");
-//                    buf.close();
-//                    QByteArray base64 = ba.toBase64();
-//                    ds["preview"] = "data:image/jpeg;base64," + base64.toStdString();
-//                }
-//                else {
-//                    log() << "[error] failed to load data preview image "
-//                          << "'"
-//                          << ds["preview"]
-//                          << "'"
-//                          << std::endl;
-//                    return;
-//                }
-//            }
-//        }
-//        else {
-//            log() << "[error] wrong database file" << std::endl;
-//            return;
-//        }
-//
-//        log() << "[Database] finished reading database meta-info" << std::endl;
-//
-//        int64_t id = json.get("id", -1).toInt64();
-//        rpcReply(client, dsJson, JsonValue(id));
-//
-//    }
-//    else if (method == "openProject") {
-//
-//        std::string projFileName;
-//        if (json.contains("params") &&
-//            json["params"].isObject() &&
-//            json["params"].contains("fileName") &&
-//            json["params"]["fileName"].isString()) {
-//            projFileName = json["params"]["fileName"].toString();
-//        }
-//        if (!projFileName.empty()) {
-//            emit openProjectRequested(projFileName, clientId);
-//        }
-//
-//    }
-//    else if (method == "closeProject") {
-//
-//        emit closeProjectRequested(clientId);
-//
-//    }
-//    else if (method == "getScene") {
-//
-//        int64_t id = json.get("id", -1).toInt64();
-//        emit getSceneRequested(id, clientId);
-//
-//    }
-//    else if (method == "requestFrame") {
-//
-//        // sample message:
-//        //  {
-//        //    "jsonrpc": "2.0",
-//        //    "method": "requestFrame",
-//        //    "params": {
-//        //      "scene": {...}
-//        //    }
-//        //  }
-//        JsonValue scene;
-//        if (json.contains("params") && json["params"].isObject() && json["params"].contains("scene")) {
-//            scene = json["params"]["scene"];
-//        }
-//        emit frameRequested(scene, clientId);
-//
-//    }
 }
 
 void v3d::dx::WebSocketCommunicator::processBinaryMessage(QByteArray message)
@@ -353,8 +231,7 @@ void v3d::dx::WebSocketCommunicator::sendFrame(QImage img, int clientId)
 
 void v3d::dx::WebSocketCommunicator::sendDatabase(v3d::JsonValue database, int64_t id, int clientId)
 {
-    if (!_clients.contains(clientId))
-        return;
+    if (!_clients.contains(clientId)) return;
     QWebSocket *client = _clients[clientId];
     rpcReply(client, database, JsonValue(id));
 }
