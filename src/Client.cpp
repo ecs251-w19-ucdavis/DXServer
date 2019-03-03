@@ -58,7 +58,7 @@ void details::Client::render()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-api::client_t clientlist::append()
+api::client_t clients::append()
 {
 	api::client_t client;
 	client_mutex.lock();
@@ -72,7 +72,7 @@ api::client_t clientlist::append()
 	return client;
 }
 
-int clientlist::remove(api::client_id_t id)
+int clients::remove(api::client_id_t id)
 {
 	client_mutex.lock();
 	{
@@ -83,7 +83,7 @@ int clientlist::remove(api::client_id_t id)
 	return 0;
 }
 
-api::client_t clientlist::get(api::client_id_t id)
+api::client_t clients::get(api::client_id_t id)
 {
 	api::client_t ret(nullptr);
 	client_mutex.lock();

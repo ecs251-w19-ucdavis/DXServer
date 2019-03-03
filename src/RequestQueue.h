@@ -25,9 +25,19 @@ namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class Request;
+class RequestQueues;
+
 namespace api {
 using response_t = std::function<void(v3d::JsonValue)>;
+using request_t  = std::shared_ptr<Request>;
+using queues_t   = std::shared_ptr<RequestQueues>;
 };
+
+namespace queues {
+void create();
+api::queues_t ref();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

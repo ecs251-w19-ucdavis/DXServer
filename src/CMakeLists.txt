@@ -26,6 +26,8 @@ set (vidi3d_dxserver_SOURCES
   Loader/RegularGridRawBinary.cpp
   Loader/TetraGridRawBinary.cpp
   Communication/WebSocketCommunicator.cpp
+  GPUTaskHandler.cpp
+  CPUTaskHandler.cpp
   RequestQueue.cpp
   Client.cpp
   Engine.cpp
@@ -40,8 +42,11 @@ set (vidi3d_dxserver_HEADERS
   Loader/TetraGridRawBinary.h
   Serializer/SceneDictionary.h
   Communication/WebSocketCommunicator.h
+  GPUTaskHandler.h
+  CPUTaskHandler.h
   RequestQueue.h
   Client.h
+  Engine.h
   Workspace.h
   Engine.h)
 

@@ -10,6 +10,28 @@
 #include "RequestQueue.h"
 #include <queue>
 
+///////////////////////////////////////////////////////////////////////////////
+
+static v3d::dx::api::queues_t global_queue;
+
+namespace v3d { namespace dx {
+namespace queues {
+
+void create()
+{
+    global_queue = std::make_shared<RequestQueues>();
+}
+
+api::queues_t ref()
+{
+    return global_queue;
+}
+
+}
+}}
+
+///////////////////////////////////////////////////////////////////////////////
+
 v3d::dx::Request::Request(int ClientId, int type, v3d::JsonValue request, api::response_t resolve)
     : _client_id(ClientId)
     , _type(type)

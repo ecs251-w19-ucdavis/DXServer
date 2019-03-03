@@ -23,7 +23,23 @@ namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace api { using client_id_t = size_t; };
+namespace details { class Client; }
+namespace api {
+using client_id_t = size_t;
+using client_t = std::shared_ptr<details::Client>;
+}
+
+// here we add handlers for append, retrieve, modify clients
+namespace clients {
+/** @return 1 means okay, 0 means error */
+int /* err */ remove(api::client_id_t);
+/** @return nullptr means error */
+api::client_t append();
+/** @return nullptr means error */
+api::client_t get(api::client_id_t);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 // detailed implementation
 namespace details {
@@ -43,32 +59,6 @@ private:
 	std::shared_ptr<FramebufferGL> _fbo;
 	std::shared_ptr<dx::details::Engine> _handler;
 };
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-// namespace for shared pointer
-namespace api { using client_t = std::shared_ptr<details::Client>; }
-
-///////////////////////////////////////////////////////////////////////////////
-
-// here we add handlers for append, retrieve, modify clients
-namespace clientlist {
-/**
- *
- * @return 1 means okay, 0 means error
- */
-int /* err */ remove(api::client_id_t);
-/**
- *
- * @return nullptr means error
- */
-api::client_t append();
-/**
- *
- * @return nullptr means error
- */
-api::client_t get(api::client_id_t);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
