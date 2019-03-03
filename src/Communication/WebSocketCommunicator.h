@@ -1,5 +1,14 @@
-#ifndef V3D_MAIN_SERVER_H_
-#define V3D_MAIN_SERVER_H_
+//===========================================================================//
+//                                                                           //
+// Daxian Server                                                             //
+// Copyright(c) 2018 Qi Wu, Yiran Li, Wenxi Lu                               //
+// University of California, Davis                                           //
+// MIT Licensed                                                              //
+//                                                                           //
+//===========================================================================//
+
+#ifndef V3D_MAIN_SERVER_H
+#define V3D_MAIN_SERVER_H
 
 #include "Util/JsonParser.h"
 
@@ -77,9 +86,8 @@ private:
     // TODO there is no lock for this ?
     QHash<int, QWebSocket*> _clients;
     int _nextClientId = 1;
-
 };
 
 }}
 
-#endif // V3D_MAIN_SERVER_H_
+#endif // V3D_MAIN_SERVER_H

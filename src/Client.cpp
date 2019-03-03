@@ -1,3 +1,12 @@
+//===========================================================================//
+//                                                                           //
+// Daxian Server                                                             //
+// Copyright(c) 2018 Qi Wu, Yiran Li, Wenxi Lu                               //
+// University of California, Davis                                           //
+// MIT Licensed                                                              //
+//                                                                           //
+//===========================================================================//
+
 #include "Client.h"
 
 #include "Graphics/DXGL.h"

@@ -1,6 +1,12 @@
-//
-// Created by Qi Wu on 2019-02-23.
-//
+//===========================================================================//
+//                                                                           //
+// Daxian Server                                                             //
+// Copyright(c) 2018 Qi Wu, Yiran Li, Wenxi Lu                               //
+// University of California, Davis                                           //
+// MIT Licensed                                                              //
+//                                                                           //
+//===========================================================================//
+
 #pragma once
 #ifndef DXSERVER_REQUESTQUEUE_H
 #define DXSERVER_REQUESTQUEUE_H
@@ -16,19 +22,21 @@
 
 #include <QObject>
 
-namespace v3d { namespace dx {
+namespace v3d {
+namespace dx {
+
 class Request {
     using response_t = std::function<void(v3d::JsonValue)>;
 public:
-    explicit Request(int ClientId, int type, v3d::JsonValue request, response_t resolve);
-    int GetClient() {return _ClientId;}
-    int GetType() {return _type;}
-    //bool IsValid() {return _Expectation == RequestCounters[_ClientId]};
-private: 
-    int _Expectation; // expected counter value
-    int _ClientId;
+    Request(int ClientId, int type, v3d::JsonValue request, response_t resolve);
+    int     getRequestType() const { return _type; }
+    int64_t getClientId()    const { return _client_id; }
+    //bool IsValid() {return _expectation == RequestCounters[_client_id]};
+private:
     int _type;
-    v3d::JsonValue _request;
+    int64_t _expectation; // expected counter value
+    int64_t _client_id;
+    JsonValue _request;
     response_t _resolve;
 };
 
@@ -38,11 +46,12 @@ class RequestQueues : public QObject {
 public: 
     void SetClientCounter();
 public slots:
-    void EnqueueRequest(int clientId, int type, v3d::JsonValue request, response_t resolve);
+    void EnqueueRequest(int client_id, int type, v3d::JsonValue request, response_t resolve);
 private: 
     std::deque<Request> QueueCPU, QueueGPU;
 };
 
-}}
+}
+}
 
 #endif //DXSERVER_EVENTQUEUE_H

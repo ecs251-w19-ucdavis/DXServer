@@ -1,8 +1,16 @@
+//===========================================================================//
+//                                                                           //
+// Daxian Server                                                             //
+// Copyright(c) 2018 Qi Wu, Yiran Li, Wenxi Lu                               //
+// University of California, Davis                                           //
+// MIT Licensed                                                              //
+//                                                                           //
+//===========================================================================//
+
 #include "WebSocketCommunicator.h"
 
-#include "ToBeRemoved/RequestHandler.h"
+//#include "ToBeRemoved/RequestHandler.h"
 #include "RequestQueue.h"
-
 #include "Util/Log.h"
 
 #include <QBuffer>

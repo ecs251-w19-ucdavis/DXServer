@@ -1,4 +1,13 @@
 /* eslint-disable no-console */
+
+//===========================================================================//
+//                                                                           //
+// Daxian Server                                                             //
+// Copyright(c) 2018 Qi Wu, Yiran Li, Wenxi Lu                               //
+// University of California, Davis                                           //
+// MIT Licensed                                                              //
+//                                                                           //
+//===========================================================================//
 /*!
  * VoxEngine
  * Copyright(c) 2018 Qi Wu (Wilson)

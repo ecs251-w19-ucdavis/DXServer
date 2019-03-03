@@ -1,7 +1,7 @@
 //===========================================================================//
 //                                                                           //
 // LibViDi3D                                                                 //
-// Copyright(c) 2018 Qi Wu (Wilson)                                          //
+// Copyright(c) 2018 Qi Wu (Wilson), Min Shih                                //
 // University of California, Davis                                           //
 // MIT Licensed                                                              //
 //                                                                           //

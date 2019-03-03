@@ -1,3 +1,12 @@
+//===========================================================================//
+//                                                                           //
+// Daxian Server                                                             //
+// Copyright(c) 2018 Qi Wu, Yiran Li, Wenxi Lu                               //
+// University of California, Davis                                           //
+// MIT Licensed                                                              //
+//                                                                           //
+//===========================================================================//
+
 #pragma once
 #ifndef DXSERVER_CLIENT_H
 #define DXSERVER_CLIENT_H
@@ -8,8 +17,6 @@
 #include <QImage>
 
 #include <string>
-//#include <queue>
-//#include <atomic>
 
 namespace v3d {
 namespace dx {

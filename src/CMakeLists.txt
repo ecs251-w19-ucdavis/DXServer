@@ -1,4 +1,11 @@
 # ┌──────────────────────────────────────────────────────────────────┐
+# │ Daxian Server                                                    │
+# │  Copyright(c) 2018 Qi Wu, Yiran Li, Wenxi Lu                     │
+# │  University of California, Davis                                 │
+# │  MIT Licensed                                                    │
+# └──────────────────────────────────────────────────────────────────┘
+
+# ┌──────────────────────────────────────────────────────────────────┐
 # │  Configure Qt                                                    │
 # └──────────────────────────────────────────────────────────────────┘
 # Find includes in corresponding build directories
@@ -19,10 +26,10 @@ set (vidi3d_dxserver_SOURCES
   Loader/RegularGridRawBinary.cpp
   Loader/TetraGridRawBinary.cpp
   Communication/WebSocketCommunicator.cpp
-  Workspace.cpp
-  Client.cpp
   RequestQueue.cpp
+  Client.cpp
   Engine.cpp
+  Workspace.cpp
   Main.cpp)
 
 # Header files
@@ -33,9 +40,9 @@ set (vidi3d_dxserver_HEADERS
   Loader/TetraGridRawBinary.h
   Serializer/SceneDictionary.h
   Communication/WebSocketCommunicator.h
-  Workspace.h
-  Client.h
   RequestQueue.h
+  Client.h
+  Workspace.h
   Engine.h)
 
 get_property(_egl_available GLOBAL PROPERTY V3D_USE_EGL)
