@@ -1,7 +1,7 @@
 #include "WebSocketCommunicator.h"
 
 #include "RequestHandler.h"
-#include "EventQueue.h"
+#include "RequestQueue.h"
 
 #include "Util/Log.h"
 
@@ -38,8 +38,8 @@ void v3d::dx::WebSocketCommunicator::close()
 
 void v3d::dx::WebSocketCommunicator::connectToRequestSlot(const QObject* _receiver)
 {
-    const auto* receiver = qobject_cast<const EventQueue*>(_receiver);
-    connect(this, &v3d::dx::WebSocketCommunicator::newRequest, receiver, &EventQueue::AddNewRequest);
+    const auto* receiver = qobject_cast<const RequestQueues*>(_receiver);
+    connect(this, &v3d::dx::WebSocketCommunicator::newRequest, receiver, &RequestQueues::EnqueueRequest);
 }
 
 void v3d::dx::WebSocketCommunicator::rpcNotify(QWebSocket *target, const std::string &method, const JsonValue &params)

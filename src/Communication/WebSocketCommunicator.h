@@ -3,7 +3,7 @@
 
 #include "Util/JsonParser.h"
 
-#include "EventQueue.h"
+#include "RequestQueue.h"
 
 #include <QWebSocket>
 #include <QWebSocketServer>

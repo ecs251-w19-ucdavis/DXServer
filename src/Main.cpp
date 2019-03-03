@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 #endif
 
-    dx::EventQueue request;
+    dx::RequestQueues request;
 
     dx::WebSocketCommunicator server(8080);
     server.open();
