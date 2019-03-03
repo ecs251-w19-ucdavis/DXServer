@@ -22,7 +22,7 @@ set (vidi3d_dxserver_SOURCES
   Main.cpp
   Workspace.cpp
   Client.cpp
-  EventQueue.cpp
+  RequestQueue.cpp
   SceneHandler.cpp
   RequestHandler.cpp)
 
@@ -36,7 +36,7 @@ set (vidi3d_dxserver_HEADERS
   Communication/WebSocketCommunicator.h
   Workspace.h
   Client.h
-  EventQueue.h
+  RequestQueue.h
   SceneHandler.h
   RequestHandler.h)
 
