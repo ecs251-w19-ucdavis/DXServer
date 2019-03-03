@@ -10,14 +10,14 @@
 #include "RequestQueue.h"
 #include <queue>
 
-v3d::dx::Request::Request(int ClientId, int type, v3d::JsonValue request, response_t resolve)
+v3d::dx::Request::Request(int ClientId, int type, v3d::JsonValue request, api::response_t resolve)
     : _client_id(ClientId)
     , _type(type)
     , _request(std::move(request))
     , _resolve(std::move(resolve))
 {}
 
-void v3d::dx::RequestQueues::EnqueueRequest(int client_id, int type, v3d::JsonValue request, response_t resolve)
+void v3d::dx::RequestQueues::EnqueueRequest(int client_id, int type, v3d::JsonValue request, api::response_t resolve)
 {
     Request newRequest(client_id, type, request, std::move(resolve));
     std::string method = request.get("method", "").toString();

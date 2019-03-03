@@ -7,6 +7,7 @@
 //                                                                           //
 //===========================================================================//
 
+#pragma once
 #ifndef V3D_MAIN_SERVER_H
 #define V3D_MAIN_SERVER_H
 
@@ -19,7 +20,6 @@
 #include <QImage>
 
 #include <functional>
-#include <mutex>
 
 /* TODO is there a light weight WebSocket library for doing this ? */
 /**
@@ -31,7 +31,6 @@ namespace v3d { namespace dx {
 
 class WebSocketCommunicator : public QObject {
     Q_OBJECT
-    using response_t = std::function<void(v3d::JsonValue)>;
 public:
     /**
      * Constructor
@@ -59,7 +58,7 @@ public:
     void connectToRequestSlot(const QObject* receiver);
 
     // enable if needed
-//    bool isConnected() const { return (_webSocketServer != nullptr) && !_clients.empty(); }
+    bool isConnected() const { return (_webSocketServer != nullptr) && !_clients.empty(); }
 
 protected:
     void rpcNotify(QWebSocket* target, const std::string& method, const v3d::JsonValue& params);
@@ -91,7 +90,7 @@ signals:
      * @param request A copy of the original JSON request.
      * @param resolve A functional to send the reply for each request.
      */
-    void newRequest(int clientId, int type, v3d::JsonValue request, response_t resolve);
+    void newRequest(int clientId, int type, v3d::JsonValue request, api::response_t resolve);
 
 private:
     bool _secureMode = false;
