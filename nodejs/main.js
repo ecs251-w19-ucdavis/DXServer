@@ -1,29 +1,27 @@
 /* eslint-disable no-console */
 const vox = require('./module/index')
 
-let PullFromEngine = () => {
-  vox.engine.CallGetScene()
-  vox.engine.NotifyRequestFrame(null)
-}
-
 function CreateEngine (client_id) {
   let engine = new vox.VoxEngine()
   engine.OnConnect = () => {
     console.log('connected', client_id)
+    // Start the process
+    engine.CallQueryDatabase()
+    engine.CallGetScene()
+    engine.NotifyRequestFrame(null)
   }
   engine.OnProjectOpened = () => {
     console.log('opened', client_id)
+    engine.CallGetScene()
+    engine.NotifyRequestFrame(null)
   }
   engine.connect('localhost')
   return engine
 }
-// let clients = new Map()
-// var id = 1
-// for(let i = 0; i < 2; ++i) {
-  /* TODO what if there are multiple sockets connecting */
+
+/* TODO what if there are multiple sockets connecting */
 
 function MainLoop(socket) {
-  
   let client_id;
   let engine;
   vox.lock.acquire(0, function () {
@@ -35,12 +33,11 @@ function MainLoop(socket) {
   })
 
   engine.OnFrame = (frame) => {
-    //vox.client.Broadcast('hasNewFrame', frame)
+    socket.emit('hasNewFrame', frame)
   }
   engine.OnGetScene = (scene) => {
     console.log('has new scene')
     socket.emit('hasNewScene', scene)
-    // clientsAction(vox.client.clients.get(socket), )
   }
   engine.OnQueryDatabase = (database) => {
     socket.emit('queryDatabase', database)
@@ -49,33 +46,25 @@ function MainLoop(socket) {
   // setup socket
   //
   socket.on('selectData', (data) => {
-    //vox.engine.NotifyOpenProject(data.label)
-    //PullFromEngine()
+    engine.NotifyOpenProject(data.label)
+    engine.CallGetScene()
+    engine.NotifyRequestFrame(null)
   })
   socket.on('disconnect', () => {
-
-    // delete clients[socket.id]
-    // vox.engine.NotifyCloseProject()
-    // PullFromEngine()
     console.log('disconnect', client_id)
-    if(vox.clients.has(client_id)) {
-      vox.clients.delete(client_id)
+
+    engine.close()
+    if(vox.clients.has(socket)) {
+     vox.clients.delete(socket)
     }
     if(vox.engines.has(client_id)) {
-      vox.engines[client_id].close()
-      vox.engines.delete(client_id)
+     vox.engines.delete(client_id)
     }
 
   })
   socket.on('requestFrame', (params) => {
-    //vox.engine.NotifyRequestFrame(params)
-    // PullFromEngine()
+    engine.NotifyRequestFrame(params)
   })
-  //
-  // Start the process
-  //
-  //vox.engine.CallQueryDatabase()
-  //PullFromEngine()
 }
 
 /*
