@@ -19,42 +19,60 @@
 #include <string>
 #include <memory>
 
+///////////////////////////////////////////////////////////////////////////////
+
 namespace v3d {
 namespace dx {
 
-namespace api { using client_id_t = int64_t; };
+namespace api { using client_id_t = size_t; };
 
-// details
+// detailed implementation
 namespace details {
 /**
  * This class defines the behavior of each client
  */
 class Client {
 public:
-	// the reason to put construct private is that
 	Client() = default;
 	void setId(api::client_id_t id) { _id = id; }
 	api::client_id_t getId() const { return _id; }
 	void init(const std::string& fname, int w, int h);
 	void render();
 private:
-	api::client_id_t _id = -1;
+	bool initialized = false;
+	api::client_id_t _id = 0; // id == 0 means invalid
 	std::shared_ptr<FramebufferGL> _fbo;
 	std::shared_ptr<dx::Engine> _handler;
 };
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 // namespace for shared pointer
 namespace api { using client_t = std::shared_ptr<details::Client>; }
 
+///////////////////////////////////////////////////////////////////////////////
+
 // here we add handlers for append, retrieve, modify clients
 namespace clientlist {
-int          remove(api::client_id_t);
+/**
+ *
+ * @return 1 means okay, 0 means error
+ */
+int /* err */ remove(api::client_id_t);
+/**
+ *
+ * @return nullptr means error
+ */
 api::client_t append();
+/**
+ *
+ * @return nullptr means error
+ */
 api::client_t get(api::client_id_t);
 }
 
-
+///////////////////////////////////////////////////////////////////////////////
 
 }
 }

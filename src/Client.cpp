@@ -13,16 +13,26 @@
 
 #include <vector>
 #include <memory>
+#include <mutex>
 
 using namespace v3d::dx;
 
-// TODO we need a lock
-static std::vector<api::client_t> client_queue;
+///////////////////////////////////////////////////////////////////////////////
+
+static std::map<api::client_id_t, api::client_t> client_queue;
+static std::mutex                                client_mutex;
+static api::client_id_t                          client_next_id = 1;
 
 void details::Client::init(const std::string& fname, int w, int h)
 {
+	if (initialized)
+	{
+		PING;
+		std::cout << "you initialized the client twice" << std::endl;
+	}
 	_fbo = std::make_shared<FramebufferGL>(w, h);
-    _handler = std::make_shared<Engine>(fname, _fbo, w, h);
+	_handler = std::make_shared<Engine>(fname, _fbo, w, h);
+	initialized = true;
 }
 
 void details::Client::render()
@@ -46,21 +56,43 @@ void details::Client::render()
 	std::cout << "save file as " << filename << std::endl;
 }
 
-api::client_t clientlist::append() {
-	auto id = static_cast<api::client_id_t>(client_queue.size());
-	auto client = std::make_shared<details::Client>();
-	client->setId(id);
-	client_queue.push_back(client);
+///////////////////////////////////////////////////////////////////////////////
+
+api::client_t clientlist::append()
+{
+	api::client_t client;
+	client_mutex.lock();
+	{
+		auto id = client_next_id++;
+		client = std::make_shared<details::Client>();
+		client->setId(id);
+		client_queue[id] = client;
+	}
+	client_mutex.unlock();
 	return client;
 }
 
-int clientlist::remove(api::client_id_t)
+int clientlist::remove(api::client_id_t id)
 {
-	PING;
+	client_mutex.lock();
+	{
+		auto it = client_queue.find(id);
+		if (it != client_queue.end()) { client_queue.erase(it); }
+	}
+	client_mutex.unlock();
 	return 0;
 }
 
 api::client_t clientlist::get(api::client_id_t id)
 {
-	return client_queue[id];
+	api::client_t ret(nullptr);
+	client_mutex.lock();
+	{
+		auto it = client_queue.find(id);
+		if (it != client_queue.end()) {
+			ret = it->second;
+		}
+	}
+	client_mutex.unlock();
+	return ret;
 }
