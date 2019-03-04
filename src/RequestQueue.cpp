@@ -8,9 +8,11 @@
 //===========================================================================//
 
 #include "RequestQueue.h"
+#include "Util/Log.h"
 #include <queue>
 
 static v3d::dx::queues_t global_queue;
+
 namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,7 +21,7 @@ namespace queues {
 
 void create()
 {
-    global_queue = std::make_shared<RequestQueues>();
+    global_queue.reset(new RequestQueues());
 }
 
 queues_t get()
@@ -51,13 +53,17 @@ void RequestQueues::EnqueueRequest(client_id_t client_id, int type, json_t json,
     // TODO should compute expected request id for each request -- DONE
     _lock.lock();
 
-    auto request_id = clients::get(client_id)->nextCounterValue(); // I implemented two counters in the Client class
+    // we create the client if not exist
+    auto client = clients::get(client_id);
+    if (!client) client = clients::add(client_id);
+
+    auto request_id = client->nextCounterValue(); // I implemented two counters in the Client class
     // each time there is a new request coming in, we get the value of 'next request counter' and then increment the
     // counter's value.
     auto request = std::make_shared<Request>(client_id, request_id, type, json, std::move(resolve));
 
     std::string method = json.get("method", "").toString();
-    std::cout << "new request received from client " << client_id << ": " << method << std::endl;
+    log() << "[RQueue] new request received from client " << client_id << ": " << method << std::endl;
 
     switch (type) {
         case 0: { // a call
@@ -77,6 +83,8 @@ void RequestQueues::EnqueueRequest(client_id_t client_id, int type, json_t json,
         }
         default: throw std::runtime_error("[Error] unknown request type");
     }
+
+    debugQueue(QueueCPU);
 
     _lock.unlock();
 }
@@ -113,6 +121,16 @@ int RequestQueues::dequeue(std::deque<request_t> &queue,
         return 0;
     }
 };
+
+void RequestQueues::debugQueue(const std::deque<request_t>& queue)
+{
+    for (const auto& x : queue) {
+        auto json = x->getRequest();
+        auto id = x->getClientId();
+        std::string method = json.get("method", "").toString();
+        log() << "[Debug] new request received from client " << id << ": " << method << std::endl;
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -30,12 +30,19 @@ using client_t = std::shared_ptr<details::Client>;
 
 // here we add handlers for append, retrieve, modify clients
 namespace clients {
+
 /** @return value 1 means okay, value 0 means error */
 int /* err */ remove(client_id_t);
+
 /** @return nullptr means error */
-client_t append();
+client_t add(client_id_t);
+
 /** @return nullptr means error */
 client_t get(client_id_t);
+
+/** check if this client exists */
+bool has(client_id_t);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,8 +53,8 @@ namespace details {
  * This class defines the behavior of each client
  */
 class Client {
+	friend client_t clients::add(client_id_t);
 public:
-	Client() = default;
 
 	void        setId(client_id_t id) { _id = id; }
 	client_id_t getId() const         { return _id; }
@@ -101,6 +108,8 @@ public:
 	void handleGetSceneRequested(int64_t id, int clientId);
 	void handleFrameRequested(const v3d::JsonValue& scene, int clientId);
 
+private:
+	Client() = default;
 
 private:
 	bool initialized = false;

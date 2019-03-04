@@ -30,14 +30,14 @@ namespace v3d { namespace dx {
 class Request;
 class RequestQueues;
 
-using json_t = v3d::JsonValue;
-using response_t = std::function<void(v3d::JsonValue)>;
+using json_t     = JsonValue;
+using response_t = std::function<void(JsonValue)>;
 using request_t  = std::shared_ptr<Request>;
 using queues_t   = std::shared_ptr<RequestQueues>;
 
 namespace queues {
-void create();
-queues_t  get();
+void           create(); // we can only have one instance of RequestQueues
+queues_t       get();
 RequestQueues* raw();
 }
 
@@ -47,7 +47,7 @@ class Request {
 
 public:
     Request(client_id_t id, client_id_t exp, int type, json_t request, response_t resolve);
-    int              getType()     const { return _type; }
+    int         getType()     const { return _type; }
     client_id_t getClientId() const { return _id; }
     json_t      getRequest()  const { return _request; }
     response_t  getResolve()  const { return _resolve; }
@@ -67,6 +67,7 @@ private:
 
 class RequestQueues : public QObject {
     Q_OBJECT
+    friend void queues::create();
 public: 
     //void SetClientCounter();
 
@@ -84,6 +85,10 @@ public slots: // <- NOTE don't forget this slots keyword defined by Qt
      * @param resolve
      */
     void EnqueueRequest(client_id_t client_id, int type, json_t json, response_t resolve);
+
+private:
+    RequestQueues() = default;
+    void debugQueue(const std::deque<request_t>&);
 
 private:
     int dequeue(std::deque<request_t>&, client_id_t &client_id, json_t&, response_t&);

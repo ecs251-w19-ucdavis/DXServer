@@ -19,10 +19,6 @@ using namespace v3d::dx;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static std::map<client_id_t, client_t> client_queue;
-static std::mutex                                client_mutex;
-static client_id_t                          client_next_id = 1;
-
 void details::Client::init(const std::string& fname, int w, int h)
 {
 	if (initialized)
@@ -58,19 +54,9 @@ void details::Client::render()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-client_t clients::append()
-{
-	client_t client;
-	client_mutex.lock();
-	{
-		auto id = client_next_id++;
-		client = std::make_shared<details::Client>();
-		client->setId(id);
-		client_queue[id] = client;
-	}
-	client_mutex.unlock();
-	return client;
-}
+static std::map<client_id_t, client_t> client_queue;
+static std::mutex                      client_mutex;
+//static client_id_t                     client_next_id = 1;
 
 int clients::remove(client_id_t id)
 {
@@ -83,6 +69,20 @@ int clients::remove(client_id_t id)
 	return 0;
 }
 
+client_t clients::add(client_id_t id)
+{
+	client_t client;
+	client_mutex.lock();
+	{
+		// auto id = client_next_id++;
+		client.reset(new details::Client());
+		client->setId(id);
+		client_queue[id] = client;
+	}
+	client_mutex.unlock();
+	return client;
+}
+
 client_t clients::get(client_id_t id)
 {
 	client_t ret(nullptr);
@@ -91,6 +91,20 @@ client_t clients::get(client_id_t id)
 		auto it = client_queue.find(id);
 		if (it != client_queue.end()) {
 			ret = it->second;
+		}
+	}
+	client_mutex.unlock();
+	return ret;
+}
+
+bool clients::has(client_id_t id)
+{
+	bool ret = false;
+	client_mutex.lock();
+	{
+		auto it = client_queue.find(id);
+		if (it != client_queue.end()) {
+			ret = true;
 		}
 	}
 	client_mutex.unlock();
