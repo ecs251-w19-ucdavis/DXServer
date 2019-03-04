@@ -24,19 +24,18 @@ namespace v3d { namespace dx {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace details { class Client; }
-namespace api {
-using client_id_t = size_t;
+
+using client_id_t = int;
 using client_t = std::shared_ptr<details::Client>;
-}
 
 // here we add handlers for append, retrieve, modify clients
 namespace clients {
 /** @return value 1 means okay, value 0 means error */
-int /* err */ remove(api::client_id_t);
+int /* err */ remove(client_id_t);
 /** @return nullptr means error */
-api::client_t append();
+client_t append();
 /** @return nullptr means error */
-api::client_t get(api::client_id_t);
+client_t get(client_id_t);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,8 +49,8 @@ class Client {
 public:
 	Client() = default;
 
-	void                  setId(api::client_id_t id) { _id = id; }
-	api::client_id_t      getId() const              { return _id; }
+	void        setId(client_id_t id) { _id = id; }
+	client_id_t getId() const         { return _id; }
 
 	/**
      * @note Can be read by RequestQueues
@@ -110,7 +109,7 @@ private:
 	size_t _curr_request_counter = 0;
 	size_t _next_request_counter = 0;
 
-	api::client_id_t _id = 0; // id == 0 means invalid
+	client_id_t _id = 0; // id == 0 means invalid
 	std::shared_ptr<FramebufferGL> _fbo;
 	std::shared_ptr<dx::details::Engine> _handler;
 };

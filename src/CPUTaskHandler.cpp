@@ -19,9 +19,9 @@ CPUTaskHandler::CPUTaskHandler(const std::string &database)
 
 void CPUTaskHandler::processNextRequest()
 {
-    api::client_id_t id;
-    api::response_t resolve;
-    api::json_t json;
+    client_id_t id;
+    response_t resolve;
+    json_t json;
 
     // get the
     queues::get()->dequeueCPU(id, json, resolve);
@@ -30,7 +30,7 @@ void CPUTaskHandler::processNextRequest()
 
     if (method == "queryDatabase") {
 
-        api::json_t output;
+        json_t output;
         handleQueryDatabase(id, output);
         resolve(output);
         clients::get(id)->incrementCurrCounter();
@@ -63,7 +63,7 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
 
     // convert preview image into base64 string
     if (_jsonDatabase.isArray()) {
-        api::json_t::Array &dsArray = _jsonDatabase.toArray();
+        json_t::Array &dsArray = _jsonDatabase.toArray();
         for (auto &ds : dsArray) {
             QImage img;
             if (img.load(ds["preview"].toString().c_str())) {
@@ -85,7 +85,7 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
     }
 }
 
-void CPUTaskHandler::handleQueryDatabase(api::client_id_t clientId, api::json_t &output)
+void CPUTaskHandler::handleQueryDatabase(client_id_t clientId, json_t &output)
 {
     if (!_jsonDatabase.isNull()) { output = _jsonDatabase; } // make a copy
 }

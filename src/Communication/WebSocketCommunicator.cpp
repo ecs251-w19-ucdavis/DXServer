@@ -26,7 +26,7 @@ void v3d::dx::WebSocketCommunicator::open()
     auto sslMode = _secureMode ? QWebSocketServer::SecureMode : QWebSocketServer::NonSecureMode;
     _webSocketServer = new QWebSocketServer(QStringLiteral("Vidi3D Render Server"), sslMode, this);
     if (_webSocketServer->listen(QHostAddress::Any, _port)) {
-        log() << ("[Server] Render server listening on port " + QString("%1").arg(_port, 0, 10)).toStdString()
+        log() << ("[RComm] Render server listening on port " + QString("%1").arg(_port, 0, 10)).toStdString()
               << std::endl;
         connect(_webSocketServer, &QWebSocketServer::newConnection, this, &WebSocketCommunicator::onNewConnection);
         connect(_webSocketServer, &QWebSocketServer::closed, this, &WebSocketCommunicator::onServerClosure);
@@ -44,7 +44,7 @@ void v3d::dx::WebSocketCommunicator::close()
 void v3d::dx::WebSocketCommunicator::connectToRequestSlot(const QObject* _receiver)
 {
     const auto* receiver = qobject_cast<const RequestQueues*>(_receiver);
-    connect(this, &v3d::dx::WebSocketCommunicator::newRequest, receiver, &RequestQueues::EnqueueRequest);
+    connect(this, &WebSocketCommunicator::newRequest, receiver, &RequestQueues::EnqueueRequest);
 }
 
 void v3d::dx::WebSocketCommunicator::rpcNotify(QWebSocket *target, const std::string &method, const JsonValue &params)
@@ -68,14 +68,14 @@ void v3d::dx::WebSocketCommunicator::rpcReply(QWebSocket *target, const JsonValu
     target->sendTextMessage(msg);
 }
 
-QWebSocket *v3d::dx::WebSocketCommunicator::getClient(int clientId)
+QWebSocket *v3d::dx::WebSocketCommunicator::getClient(client_id_t clientId)
 {
     return _clients.contains(clientId) ? _clients[clientId] : nullptr;
 }
 
 void v3d::dx::WebSocketCommunicator::onNewConnection()
 {
-    log() << "new connection " << _nextClientId << std::endl;
+    log() << "[RComm] new connection from client " << _nextClientId << std::endl;
     QWebSocket *socket = _webSocketServer->nextPendingConnection();
 
     connect(socket, &QWebSocket::textMessageReceived, this, &WebSocketCommunicator::processTextMessage);
@@ -88,13 +88,13 @@ void v3d::dx::WebSocketCommunicator::onNewConnection()
 
 void v3d::dx::WebSocketCommunicator::onServerClosure()
 {
-    log() << "[Server] Connection closed" << std::endl;
+    log() << "[RComm] Connection closed" << std::endl;
 }
 
 void v3d::dx::WebSocketCommunicator::onClientClosure()
 {
     QWebSocket *client = qobject_cast<QWebSocket *>(sender());
-    log() << "[Server] Socket disconnected" << std::endl;
+    log() << "[RComm] Socket disconnected" << std::endl;
     if (client) {
         int key = _clients.key(client, 0);
         if (_clients.contains(key)) { _clients.remove(key); }
@@ -106,12 +106,12 @@ void v3d::dx::WebSocketCommunicator::processTextMessage(QString message)
 {
     // compute client Id
     auto *client = qobject_cast<QWebSocket *>(sender());
-    int clientId = _clients.key(client, 0);
+    client_id_t clientId = _clients.key(client, 0);
     if (client == nullptr || !_clients.contains(clientId)) {
-        log() << "[Server] Message received from invalid client" << std::endl;
+        log() << "[RComm] Message received from invalid client" << std::endl;
         return;
     }
-    log() << "[Server] Message received from client " << clientId << ": " << message.toStdString() << std::endl;
+    log() << "[RComm] Message received from client " << clientId << ": " << message.toStdString() << std::endl;
 
     // parse the message into a JSON
     JsonValue json;
@@ -119,18 +119,18 @@ void v3d::dx::WebSocketCommunicator::processTextMessage(QString message)
         json = JsonParser().parse(message.toStdString());
     }
     catch (std::exception &) {
-        log() << "[Error] Invalid JSON message" << std::endl;
+        log() << "[Error] Invalid JSON message: " << __FILE__ << " " << __LINE__ << std::endl;
         return;
     }
 
     // handle different requests
     std::string method = json.get("method", "").toString();
-    log() << "message received " << method << std::endl;
+
     if (method == "queryDatabase") {
 
         int64_t id = json.get("id", -1).toInt64();
-        emit newRequest(clientId, 0, json, [=] (v3d::JsonValue result) {
-            log() << "resolved" << std::endl;
+        emit newRequest(clientId, 0, json, [=] (JsonValue result) {
+            log() << "[RComm] resolved" << std::endl;
             sendDatabase(result, id, clientId);
         });
 
@@ -146,14 +146,14 @@ void v3d::dx::WebSocketCommunicator::processTextMessage(QString message)
             projFileName = json["params"]["fileName"].toString();
         }
 
-        emit newRequest(clientId, 1, json, [=] (v3d::JsonValue) {
+        emit newRequest(clientId, 1, json, [=] (JsonValue) {
             notifyProjectOpened(projFileName, clientId);
         });
 
     }
     else if (method == "closeProject") {
 
-        emit newRequest(clientId, 1, json, [=] (v3d::JsonValue) {
+        emit newRequest(clientId, 1, json, [=] (JsonValue) {
             notifyProjectClosed(clientId);
         });
 
@@ -161,8 +161,8 @@ void v3d::dx::WebSocketCommunicator::processTextMessage(QString message)
     else if (method == "getScene") {
 
         int64_t id = json.get("id", -1).toInt64();
-        std::cout << "emitting signals" << std::endl;
-        emit newRequest(clientId, 0, json, [=] (v3d::JsonValue scene) {
+        std::cout << "[RComm] emitting signals" << std::endl;
+        emit newRequest(clientId, 0, json, [=] (JsonValue scene) {
             sendScene(scene, id, clientId);
         });
 
@@ -177,12 +177,12 @@ void v3d::dx::WebSocketCommunicator::processTextMessage(QString message)
 
 void v3d::dx::WebSocketCommunicator::processBinaryMessage(QByteArray message)
 {
-    log() << "[Server] Binary Message ignored" << std::endl;
+    log() << "[RComm] Binary Message ignored" << std::endl;
 }
 
-void v3d::dx::WebSocketCommunicator::notifyProjectOpened(std::string projFileName, int clientId)
+void v3d::dx::WebSocketCommunicator::notifyProjectOpened(std::string projFileName, client_id_t clientId)
 {
-    log() << "[Server] Project opened: " << projFileName << std::endl;
+    log() << "[RComm] Project opened: " << projFileName << std::endl;
 
     QWebSocket *client = getClient(clientId);
     if (client == nullptr)
@@ -192,17 +192,16 @@ void v3d::dx::WebSocketCommunicator::notifyProjectOpened(std::string projFileNam
     rpcNotify(client, "projectOpened", params);
 }
 
-void v3d::dx::WebSocketCommunicator::notifyProjectClosed(int clientId)
+void v3d::dx::WebSocketCommunicator::notifyProjectClosed(client_id_t clientId)
 {
-    log() << "[Server] Project closed" << std::endl;
-
+    log() << "[RComm] Project closed" << std::endl;
     QWebSocket *client = getClient(clientId);
     if (client == nullptr)
         return;
     rpcNotify(client, "projectClosed", JsonValue());
 }
 
-void v3d::dx::WebSocketCommunicator::sendScene(JsonValue scene, int64_t id, int clientId)
+void v3d::dx::WebSocketCommunicator::sendScene(JsonValue scene, int64_t id, client_id_t clientId)
 {
     if (!_clients.contains(clientId))
         return;
@@ -210,7 +209,7 @@ void v3d::dx::WebSocketCommunicator::sendScene(JsonValue scene, int64_t id, int 
     rpcReply(client, scene, JsonValue(id));
 }
 
-void v3d::dx::WebSocketCommunicator::sendFrame(QImage img, int clientId)
+void v3d::dx::WebSocketCommunicator::sendFrame(QImage img, client_id_t clientId)
 {
     if (!_clients.contains(clientId))
         return;
@@ -229,7 +228,7 @@ void v3d::dx::WebSocketCommunicator::sendFrame(QImage img, int clientId)
     rpcNotify(client, "frame", params);
 }
 
-void v3d::dx::WebSocketCommunicator::sendDatabase(v3d::JsonValue database, int64_t id, int clientId)
+void v3d::dx::WebSocketCommunicator::sendDatabase(JsonValue database, int64_t id, client_id_t clientId)
 {
     if (!_clients.contains(clientId)) return;
     QWebSocket *client = _clients[clientId];

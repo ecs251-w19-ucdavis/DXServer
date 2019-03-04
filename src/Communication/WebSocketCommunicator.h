@@ -59,9 +59,9 @@ public:
     bool isConnected() const { return (_webSocketServer != nullptr) && !_clients.empty(); }
 
 protected:
-    void rpcNotify(QWebSocket* target, const std::string& method, const v3d::JsonValue& params);
-    void rpcReply(QWebSocket* target, const v3d::JsonValue& result, const v3d::JsonValue& id);
-    QWebSocket* getClient(int clientId);
+    void rpcNotify(QWebSocket* target, const std::string& method, const JsonValue& params);
+    void rpcReply(QWebSocket* target, const JsonValue& result, const JsonValue& id);
+    QWebSocket* getClient(client_id_t clientId);
 
 public slots:
     // called by websocket
@@ -72,11 +72,11 @@ public slots:
     void processBinaryMessage(QByteArray message);
 
     // call by other components inside this project
-    void notifyProjectOpened(std::string projFileName, int clientId);
-    void notifyProjectClosed(int clientId);
-    void sendScene(v3d::JsonValue scene, int64_t id, int clientId);
-    void sendFrame(QImage img, int clientId);
-    void sendDatabase(v3d::JsonValue database, int64_t id, int clientId);
+    void notifyProjectOpened(std::string projFileName, client_id_t clientId);
+    void notifyProjectClosed(client_id_t clientId);
+    void sendScene(JsonValue scene, int64_t id, client_id_t clientId);
+    void sendFrame(QImage img, client_id_t clientId);
+    void sendDatabase(JsonValue database, int64_t id, client_id_t clientId);
 
 signals:
     /**
@@ -88,7 +88,7 @@ signals:
      * @param request A copy of the original JSON request.
      * @param resolve A functional to send the reply for each request.
      */
-    void newRequest(api::client_id_t clientId, int type, api::json_t request, api::response_t resolve);
+    void newRequest(client_id_t clientId, int type, json_t request, response_t resolve);
 
 private:
     bool _secureMode = false;
@@ -96,8 +96,8 @@ private:
     QWebSocketServer* _webSocketServer = nullptr;
     /// @note we do not need a lock here because all Qt slots are running on the same thread
     /// @note ref: https://doc.qt.io/qt-5/qt.html#ConnectionType-enum
-    QHash<int, QWebSocket*> _clients;
-    int _nextClientId = 1;
+    QHash<client_id_t, QWebSocket*> _clients;
+    client_id_t _nextClientId = 1;
 };
 
 }}

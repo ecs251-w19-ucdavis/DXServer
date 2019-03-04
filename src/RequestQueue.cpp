@@ -10,7 +10,7 @@
 #include "RequestQueue.h"
 #include <queue>
 
-static v3d::dx::api::queues_t global_queue;
+static v3d::dx::queues_t global_queue;
 namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ void create()
     global_queue = std::make_shared<RequestQueues>();
 }
 
-api::queues_t get()
+queues_t get()
 {
     return global_queue;
 }
@@ -36,7 +36,7 @@ RequestQueues* raw()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Request::Request(api::client_id_t id, api::client_id_t exp, int type, api::json_t request, api::response_t resolve)
+Request::Request(client_id_t id, client_id_t exp, int type, json_t request, response_t resolve)
     : _id(id)
     , _exp(exp)
     , _type(type)
@@ -44,7 +44,7 @@ Request::Request(api::client_id_t id, api::client_id_t exp, int type, api::json_
     , _resolve(std::move(resolve))
 {}
 
-void RequestQueues::EnqueueRequest(api::client_id_t client_id, int type, api::json_t json, api::response_t resolve)
+void RequestQueues::EnqueueRequest(client_id_t client_id, int type, json_t json, response_t resolve)
 {
     // TODO should add lock -- DONE
     // TODO should decide which queue to add
@@ -65,7 +65,7 @@ void RequestQueues::EnqueueRequest(api::client_id_t client_id, int type, api::js
             break;
         }
         case 1: { // a notification
-            auto it = std::find_if(QueueCPU.begin(), QueueCPU.end(), [&](api::request_t &req) {
+            auto it = std::find_if(QueueCPU.begin(), QueueCPU.end(), [&](request_t &req) {
                 return (req->getClientId() == client_id && req->getType() == type);
             });
             if (it != QueueCPU.end()) { // if there is a previous notification, replace it with the new one
@@ -81,27 +81,27 @@ void RequestQueues::EnqueueRequest(api::client_id_t client_id, int type, api::js
     _lock.unlock();
 }
 
-int RequestQueues::dequeueCPU(api::client_id_t &client_id,
-                              api::json_t& request,
-                              api::response_t& resolve)
+int RequestQueues::dequeueCPU(client_id_t &client_id,
+                              json_t& request,
+                              response_t& resolve)
 {
     return dequeue(QueueCPU, client_id, request, resolve);
 }
 
-int RequestQueues::dequeueGPU(api::client_id_t &client_id,
-                              api::json_t& request,
-                              api::response_t& resolve)
+int RequestQueues::dequeueGPU(client_id_t &client_id,
+                              json_t& request,
+                              response_t& resolve)
 {
     return dequeue(QueueGPU, client_id, request, resolve);
 }
 
-int RequestQueues::dequeue(std::deque<api::request_t> &queue,
-                           api::client_id_t &client_id,
-                           api::json_t &request,
-                           api::response_t &resolve)
+int RequestQueues::dequeue(std::deque<request_t> &queue,
+                           client_id_t &client_id,
+                           json_t &request,
+                           response_t &resolve)
 {
     _lock.lock();
-    auto it = std::find_if(queue.begin(), queue.end(), [&](api::request_t &req) { return req->isReady(); });
+    auto it = std::find_if(queue.begin(), queue.end(), [&](request_t &req) { return req->isReady(); });
     if (it != queue.end()) {
         client_id = (*it)->getClientId();
         request = (*it)->getRequest();

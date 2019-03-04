@@ -19,9 +19,9 @@ using namespace v3d::dx;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static std::map<api::client_id_t, api::client_t> client_queue;
+static std::map<client_id_t, client_t> client_queue;
 static std::mutex                                client_mutex;
-static api::client_id_t                          client_next_id = 1;
+static client_id_t                          client_next_id = 1;
 
 void details::Client::init(const std::string& fname, int w, int h)
 {
@@ -58,9 +58,9 @@ void details::Client::render()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-api::client_t clients::append()
+client_t clients::append()
 {
-	api::client_t client;
+	client_t client;
 	client_mutex.lock();
 	{
 		auto id = client_next_id++;
@@ -72,7 +72,7 @@ api::client_t clients::append()
 	return client;
 }
 
-int clients::remove(api::client_id_t id)
+int clients::remove(client_id_t id)
 {
 	client_mutex.lock();
 	{
@@ -83,9 +83,9 @@ int clients::remove(api::client_id_t id)
 	return 0;
 }
 
-api::client_t clients::get(api::client_id_t id)
+client_t clients::get(client_id_t id)
 {
-	api::client_t ret(nullptr);
+	client_t ret(nullptr);
 	client_mutex.lock();
 	{
 		auto it = client_queue.find(id);
