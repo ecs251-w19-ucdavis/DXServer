@@ -105,8 +105,8 @@ void RequestQueues::EnqueueRequest(clid_t client_id, int type, json_t json, rply
         json2["method"] = "InitGL";
         std::cout << "json1" << json1.get("method", "").toString() << std::endl;
         std::cout << "json2" << json2.get("method", "").toString() << std::endl;
-        rply_t resolve1 = std::function<void(JsonValue)>{};
-        Enqueue(client_id, request_id1, type, json1, std::move(resolve1));
+        // rply_t resolve1 = std::function<void(JsonValue)>{};
+        Enqueue(client_id, request_id1, type, json1, std::move(rply_t {}));
         Enqueue(client_id, request_id2, type, json2, std::move(resolve));
     }
     else if(method == "closeProject") //splitting into 2 subrequests: LoadData enters QueueCPU, and InitGL enters QueueGPU
@@ -119,8 +119,8 @@ void RequestQueues::EnqueueRequest(clid_t client_id, int type, json_t json, rply
         json2["method"] = "CloseGL";
         std::cout << "json1" << json1.get("method", "").toString() << std::endl;
         std::cout << "json2" << json2.get("method", "").toString() << std::endl;
-        rply_t resolve1 = std::function<void(JsonValue)>{};
-        Enqueue(client_id, request_id1, type, json1, std::move(resolve1));
+        // rply_t resolve1 = std::function<void(JsonValue)>{};
+        Enqueue(client_id, request_id1, type, json1, std::move(rply_t {}));
         Enqueue(client_id, request_id2, type, json2, std::move(resolve));
     }
     else

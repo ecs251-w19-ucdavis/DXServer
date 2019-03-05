@@ -13,6 +13,7 @@ const vox = require('./module/index')
 let en0 = new vox.VoxEngine()
 en0.OnConnect = () => {
     console.log('connect')
+    en0._rpcNotify('openProject', {});
     en0._rpcCall('getScene', {}, 2, (data) => {
         console.log('engine 0', data)
     })

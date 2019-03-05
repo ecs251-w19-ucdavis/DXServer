@@ -10,10 +10,18 @@
 #include <QBuffer>
 #include <QImage>
 
+
+/** Here are the part of requests we deal with in CPU.
+ * First, we Load database from disk, and read/query data from the database.
+ * Second, We remove database from CPU.
+ * Finally, we close clients' connection and delete the clients.
+ * 
+ */
 namespace v3d { namespace dx {
 
 CPUTaskHandler::CPUTaskHandler(const std::string &database)
 {
+    // Load database from disk
     loadDatabase(database);
 }
 
@@ -23,7 +31,13 @@ void CPUTaskHandler::processNextRequest()
     rply_t resolve;
     json_t json;
 
-    // get the
+    /** get the data from the RequestQueue, since we split the openProject request into two parts:
+     *  1. load data (in CPU)
+     *  2. initilize OpenGL (in GPU)
+     * 
+     *  Here in CPU we deal with the load data request  
+     * 
+    */
     queues::get()->dequeueCPU(id, json, resolve);
 
     std::string method = json.get("method", "").toString();
@@ -84,7 +98,7 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
         throw std::runtime_error("[Error] invalid database lookup file " + database);
     }
 }
-
+// Read Data From Database
 void CPUTaskHandler::handleQueryDatabase(clid_t clientId, json_t &output)
 {
     if (!_jsonDatabase.isNull()) { output = _jsonDatabase; } // make a copy
