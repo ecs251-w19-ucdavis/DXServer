@@ -31,7 +31,7 @@ void CPUTaskHandler::processNextRequest()
     rply_t resolve;
     json_t json;
 
-    /** get the data from the RequestQueue, siance we split the openProject request into two parts:
+    /** get the data from the RequestQueue, since we split the openProject request into two parts:
      *  1. load data (in CPU)
      *  2. initilize OpenGL (in GPU)
      * 
