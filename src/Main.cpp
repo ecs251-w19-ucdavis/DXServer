@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 #endif
 
-    dx::queues::create();
+    dx::queues::create(); // TODO why we need to call create ?? should not have to
 
     dx::Communicator server(8080);
     server.open();

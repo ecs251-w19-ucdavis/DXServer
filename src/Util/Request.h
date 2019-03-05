@@ -14,9 +14,9 @@ namespace v3d { namespace dx {
 ///////////////////////////////////////////////////////////////////////////////
 
 class Request;
-using json_t   = JsonValue;
-using rply_t  = std::function<void(JsonValue)>;
-using reqt_t   = std::shared_ptr<Request>;
+using json_t = JsonValue;
+using rply_t = std::function<void(JsonValue)>;
+using rqst_t = std::shared_ptr<Request>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +32,7 @@ public:
         return _exp == clients::get(_id)->currCounterValue(); // TODO is this implementation correct ?
     }
 private:
-    int _type;
+    int    _type;
     clid_t _id; // client id
     size_t _exp; // expected counter value
     json_t _request;

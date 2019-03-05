@@ -51,7 +51,7 @@ void RequestQueues::enqueue(clid_t client_id, clid_t request_id, int type, json_
         case 1: { // a notification
             if(method == "LoadData" || method == "DelData") // CPU notifications
             {
-                auto it = std::find_if(QueueCPU.begin(), QueueCPU.end(), [&](reqt_t &req) {
+                auto it = std::find_if(QueueCPU.begin(), QueueCPU.end(), [&](rqst_t &req) {
                     return (req->getClientId() == client_id && req->getType() == type);
                 });
                 if (it != QueueCPU.end()) { // if there is a previous notification, replace it with the new one
@@ -63,7 +63,7 @@ void RequestQueues::enqueue(clid_t client_id, clid_t request_id, int type, json_
             }
             else // GPU notifications
             {
-                auto it = std::find_if(QueueGPU.begin(), QueueGPU.end(), [&](reqt_t &req) {
+                auto it = std::find_if(QueueGPU.begin(), QueueGPU.end(), [&](rqst_t &req) {
                     return (req->getClientId() == client_id && req->getType() == type);
                 });
                 if (it != QueueGPU.end()) { // if there is a previous notification, replace it with the new one
@@ -146,14 +146,14 @@ int RequestQueues::dequeueGPU(clid_t &client_id,
     return dequeue(QueueGPU, client_id, request, resolve);
 }
 
-int RequestQueues::dequeue(std::deque<reqt_t> &queue,
+int RequestQueues::dequeue(std::deque<rqst_t> &queue,
                            clid_t &client_id,
                            json_t &request,
                            rply_t &resolve)
 {
     _lock.lock();
     // TODO we forgot to remove the executed request ?? DONE ?
-    auto it = std::find_if(queue.begin(), queue.end(), [&](reqt_t &req) { return req->isReady(); });
+    auto it = std::find_if(queue.begin(), queue.end(), [&](rqst_t &req) { return req->isReady(); });
     if (it != queue.end()) {
         client_id = (*it)->getClientId();
         request = (*it)->getRequest();
@@ -168,7 +168,7 @@ int RequestQueues::dequeue(std::deque<reqt_t> &queue,
     }
 };
 
-void RequestQueues::debugQueue(const std::deque<reqt_t>& queue)
+void RequestQueues::debugQueue(const std::deque<rqst_t>& queue)
 {
     for (const auto& x : queue) {
         auto json = x->getRequest();

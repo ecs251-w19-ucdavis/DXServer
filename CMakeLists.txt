@@ -40,3 +40,14 @@ add_subdirectory(src)
 file(TO_NATIVE_PATH "${PROJECT_SOURCE_DIR}/data/" DX_DATA_NATIVE_PATH)
 configure_file(${PROJECT_SOURCE_DIR}/data/database.json.in
   database.json @ONLY)
+
+# ┌──────────────────────────────────────────────────────────────────┐
+# │  Build Documentation                                             │
+# └──────────────────────────────────────────────────────────────────┘
+find_package(Doxygen)
+find_package(Perl)
+if(DOXYGEN_FOUND AND PERL_FOUND)
+  doxygen_add_docs(doc ${PROJECT_SOURCE_DIR}/src COMMENT "Generate man pages")
+else()
+  message("Doxygen is not found")
+endif()

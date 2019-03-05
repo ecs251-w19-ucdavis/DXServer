@@ -23,8 +23,8 @@
 /* TODO is there a light weight WebSocket library for doing this ? */
 /**
  * This comminicator solves two problems:
- * 1) how to receive requests and pass them to render engine
- * 2) how to retrieve results from the render engine and pass them to web-server
+ * 1) how to receive requests and pass them to render engine;
+ * 2) how to retrieve results from the render engine and pass them to web-server.
  */
 namespace v3d { namespace dx {
 
@@ -34,24 +34,24 @@ public:
     /**
      * Constructor
      * @param port The network port this communicator will be listening to
-     * @param parent Always a nullptr in our application
+     * @param parent Always a nullptr in our application.
      */
     explicit Communicator(quint16 port, QObject* parent = nullptr);
 
     /**
-     * Open the communicator and start to listen to connections
+     * Open the communicator and start to listen to connections。
      */
     void open();
 
     /**
-     * Terminate the communicator
+     * Terminate the communicator。
      */
     void close();
 
     /**
      * This function is used to connect signals produced by the WebSocketComminicator to a receiver. Such a receiver
      * must be a derived class of QObject. An example implementation of such a receiver can be found in
-     * RequestHandler.h and RequestHandler.cpp.
+     * _RequestHandler.h_ and _RequestHandler.cpp_.
      * @param receiver
      */
     void connectToRequestSlot(const QObject* receiver);
@@ -83,7 +83,7 @@ public slots:
     void processBinaryMessage(QByteArray message);
 
     // call by our server
-    void onResolve(int id) { resolves::get(id)(); };
+    void onResolve(int id) { resolves::pop(id)(); };
 
 signals:
     /**

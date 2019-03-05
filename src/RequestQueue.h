@@ -62,12 +62,12 @@ public slots: // <- NOTE don't forget this slots keyword defined by Qt
 
 private:
     RequestQueues() = default;
-    void debugQueue(const std::deque<reqt_t>&);
+    void debugQueue(const std::deque<rqst_t>&);
 
 private:
-    int dequeue(std::deque<reqt_t>&, clid_t &client_id, json_t&, rply_t&);
+    int dequeue(std::deque<rqst_t>&, clid_t &client_id, json_t&, rply_t&);
     std::mutex _lock;
-    std::deque<reqt_t> QueueCPU, QueueGPU;
+    std::deque<rqst_t> QueueCPU, QueueGPU;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
