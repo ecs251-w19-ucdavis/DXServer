@@ -31,7 +31,7 @@ public:
     }
 
 signals:
-    void onResolve(std::function<void()>);
+    void onResolve(int);
 
 public:
     void run(void) override

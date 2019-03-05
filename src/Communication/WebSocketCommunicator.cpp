@@ -16,6 +16,16 @@
 
 using namespace v3d;
 
+static std::vector<std::function<void()>> replies;
+
+int v3d::dx::WebSocketCommunicator::addReply(const std::function<void()>& foo) {
+    replies.emplace_back(foo);
+    return replies.size() - 1;
+}
+const std::function<void()>& v3d::dx::WebSocketCommunicator::getReply(int id) {
+    return replies[id];
+}
+
 v3d::dx::WebSocketCommunicator::WebSocketCommunicator(quint16 port, QObject *parent)
     : QObject(parent), _port(port)
 {
@@ -65,6 +75,7 @@ void v3d::dx::WebSocketCommunicator::rpcReply(QWebSocket *target, const JsonValu
     json["result"] = result;
     json["id"] = id;
     QString msg = QString::fromStdString(JsonParser().stringify(json));
+    std::cout << "[RComm] database " << msg.toCFString() << std::endl;
     target->sendTextMessage(msg);
 }
 
@@ -130,7 +141,7 @@ void v3d::dx::WebSocketCommunicator::processTextMessage(QString message)
 
         int64_t id = json.get("id", -1).toInt64();
         emit newRequest(clientId, 0, json, [=] (JsonValue result) {
-            log() << "[RComm] resolved" << std::endl;
+            log() << "[RComm] inner resolved" << std::endl;
             sendDatabase(result, id, clientId);
         });
 
