@@ -26,3 +26,9 @@ In one word, the "expected" counter value for each request is only related to th
 But this solution might need searching through the queue on every enqueue.
 
 **Qi**'s solution: Besides keeping a 
+
+
+###Client-Webserver and Render Engine Connection
+
+**Wenxi**: For each client, we create a new engine to connect the client to the render engine. That is to say, we have two maps, first is to store clients, since each socket represents a client, we store the client id as a key, and store the socket as the value; second map is to store the engine corresponds to the client, we store the client id as the key,  and store the engine as the value.
+Each engine includes the requests of clients that we need to connect to the render engine.
