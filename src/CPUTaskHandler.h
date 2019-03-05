@@ -21,7 +21,7 @@ public:
 
 private:
     void loadDatabase(const std::string& database);
-    void handleQueryDatabase(client_id_t clientId, json_t& output);
+    void handleQueryDatabase(clid_t clientId, json_t& output);
 
 private:
     json_t _jsonDatabase;

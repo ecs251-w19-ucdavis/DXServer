@@ -38,7 +38,7 @@ RequestQueues* raw()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Request::Request(client_id_t id, client_id_t exp, int type, json_t request, response_t resolve)
+Request::Request(clid_t id, clid_t exp, int type, json_t request, rply_t resolve)
     : _id(id)
     , _exp(exp)
     , _type(type)
@@ -46,7 +46,7 @@ Request::Request(client_id_t id, client_id_t exp, int type, json_t request, resp
     , _resolve(std::move(resolve))
 {}
 
-void RequestQueues::EnqueueRequest(client_id_t client_id, int type, json_t json, response_t resolve)
+void RequestQueues::EnqueueRequest(clid_t client_id, int type, json_t json, rply_t resolve)
 {
     // TODO should add lock -- DONE
     // TODO should decide which queue to add
@@ -71,7 +71,7 @@ void RequestQueues::EnqueueRequest(client_id_t client_id, int type, json_t json,
             break;
         }
         case 1: { // a notification
-            auto it = std::find_if(QueueCPU.begin(), QueueCPU.end(), [&](request_t &req) {
+            auto it = std::find_if(QueueCPU.begin(), QueueCPU.end(), [&](reqt_t &req) {
                 return (req->getClientId() == client_id && req->getType() == type);
             });
             if (it != QueueCPU.end()) { // if there is a previous notification, replace it with the new one
@@ -89,27 +89,27 @@ void RequestQueues::EnqueueRequest(client_id_t client_id, int type, json_t json,
     _lock.unlock();
 }
 
-int RequestQueues::dequeueCPU(client_id_t &client_id,
+int RequestQueues::dequeueCPU(clid_t &client_id,
                               json_t& request,
-                              response_t& resolve)
+                              rply_t& resolve)
 {
     return dequeue(QueueCPU, client_id, request, resolve);
 }
 
-int RequestQueues::dequeueGPU(client_id_t &client_id,
+int RequestQueues::dequeueGPU(clid_t &client_id,
                               json_t& request,
-                              response_t& resolve)
+                              rply_t& resolve)
 {
     return dequeue(QueueGPU, client_id, request, resolve);
 }
 
-int RequestQueues::dequeue(std::deque<request_t> &queue,
-                           client_id_t &client_id,
+int RequestQueues::dequeue(std::deque<reqt_t> &queue,
+                           clid_t &client_id,
                            json_t &request,
-                           response_t &resolve)
+                           rply_t &resolve)
 {
     _lock.lock();
-    auto it = std::find_if(queue.begin(), queue.end(), [&](request_t &req) { return req->isReady(); });
+    auto it = std::find_if(queue.begin(), queue.end(), [&](reqt_t &req) { return req->isReady(); });
     if (it != queue.end()) {
         client_id = (*it)->getClientId();
         request = (*it)->getRequest();
@@ -122,7 +122,7 @@ int RequestQueues::dequeue(std::deque<request_t> &queue,
     }
 };
 
-void RequestQueues::debugQueue(const std::deque<request_t>& queue)
+void RequestQueues::debugQueue(const std::deque<reqt_t>& queue)
 {
     for (const auto& x : queue) {
         auto json = x->getRequest();

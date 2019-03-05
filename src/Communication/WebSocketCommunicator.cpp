@@ -68,7 +68,7 @@ void v3d::dx::WebSocketCommunicator::rpcReply(QWebSocket *target, const JsonValu
     target->sendTextMessage(msg);
 }
 
-QWebSocket *v3d::dx::WebSocketCommunicator::getClient(client_id_t clientId)
+QWebSocket *v3d::dx::WebSocketCommunicator::getClient(clid_t clientId)
 {
     return _clients.contains(clientId) ? _clients[clientId] : nullptr;
 }
@@ -106,7 +106,7 @@ void v3d::dx::WebSocketCommunicator::processTextMessage(QString message)
 {
     // compute client Id
     auto *client = qobject_cast<QWebSocket *>(sender());
-    client_id_t clientId = _clients.key(client, 0);
+    clid_t clientId = _clients.key(client, 0);
     if (client == nullptr || !_clients.contains(clientId)) {
         log() << "[RComm] Message received from invalid client" << std::endl;
         return;
@@ -180,7 +180,7 @@ void v3d::dx::WebSocketCommunicator::processBinaryMessage(QByteArray message)
     log() << "[RComm] Binary Message ignored" << std::endl;
 }
 
-void v3d::dx::WebSocketCommunicator::notifyProjectOpened(std::string projFileName, client_id_t clientId)
+void v3d::dx::WebSocketCommunicator::notifyProjectOpened(std::string projFileName, clid_t clientId)
 {
     log() << "[RComm] Project opened: " << projFileName << std::endl;
 
@@ -192,7 +192,7 @@ void v3d::dx::WebSocketCommunicator::notifyProjectOpened(std::string projFileNam
     rpcNotify(client, "projectOpened", params);
 }
 
-void v3d::dx::WebSocketCommunicator::notifyProjectClosed(client_id_t clientId)
+void v3d::dx::WebSocketCommunicator::notifyProjectClosed(clid_t clientId)
 {
     log() << "[RComm] Project closed" << std::endl;
     QWebSocket *client = getClient(clientId);
@@ -201,7 +201,7 @@ void v3d::dx::WebSocketCommunicator::notifyProjectClosed(client_id_t clientId)
     rpcNotify(client, "projectClosed", JsonValue());
 }
 
-void v3d::dx::WebSocketCommunicator::sendScene(JsonValue scene, int64_t id, client_id_t clientId)
+void v3d::dx::WebSocketCommunicator::sendScene(JsonValue scene, int64_t id, clid_t clientId)
 {
     if (!_clients.contains(clientId))
         return;
@@ -209,7 +209,7 @@ void v3d::dx::WebSocketCommunicator::sendScene(JsonValue scene, int64_t id, clie
     rpcReply(client, scene, JsonValue(id));
 }
 
-void v3d::dx::WebSocketCommunicator::sendFrame(QImage img, client_id_t clientId)
+void v3d::dx::WebSocketCommunicator::sendFrame(QImage img, clid_t clientId)
 {
     if (!_clients.contains(clientId))
         return;
@@ -228,7 +228,7 @@ void v3d::dx::WebSocketCommunicator::sendFrame(QImage img, client_id_t clientId)
     rpcNotify(client, "frame", params);
 }
 
-void v3d::dx::WebSocketCommunicator::sendDatabase(JsonValue database, int64_t id, client_id_t clientId)
+void v3d::dx::WebSocketCommunicator::sendDatabase(JsonValue database, int64_t id, clid_t clientId)
 {
     if (!_clients.contains(clientId)) return;
     QWebSocket *client = _clients[clientId];

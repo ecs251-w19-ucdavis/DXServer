@@ -54,11 +54,11 @@ void details::Client::render()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static std::map<client_id_t, client_t> client_queue;
+static std::map<clid_t, client_t> client_queue;
 static std::mutex                      client_mutex;
-//static client_id_t                     client_next_id = 1;
+//static clid_t                     client_next_id = 1;
 
-int clients::remove(client_id_t id)
+int clients::remove(clid_t id)
 {
 	client_mutex.lock();
 	{
@@ -69,7 +69,7 @@ int clients::remove(client_id_t id)
 	return 0;
 }
 
-client_t clients::add(client_id_t id)
+client_t clients::add(clid_t id)
 {
 	client_t client;
 	client_mutex.lock();
@@ -83,7 +83,7 @@ client_t clients::add(client_id_t id)
 	return client;
 }
 
-client_t clients::get(client_id_t id)
+client_t clients::get(clid_t id)
 {
 	client_t ret(nullptr);
 	client_mutex.lock();
@@ -97,7 +97,7 @@ client_t clients::get(client_id_t id)
 	return ret;
 }
 
-bool clients::has(client_id_t id)
+bool clients::has(clid_t id)
 {
 	bool ret = false;
 	client_mutex.lock();

@@ -19,8 +19,8 @@ CPUTaskHandler::CPUTaskHandler(const std::string &database)
 
 void CPUTaskHandler::processNextRequest()
 {
-    client_id_t id;
-    response_t resolve;
+    clid_t id;
+    rply_t resolve;
     json_t json;
 
     // get the
@@ -85,7 +85,7 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
     }
 }
 
-void CPUTaskHandler::handleQueryDatabase(client_id_t clientId, json_t &output)
+void CPUTaskHandler::handleQueryDatabase(clid_t clientId, json_t &output)
 {
     if (!_jsonDatabase.isNull()) { output = _jsonDatabase; } // make a copy
 }
