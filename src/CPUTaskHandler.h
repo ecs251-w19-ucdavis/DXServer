@@ -7,17 +7,37 @@
 #define DXSERVER_REQUESTHANDLER_H
 
 #include "RequestQueue.h"
+#include "Communication/WebSocketCommunicator.h"
 #include "Util/JsonParser.h"
+
+#include <QThread>
+#include <functional>
 
 namespace v3d { namespace dx {
 
 /**
  * This class suppose to handle requests from the event queue. This class will open and run in a different thread.
  */
-class CPUTaskHandler {
+class CPUTaskHandler : public QThread {
+    Q_OBJECT
 public:
     explicit CPUTaskHandler(const std::string& database = "database.json");
     void processNextRequest();
+
+    void ConnectToSlot(const QObject* _receiver)
+    {
+        const auto* receiver = qobject_cast<const WebSocketCommunicator*>(_receiver);
+        connect(this, &CPUTaskHandler::onResolve, receiver, &WebSocketCommunicator::onResolve);
+    }
+
+signals:
+    void onResolve(std::function<void()>);
+
+public:
+    void run(void) override
+    {
+        while (true) processNextRequest();
+    }
 
 private:
     void loadDatabase(const std::string& database);
