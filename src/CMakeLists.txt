@@ -22,33 +22,49 @@ set(CMAKE_AUTORCC ON)
 # └──────────────────────────────────────────────────────────────────┘
 # Source files
 set (vidi3d_dxserver_SOURCES
+
   Graphics/DXGL.cpp
+  Graphics/Engine.cpp
+
   Loader/RegularGridRawBinary.cpp
   Loader/TetraGridRawBinary.cpp
+
+  Util/Client.cpp
+  Util/Resolve.cpp
+  Util/Request.cpp
+
   Communicator.cpp
   GPUTaskHandler.cpp
   CPUTaskHandler.cpp
   RequestQueue.cpp
-  Util/Client.cpp
-  Graphics/Engine.cpp
+
   Workspace.cpp
-  Main.cpp Util/Resolve.h)
+  Main.cpp
+  )
 
 # Header files
 set (vidi3d_dxserver_HEADERS
+
   Graphics/DXGL.h
+  Graphics/Engine.h
+
   Loader/Common.h
   Loader/RegularGridRawBinary.h
   Loader/TetraGridRawBinary.h
+
   Serializer/SceneDictionary.h
+
+  Util/Client.h
+  Util/Request.h
+  Util/Resolve.h
+
   Communicator.h
   GPUTaskHandler.h
   CPUTaskHandler.h
   RequestQueue.h
-  Util/Client.h
-  Graphics/Engine.h
+
   Workspace.h
-  Graphics/Engine.h Util/Resolve.cpp)
+  )
 
 get_property(_egl_available GLOBAL PROPERTY V3D_USE_EGL)
 set(_extra_libs )

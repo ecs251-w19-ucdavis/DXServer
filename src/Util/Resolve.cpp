@@ -3,6 +3,7 @@
 //
 
 #include "Resolve.h"
+
 #include <vector>
 #include <mutex>
 
@@ -13,7 +14,7 @@ using fcn_t = std::function<void()>;
 static std::mutex         _reply_lock;
 static std::vector<fcn_t> _reply_list;
 
-int replies::add(const std::function<void()> &foo)
+int resolves::add(const std::function<void()> &foo)
 {
     _reply_lock.lock();
     _reply_list.emplace_back(foo);
@@ -22,7 +23,7 @@ int replies::add(const std::function<void()> &foo)
     return ret;
 }
 
-const std::function<void()> replies::get(int id)
+const std::function<void()> resolves::get(int id)
 {
     _reply_lock.lock();
     const auto &ret = _reply_list[id];
@@ -30,7 +31,7 @@ const std::function<void()> replies::get(int id)
     return ret;
 }
 
-const std::function<void()> replies::pop(int id)
+const std::function<void()> resolves::pop(int id)
 {
     _reply_lock.lock();
     auto ret = _reply_list[id];

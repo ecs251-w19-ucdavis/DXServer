@@ -9,7 +9,7 @@
 
 namespace v3d { namespace dx {
 
-namespace replies {
+namespace resolves {
 
 int add(const std::function<void()> &);
 

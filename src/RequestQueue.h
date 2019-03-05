@@ -11,8 +11,9 @@
 #ifndef DXSERVER_REQUESTQUEUE_H
 #define DXSERVER_REQUESTQUEUE_H
 
-#include "Util/Client.h"
 #include "Util/JsonParser.h"
+#include "Util/Client.h"
+#include "Util/Request.h"
 
 #include <QWebSocket>
 #include <QWebSocketServer>
@@ -27,12 +28,7 @@ namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Request;
 class RequestQueues;
-
-using json_t   = JsonValue;
-using rply_t   = std::function<void(JsonValue)>;
-using reqt_t   = std::shared_ptr<Request>;
 using queues_t = std::shared_ptr<RequestQueues>;
 
 namespace queues {
@@ -43,34 +39,12 @@ RequestQueues* raw();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Request {
-
-public:
-    Request(clid_t id, clid_t exp, int type, json_t request, rply_t resolve);
-    int    getType()     const { return _type; }
-    clid_t getClientId() const { return _id; }
-    json_t getRequest()  const { return _request; }
-    rply_t getResolve()  const { return _resolve; }
-    bool isReady() const
-    {
-        return _exp == clients::get(_id)->currCounterValue(); // TODO is this implementation correct ?
-    }
-private:
-    int _type;
-    clid_t _id; // client id
-    size_t _exp; // expected counter value
-    json_t _request;
-    rply_t _resolve;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 class RequestQueues : public QObject {
     Q_OBJECT
     friend void queues::create();
 public: 
     //void SetClientCounter();
-    void Enqueue(clid_t client_id, clid_t request_id, int type, json_t json, rply_t resolve);
+    void enqueue(clid_t client_id, clid_t request_id, int type, json_t json, rply_t resolve);
     int dequeueCPU(clid_t &client_id, json_t& request, rply_t& resolve);
     int dequeueGPU(clid_t &client_id, json_t& request, rply_t& resolve);
 
@@ -84,7 +58,7 @@ public slots: // <- NOTE don't forget this slots keyword defined by Qt
      * @param request
      * @param resolve
      */
-    void EnqueueRequest(clid_t client_id, int type, json_t json, rply_t resolve);
+    void enqueueRequest(clid_t client_id, int type, json_t json, rply_t resolve);
 
 private:
     RequestQueues() = default;

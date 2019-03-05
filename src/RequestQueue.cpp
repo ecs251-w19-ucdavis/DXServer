@@ -38,15 +38,7 @@ RequestQueues* raw()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Request::Request(clid_t id, clid_t exp, int type, json_t request, rply_t resolve)
-    : _id(id)
-    , _exp(exp)
-    , _type(type)
-    , _request(std::move(request))
-    , _resolve(std::move(resolve))
-{}
-
-void RequestQueues::Enqueue(clid_t client_id, clid_t request_id, int type, json_t json, rply_t resolve)
+void RequestQueues::enqueue(clid_t client_id, clid_t request_id, int type, json_t json, rply_t resolve)
 {
     auto request = std::make_shared<Request>(client_id, request_id, type, json, std::move(resolve));
     std::string method = json.get("method", "").toString();
@@ -86,7 +78,7 @@ void RequestQueues::Enqueue(clid_t client_id, clid_t request_id, int type, json_
     }
 }
 
-void RequestQueues::EnqueueRequest(clid_t client_id, int type, json_t json, rply_t resolve)
+void RequestQueues::enqueueRequest(clid_t client_id, int type, json_t json, rply_t resolve)
 {
     // TODO should add lock -- DONE
     // TODO should decide which queue to add
@@ -109,8 +101,8 @@ void RequestQueues::EnqueueRequest(clid_t client_id, int type, json_t json, rply
         std::cout << "json1" << json1.get("method", "").toString() << std::endl;
         std::cout << "json2" << json2.get("method", "").toString() << std::endl;
         // rply_t resolve1 = std::function<void(JsonValue)>{};
-        Enqueue(client_id, request_id1, type, json1, std::move(rply_t {}));
-        Enqueue(client_id, request_id2, type, json2, std::move(resolve));
+        enqueue(client_id, request_id1, type, json1, std::move(rply_t{}));
+        enqueue(client_id, request_id2, type, json2, std::move(resolve));
     }
     else if(method == "closeProject") //splitting into 2 subrequests: LoadData enters QueueCPU, and InitGL enters QueueGPU
     {
@@ -123,15 +115,15 @@ void RequestQueues::EnqueueRequest(clid_t client_id, int type, json_t json, rply
         std::cout << "json1" << json1.get("method", "").toString() << std::endl;
         std::cout << "json2" << json2.get("method", "").toString() << std::endl;
         // rply_t resolve1 = std::function<void(JsonValue)>{};
-        Enqueue(client_id, request_id1, type, json1, std::move(rply_t {}));
-        Enqueue(client_id, request_id2, type, json2, std::move(resolve));
+        enqueue(client_id, request_id1, type, json1, std::move(rply_t{}));
+        enqueue(client_id, request_id2, type, json2, std::move(resolve));
     }
     else
     {
         auto request_id = client->nextCounterValue(); // I implemented two counters in the Client class
         // each time there is a new request coming in, we get the value of 'next request counter' and then increment the
         // counter's value.
-        Enqueue(client_id, request_id, type, json, std::move(resolve));
+        enqueue(client_id, request_id, type, json, std::move(resolve));
     }
 
     //debugQueue(QueueCPU);
@@ -160,13 +152,13 @@ int RequestQueues::dequeue(std::deque<reqt_t> &queue,
                            rply_t &resolve)
 {
     _lock.lock();
-    // TODO we forgot to remove the executed request ??
+    // TODO we forgot to remove the executed request ?? DONE ?
     auto it = std::find_if(queue.begin(), queue.end(), [&](reqt_t &req) { return req->isReady(); });
     if (it != queue.end()) {
         client_id = (*it)->getClientId();
         request = (*it)->getRequest();
         resolve = (*it)->getResolve();
-        queue.erase(it);
+        queue.erase(it); // << dequeue
         debugQueue(queue);
         _lock.unlock();
         return 1;

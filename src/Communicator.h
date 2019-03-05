@@ -83,7 +83,7 @@ public slots:
     void processBinaryMessage(QByteArray message);
 
     // call by our server
-    void onResolve(int id) { replies::get(id)(); };
+    void onResolve(int id) { resolves::get(id)(); };
 
 signals:
     /**

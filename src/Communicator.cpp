@@ -45,7 +45,7 @@ void v3d::dx::Communicator::close()
 void v3d::dx::Communicator::connectToRequestSlot(const QObject* _receiver)
 {
     const auto* receiver = qobject_cast<const RequestQueues*>(_receiver);
-    connect(this, &Communicator::newRequest, receiver, &RequestQueues::EnqueueRequest);
+    connect(this, &Communicator::newRequest, receiver, &RequestQueues::enqueueRequest);
 }
 
 void v3d::dx::Communicator::rpcNotify(QWebSocket *target, const std::string &method, const JsonValue &params)

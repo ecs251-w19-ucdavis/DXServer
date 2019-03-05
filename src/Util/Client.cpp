@@ -10,7 +10,6 @@
 #include "Client.h"
 
 #include "Graphics/DXGL.h"
-
 #include "Util/Log.h"
 
 #include <vector>

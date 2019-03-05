@@ -59,7 +59,7 @@ void CPUTaskHandler::processNextRequest()
 
         json_t output;
         handleQueryDatabase(id, output);
-        emit onResolve(replies::add([=]() {
+        emit onResolve(resolves::add([=]() {
             resolve(output);
             log() << "[CPU] resolve " << id << std::endl;
         }));
