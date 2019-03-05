@@ -41,4 +41,12 @@ const std::function<void()> resolves::pop(int id)
     return std::move(ret);
 }
 
+bool resolves::has(int id)
+{
+    _reply_lock.lock();
+    auto ret = (_reply_list.find(id) != _reply_list.end());
+    _reply_lock.unlock();
+    return std::move(ret);
+}
+
 }}

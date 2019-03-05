@@ -12,7 +12,6 @@
 #define DXSERVER_SCENELOADER_H
 
 #include "Util/JsonParser.h"
-
 #include "Scene/IGeometry.h"
 #include "Scene/IMedium.h"
 
@@ -27,11 +26,15 @@
 
 #include <string>
 
-namespace v3d {
-namespace dx {
+namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Implementation details. Usually we should not directly access a class inside
+ * a details namespace. We should either use a corresponding shared pointer
+ * creater, or a list manipulator.
+ */
 namespace details {
 
 /**
@@ -43,6 +46,12 @@ class Engine {
     using fbo_t = std::shared_ptr<FramebufferGL>;
     enum  mode_t { INVALID, REGULAR_GRID, TETRA_GRID };
 public:
+    /**
+     * Constructor
+     * @param fbo We always need a framebuffer object for drawing
+     * @param w The initial framebuffer width
+     * @param h The initial framebuffer height
+     */
     Engine(fbo_t fbo, int w, int h);
 
     /**
@@ -91,10 +100,10 @@ protected:
     std::shared_ptr<OcclusionTransferFunction> _otf;
 
     // TODO things below need to be refactored
-    std::shared_ptr<RegularGridSceneGL> _sceneGrid; // TODO this is a hack! Eventually they should be child classes of
-    std::shared_ptr<TetraGridSceneGL> _sceneTets; // TODO   one common parent
+    std::shared_ptr<RegularGridSceneGL>    _sceneGrid;
+    std::shared_ptr<TetraGridSceneGL>      _sceneTets;
     std::shared_ptr<RegularGridPipelineGL> _rendererGrid;
-    std::shared_ptr<TetraGridPipelineGL> _rendererTets;
+    std::shared_ptr<TetraGridPipelineGL>   _rendererTets;
 };
 
 }
@@ -103,7 +112,6 @@ protected:
 
 // we do not expose anything in the dx namespace
 using engine_t = std::shared_ptr<details::Engine>;
-
 
 ///////////////////////////////////////////////////////////////////////////////
 

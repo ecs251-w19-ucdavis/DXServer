@@ -29,26 +29,39 @@ namespace details { class Client; }
 using clid_t = int;
 using client_t = std::shared_ptr<details::Client>;
 
-// here we add handlers for append, retrieve, modify clients
+/**
+ * Through this namespace, we add handlers for append, retrieve & modify the
+ * underlying client list.
+ */
 namespace clients {
 
-/** @return value 1 means okay, value 0 means error */
-int /* err */ remove(clid_t);
+/**
+ * TODO DOC
+ * @return value 1 means okay, value 0 means error
+ */
+int /* err */ pop(clid_t);
 
-/** @return nullptr means error */
+/**
+ * TODO DOC
+ * @return nullptr means error
+ */
 client_t add(clid_t);
 
-/** @return nullptr means error */
+/**
+ * TODO DOC
+ * @return nullptr means error
+ */
 client_t get(clid_t);
 
-/** check if this client exists */
+/**
+ * Check if this client exists
+ */
 bool has(clid_t);
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// detailed implementation
 namespace details {
 /**
  * This class defines the behavior of each client
@@ -57,7 +70,15 @@ class Client {
 	friend client_t clients::add(clid_t);
 public:
 
+	/**
+	 * Set the client ID
+	 * @param id The client ID
+	 */
 	void   setId(clid_t id) { _id = id; }
+	/**
+	 * Access the client ID
+	 * @return The client ID
+	 */
 	clid_t getId() const { return _id; }
 
 	/**

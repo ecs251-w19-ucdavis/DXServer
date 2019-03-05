@@ -40,7 +40,7 @@ RequestQueues* raw()
 
 void RequestQueues::enqueue(clid_t client_id, clid_t request_id, int type, json_t json, rply_t resolve)
 {
-    auto request = std::make_shared<Request>(client_id, request_id, type, json, std::move(resolve));
+    auto request = requests::create(client_id, request_id, type, json, std::move(resolve));
     std::string method = json.get("method", "").toString();
     log() << "[RQueue] new request received from client " << client_id << ": " << method << std::endl;
     switch (type) {

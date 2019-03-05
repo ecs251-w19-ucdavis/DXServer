@@ -19,7 +19,7 @@ namespace resolves {
  * TODO DOC
  * @return
  */
-int add(const std::function<void()> &);
+int add(const std::function<void()>&);
 
 /**
  * TODO DOC
@@ -32,6 +32,12 @@ const std::function<void()> get(int);
  * @return
  */
 const std::function<void()> pop(int);
+
+/**
+ * TODO DOC
+ * @return
+ */
+bool has(int);
 
 }
 

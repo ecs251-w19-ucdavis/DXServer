@@ -16,7 +16,7 @@
 namespace v3d { namespace dx {
 
 /**
- * This class suppose to handle requests from the event queue. This class will open and run in a different thread.
+ * This class suppose to handle requests from the event queue. This class will run in a different thread.
  */
 class CPUTaskHandler : public QThread {
     Q_OBJECT

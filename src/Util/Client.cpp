@@ -20,27 +20,76 @@ using namespace v3d::dx;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static std::map<clid_t, client_t> client_queue;
+static std::mutex                 client_mutex; // lock for the client queue
+
+int clients::pop(clid_t id)
+{
+	client_mutex.lock();
+	{
+		auto it = client_queue.find(id);
+		if (it != client_queue.end()) { client_queue.erase(it); }
+	}
+	client_mutex.unlock();
+	return 0;
+}
+
+client_t clients::add(clid_t id)
+{
+	client_t client;
+	client_mutex.lock();
+	{
+		client.reset(new details::Client());
+		client->setId(id);
+		client_queue[id] = client;
+	}
+	client_mutex.unlock();
+	return client;
+}
+
+client_t clients::get(clid_t id)
+{
+	client_t ret(nullptr);
+	client_mutex.lock();
+	{
+		auto it = client_queue.find(id);
+		if (it != client_queue.end()) {
+			ret = it->second;
+		}
+	}
+	client_mutex.unlock();
+	return ret;
+}
+
+bool clients::has(clid_t id)
+{
+	bool ret = false;
+	client_mutex.lock();
+	{
+		auto it = client_queue.find(id);
+		if (it != client_queue.end()) {
+			ret = true;
+		}
+	}
+	client_mutex.unlock();
+	return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 size_t details::Client::currCounterValue()
 {
-//		_lock.lock();
-	size_t v = _curr_request_counter;
-//		_lock.unlock();
-	return v;
+	return _curr_request_counter;
 }
 
 size_t details::Client::nextCounterValue()
 {
-//		_lock.lock();
-	size_t v = _next_request_counter++;
-//		_lock.unlock();
-	return v;
+	return _next_request_counter++;
 }
 
 void details::Client::incrementCurrCounter()
 {
-//		_lock.lock();
 	_curr_request_counter += 1;
-//		_lock.unlock();
 }
 
 void details::Client::init(int w, int h)
@@ -95,58 +144,3 @@ void details::Client::renderDebug()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-static std::map<clid_t, client_t> client_queue;
-static std::mutex                 client_mutex; // lock for the client queue
-
-int clients::remove(clid_t id)
-{
-	client_mutex.lock();
-	{
-		auto it = client_queue.find(id);
-		if (it != client_queue.end()) { client_queue.erase(it); }
-	}
-	client_mutex.unlock();
-	return 0;
-}
-
-client_t clients::add(clid_t id)
-{
-	client_t client;
-	client_mutex.lock();
-	{
-		client.reset(new details::Client());
-		client->setId(id);
-		client_queue[id] = client;
-	}
-	client_mutex.unlock();
-	return client;
-}
-
-client_t clients::get(clid_t id)
-{
-	client_t ret(nullptr);
-	client_mutex.lock();
-	{
-		auto it = client_queue.find(id);
-		if (it != client_queue.end()) {
-			ret = it->second;
-		}
-	}
-	client_mutex.unlock();
-	return ret;
-}
-
-bool clients::has(clid_t id)
-{
-	bool ret = false;
-	client_mutex.lock();
-	{
-		auto it = client_queue.find(id);
-		if (it != client_queue.end()) {
-			ret = true;
-		}
-	}
-	client_mutex.unlock();
-	return ret;
-}
