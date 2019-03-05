@@ -9,9 +9,9 @@
 
 **Wenxi**
 
-##Topic Discussed
+## Topic Discussed
 
-###Request Counter Implementation
+### Request Counter Implementation
 
 Besides two request queues (``QueueCPU`` and ``QueueGPU``), a list of clients should be maintained to keep the current request counter for each client.
 
