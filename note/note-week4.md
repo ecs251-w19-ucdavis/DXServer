@@ -5,7 +5,16 @@
 ## Commits
 **Qi** 
 
+[implemented a request counter](https://github.com/ecs251-w19-ucdavis/DXServer/commit/5a2b38a5f3fc1cfffe63c6ee37784162ab09a2f2)
+
+[implemented a client queue](https://github.com/ecs251-w19-ucdavis/DXServer/commit/fe8ee4bd5a41206e1e3607b9b1fb371e2d09da2f)
+
+[add CPU & GPU handlers, add function to access the global queue](https://github.com/ecs251-w19-ucdavis/DXServer/commit/3d1045d4ce70a433ead413aecb3693c1d519b38b)
+
+[connect clients to render-server for the first time](https://github.com/ecs251-w19-ucdavis/DXServer/commit/433bf09fe79454b864b2d5ac24070e77915b3f50)
+
 **Yiran**  
+
 [splitted requests into subrequests, and pushed into two different queues](https://github.com/ecs251-w19-ucdavis/DXServer/commit/73ff6f3220f0618b6dd086434a9f8b1eb3e09b79)
 
 **Wenxi**
