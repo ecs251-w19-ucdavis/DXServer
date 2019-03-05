@@ -18,6 +18,9 @@
 [splitted requests into subrequests, and pushed into two different queues](https://github.com/ecs251-w19-ucdavis/DXServer/commit/73ff6f3220f0618b6dd086434a9f8b1eb3e09b79)
 
 **Wenxi**
+* [Complete connection between client-webserver and render engine](https://github.com/ecs251-w19-ucdavis/DXServer/commit/0e7b612c31c07405040cd2f8bec6cf470b6cb293)
+* [Add documentations to RequestsHandler that need to be dealt with in CPU](https://github.com/ecs251-w19-ucdavis/DXServer/commit/1ef85d8e8a8995c81792a34535c4b65191ec6c85)
+* [Requests that need to be dealt with in GPU](https://github.com/ecs251-w19-ucdavis/DXServer/commit/c265a6efa2d4196c6593de3bad15cf31f627de80)
 
 ## Topic Discussed
 
