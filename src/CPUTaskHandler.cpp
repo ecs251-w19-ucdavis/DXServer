@@ -4,6 +4,8 @@
 
 #include "CPUTaskHandler.h"
 
+#include "Communication/WebSocketCommunicator.h"
+
 #include "Util/Log.h"
 #include "Client.h"
 
@@ -47,9 +49,10 @@ void CPUTaskHandler::processNextRequest()
 
         json_t output;
         handleQueryDatabase(id, output);
-        emit onResolve([=]() {
+        emit onResolve(WebSocketCommunicator::addReply([=]() {
             resolve(output);
-        });
+            log() << "[CPU] resolve " << std::endl;
+        }));
         clients::get(id)->incrementCurrCounter();
 
     } else {

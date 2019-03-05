@@ -71,8 +71,8 @@ public slots:
     void processTextMessage(QString message);
     void processBinaryMessage(QByteArray message);
 
-    void onResolve(std::function<void()> foo) {
-        foo();
+    void onResolve(int id) {
+        getReply(id)();
     };
 
     // call by other components inside this project
@@ -94,7 +94,13 @@ signals:
      */
     void newRequest(clid_t clientId, int type, json_t request, rply_t resolve);
 
+public:
+    static int addReply(const std::function<void()>& foo);
+    static const std::function<void()>& getReply(int id);
 private:
+
+//    static std::vector<std::function<void()>> replies;
+
     bool _secureMode = false;
     quint16 _port = 8080;
     QWebSocketServer* _webSocketServer = nullptr;
