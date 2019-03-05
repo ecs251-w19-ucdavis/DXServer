@@ -20,14 +20,15 @@
 
 #include <functional>
 
-/* TODO is there a light weight WebSocket library for doing this ? */
+namespace v3d { namespace dx {
+
+// TODO is there a light weight WebSocket library for doing this ?
+
 /**
  * This comminicator solves two problems:
  * 1) how to receive requests and pass them to render engine;
  * 2) how to retrieve results from the render engine and pass them to web-server.
  */
-namespace v3d { namespace dx {
-
 class Communicator : public QObject {
     Q_OBJECT
 public:

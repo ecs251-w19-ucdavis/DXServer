@@ -45,31 +45,31 @@ void RequestQueues::enqueue(clid_t client_id, clid_t request_id, int type, json_
     log() << "[RQueue] new request received from client " << client_id << ": " << method << std::endl;
     switch (type) {
         case 0: { // a call
-            QueueCPU.push_back(request);
+            _queue_cpu.push_back(request);
             break;
         }
         case 1: { // a notification
             if(method == "LoadData" || method == "DelData") // CPU notifications
             {
-                auto it = std::find_if(QueueCPU.begin(), QueueCPU.end(), [&](rqst_t &req) {
+                auto it = std::find_if(_queue_cpu.begin(), _queue_cpu.end(), [&](rqst_t &req) {
                     return (req->getClientId() == client_id && req->getType() == type);
                 });
-                if (it != QueueCPU.end()) { // if there is a previous notification, replace it with the new one
+                if (it != _queue_cpu.end()) { // if there is a previous notification, replace it with the new one
                     *it = request;
                 } else {
-                    QueueCPU.push_back(request);
+                    _queue_cpu.push_back(request);
                 }
                 break;
             }
             else // GPU notifications
             {
-                auto it = std::find_if(QueueGPU.begin(), QueueGPU.end(), [&](rqst_t &req) {
+                auto it = std::find_if(_queue_gpu.begin(), _queue_gpu.end(), [&](rqst_t &req) {
                     return (req->getClientId() == client_id && req->getType() == type);
                 });
-                if (it != QueueGPU.end()) { // if there is a previous notification, replace it with the new one
+                if (it != _queue_gpu.end()) { // if there is a previous notification, replace it with the new one
                     *it = request;
                 } else {
-                    QueueGPU.push_back(request);
+                    _queue_gpu.push_back(request);
                 }
                 break;
             }
@@ -90,7 +90,7 @@ void RequestQueues::enqueueRequest(clid_t client_id, int type, json_t json, rply
     auto client = clients::get(client_id);
     if (!client) client = clients::add(client_id);
 
-    if(method == "openProject") //splitting into 2 subrequests: LoadData enters QueueCPU, and InitGL enters QueueGPU
+    if(method == "openProject") //splitting into 2 subrequests: LoadData enters _queue_cpu, and InitGL enters _queue_gpu
     {
         auto request_id1 = client -> nextCounterValue(),
              request_id2 = client -> nextCounterValue();
@@ -104,7 +104,7 @@ void RequestQueues::enqueueRequest(clid_t client_id, int type, json_t json, rply
         enqueue(client_id, request_id1, type, json1, std::move(rply_t{}));
         enqueue(client_id, request_id2, type, json2, std::move(resolve));
     }
-    else if(method == "closeProject") //splitting into 2 subrequests: LoadData enters QueueCPU, and InitGL enters QueueGPU
+    else if(method == "closeProject") //splitting into 2 subrequests: LoadData enters _queue_cpu, and InitGL enters _queue_gpu
     {
         auto request_id1 = client -> nextCounterValue(),
              request_id2 = client -> nextCounterValue();
@@ -126,8 +126,8 @@ void RequestQueues::enqueueRequest(clid_t client_id, int type, json_t json, rply
         enqueue(client_id, request_id, type, json, std::move(resolve));
     }
 
-    //debugQueue(QueueCPU);
-    //debugQueue(QueueGPU);
+    //debugQueue(_queue_cpu);
+    //debugQueue(_queue_gpu);
 
     _lock.unlock();
 }
@@ -136,14 +136,14 @@ int RequestQueues::dequeueCPU(clid_t &client_id,
                               json_t& request,
                               rply_t& resolve)
 {
-    return dequeue(QueueCPU, client_id, request, resolve);
+    return dequeue(_queue_cpu, client_id, request, resolve);
 }
 
 int RequestQueues::dequeueGPU(clid_t &client_id,
                               json_t& request,
                               rply_t& resolve)
 {
-    return dequeue(QueueGPU, client_id, request, resolve);
+    return dequeue(_queue_gpu, client_id, request, resolve);
 }
 
 int RequestQueues::dequeue(std::deque<rqst_t> &queue,

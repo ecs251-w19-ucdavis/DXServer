@@ -30,8 +30,7 @@ namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace details
-{
+namespace details {
 
 Engine::Engine(fbo_t fbo, int w, int h)
     : _size{w, h}
