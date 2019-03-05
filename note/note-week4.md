@@ -5,7 +5,7 @@
 ## Commits
 **Qi** 
 
-**Yiran**
+**Yiran**  
 [splitted requests into subrequests, and pushed into two different queues](https://github.com/ecs251-w19-ucdavis/DXServer/commit/73ff6f3220f0618b6dd086434a9f8b1eb3e09b79)
 
 **Wenxi**
