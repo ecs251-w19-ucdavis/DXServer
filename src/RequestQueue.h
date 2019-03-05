@@ -70,7 +70,7 @@ class RequestQueues : public QObject {
     friend void queues::create();
 public: 
     //void SetClientCounter();
-
+    void Enqueue(clid_t client_id, clid_t request_id, int type, json_t json, rply_t resolve);
     int dequeueCPU(clid_t &client_id, json_t& request, rply_t& resolve);
     int dequeueGPU(clid_t &client_id, json_t& request, rply_t& resolve);
 
