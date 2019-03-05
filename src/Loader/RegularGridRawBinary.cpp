@@ -57,7 +57,9 @@ api::V3DMedium RegularGridRawBinary(const JsonValue& json, std::string jsonFileN
     auto medium = std::make_shared<RegularGridDataGL>();
     loader->setOutputData(medium.get());
     loader->update();
-    medium->loadGL();
+
+    // load data to GPU
+//    medium->loadGL();
 
     // return
     return medium;

@@ -10,6 +10,7 @@
 #include "Client.h"
 
 #include "Graphics/DXGL.h"
+#include "Util/Log.h"
 
 #include <vector>
 #include <memory>
@@ -19,22 +20,61 @@ using namespace v3d::dx;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void details::Client::init(const std::string& fname, int w, int h)
+size_t details::Client::currCounterValue()
 {
-	if (initialized)
-	{
-		PING;
-		std::cout << "you initialized the client twice" << std::endl;
-	}
-	_fbo = std::make_shared<FramebufferGL>(w, h);
-	_handler = std::make_shared<Engine>(fname, _fbo, w, h);
-	initialized = true;
+//		_lock.lock();
+	size_t v = _curr_request_counter;
+//		_lock.unlock();
+	return v;
 }
 
-void details::Client::render()
+size_t details::Client::nextCounterValue()
+{
+//		_lock.lock();
+	size_t v = _next_request_counter++;
+//		_lock.unlock();
+	return v;
+}
+
+void details::Client::incrementCurrCounter()
+{
+//		_lock.lock();
+	_curr_request_counter += 1;
+//		_lock.unlock();
+}
+
+void details::Client::init(int w, int h)
+{
+    if (_initialized) { log() << "[Warn] you initialized the client twice" << std::endl; }
+    _fbo = std::make_shared<FramebufferGL>(w, h);
+    _handler = std::make_shared<Engine>(_fbo, w, h);
+    _initialized = true;
+}
+
+void details::Client::initDebug(const std::string& fname, int w, int h)
+{
+	if (_initialized)
+	{
+		std::cout << "you initialized the client twice" << std::endl;
+	}
+
+	_currentProjectName = fname;
+
+	_fbo = std::make_shared<FramebufferGL>(w, h);
+
+	_handler = std::make_shared<Engine>(_fbo, w, h);
+
+	_initialized = true;
+}
+
+void details::Client::renderDebug()
 {
 	// create renderer
+    _handler->loadJSONFile(_currentProjectName);
+
 	_handler->initData();
+    _handler->loadGL();
+
 	_handler->initScene();
 	_handler->updateView();
 	_handler->updateRenderer();
@@ -50,13 +90,14 @@ void details::Client::render()
 	std::string filename = "image" + std::to_string(_id) + ".PNG";
 	img.save(filename.c_str(), nullptr, -1);
 	std::cout << "save file as " << filename << std::endl;
+
+	_handler->unloadGL();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 static std::map<clid_t, client_t> client_queue;
-static std::mutex                      client_mutex;
-//static clid_t                     client_next_id = 1;
+static std::mutex                 client_mutex; // lock for the client queue
 
 int clients::remove(clid_t id)
 {
@@ -74,7 +115,6 @@ client_t clients::add(clid_t id)
 	client_t client;
 	client_mutex.lock();
 	{
-		// auto id = client_next_id++;
 		client.reset(new details::Client());
 		client->setId(id);
 		client_queue[id] = client;

@@ -230,6 +230,9 @@ void v3d::dx::WebSocketCommunicator::sendFrame(QImage img, clid_t clientId)
 
 void v3d::dx::WebSocketCommunicator::sendDatabase(JsonValue database, int64_t id, clid_t clientId)
 {
+
+    log() << "[RComm] database " << JsonParser().stringify(database) << std::endl;
+
     if (!_clients.contains(clientId)) return;
     QWebSocket *client = _clients[clientId];
     rpcReply(client, database, JsonValue(id));

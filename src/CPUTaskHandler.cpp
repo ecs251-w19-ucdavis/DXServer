@@ -38,7 +38,8 @@ void CPUTaskHandler::processNextRequest()
      *  Here in CPU we deal with the load data request  
      * 
     */
-    queues::get()->dequeueCPU(id, json, resolve);
+    // get the
+    if (!queues::get()->dequeueCPU(id, json, resolve)) return;
 
     std::string method = json.get("method", "").toString();
 
@@ -46,7 +47,9 @@ void CPUTaskHandler::processNextRequest()
 
         json_t output;
         handleQueryDatabase(id, output);
-        resolve(output);
+        emit onResolve([=]() {
+            resolve(output);
+        });
         clients::get(id)->incrementCurrCounter();
 
     } else {

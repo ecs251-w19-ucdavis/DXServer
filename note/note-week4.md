@@ -19,13 +19,20 @@ Besides two request queues (``QueueCPU`` and ``QueueGPU``), a list of clients sh
 
 In one word, the "expected" counter value for each request is only related to the request name ("method").
 
-**Qi**: Configuring a fixed expectation for each request would be hard and not necessary. For now, we can assume each customer is well-behaved and will make requests in correct orders. In this way, the only invariant we need to keep is that the ``Request Handler`` processes each client's requests in the same order as he originally made. 
+**Qi**: Configuring a fixed expectation for each request would be hard and not necessary. For now, we can assume each customer is well-behaved and will make requests in correct orders. In this way, the only invariant we need to keep is that the ``RequestHandler`` processes each client's requests in the same order as he originally made. 
 
 **Qi**: We don't need to set a fixed expectation value according to each request's name. Instead, upon enqueueing a request, we can check the client's largest expectation value currently in the queue, and set the enqueueing request's expectation to be that value + 1.
 
 But this solution might need searching through the queue on every enqueue.
 
+<<<<<<< HEAD
 **Qi**'s solution: Besides keeping a 
+
+=======
+**Qi**'s solution: Besides keeping a current request counter for each client, we can also keep a ``next_request_id``, which will be incremented only when a request enqueues.
+
+
+>>>>>>> 397de00153269d2703b36a2db3a62110766483cb
 
 
 ###Client-Webserver and Render Engine Connection

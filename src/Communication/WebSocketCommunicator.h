@@ -71,6 +71,10 @@ public slots:
     void processTextMessage(QString message);
     void processBinaryMessage(QByteArray message);
 
+    void onResolve(std::function<void()> foo) {
+        foo();
+    };
+
     // call by other components inside this project
     void notifyProjectOpened(std::string projFileName, clid_t clientId);
     void notifyProjectClosed(clid_t clientId);

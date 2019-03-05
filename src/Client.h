@@ -57,61 +57,77 @@ class Client {
 	friend client_t clients::add(clid_t);
 public:
 
-	void        setId(clid_t id) { _id = id; }
-	clid_t getId() const         { return _id; }
+	void   setId(clid_t id) { _id = id; }
+	clid_t getId() const { return _id; }
 
 	/**
      * @note Can be read by RequestQueues
      * @return counter value
      */
-	size_t currCounterValue()
-	{
-//		_lock.lock();
-		size_t v = _curr_request_counter;
-//		_lock.unlock();
-		return v;
-	}
+	size_t currCounterValue();
+
 	/**
 	 * Increment the next request counter and return the value before
 	 * @note Can be read by RequestQueues
 	 * @return
 	 */
-	size_t nextCounterValue()
-	{
-//		_lock.lock();
-		size_t v = _next_request_counter++;
-//		_lock.unlock();
-		return v;
-	}
+	size_t nextCounterValue();
 
 	/**
      * @note Be incremented by RequestHandler
      */
-	void incrementCurrCounter()
-	{
-//		_lock.lock();
-		_curr_request_counter += 1;
-//		_lock.unlock();
-	}
+	void incrementCurrCounter();
 
-	void init(const std::string& fname, int w, int h);
+
+	void init(int w, int h);
+
 //	void loadGL();
 //	void unloadGL();
-//	void loadData(const std::string& fname);
-//	void getScene();
-	void render();
+
+    void openProject(const std::string& fname)
+    {
+		_handler->loadJSONFile(_currentProjectName);
+    }
+
+    void loadDataToGPU() // GPU
+    {
+		// do nothing
+    }
+
+	void removeDataFromGPU() // GPU
+	{
+		_handler->unloadGL();
+	}
+
+	void closeProject()
+	{
+    	// do nothing
+	}
+
+	void getScene() // GPU
+	{
+		_handler->loadGL();
+	}
+
+	void renderFrame()
+	{
+
+	}
 
 
-//	void handleOpenProjectRequested(std::string projFileName, int clientId);
-//	void handleCloseProjectRequested(int clientId);
-//	void handleGetSceneRequested(int64_t id, int clientId);
-//	void handleFrameRequested(const v3d::JsonValue& scene, int clientId);
+
+	void initDebug(const std::string& fname, int w, int h);
+	void renderDebug();
+
 
 private:
 	Client() : _curr_request_counter{0}, _next_request_counter{0} {}
 
 private:
-	bool initialized = false;
+
+    std::string _currentProjectName;
+
+	bool _initialized = false;
 
 //	std::mutex _lock;
 //	size_t _curr_request_counter = 0;

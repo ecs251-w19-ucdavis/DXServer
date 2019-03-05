@@ -38,11 +38,19 @@ namespace details {
  * This is an internal class for rendering
  */
 class Engine {
-    using V3DMedium = v3d::api::V3DMedium;
+    using V3DMedium   = v3d::api::V3DMedium;
     using V3DGeometry = v3d::api::V3DGeometry;
     using fbo_t = std::shared_ptr<FramebufferGL>;
+    enum  mode_t { INVALID, REGULAR_GRID, TETRA_GRID };
 public:
-    explicit Engine(std::string project_name, fbo_t framebuffer_object, int initial_width, int initial_height);
+    Engine(fbo_t fbo, int w, int h);
+
+    /**
+     * This function will open and parse the JSON configuration file from disk
+     * @param project_name The name of the JSON configuration file
+     */
+    void loadJSONFile(std::string pname);
+
     void initData();
     void initScene();
     void updateView(const JsonValue &input = JsonValue());
@@ -53,29 +61,29 @@ public:
 //    void resize(int w, int h); // TODO I am not sure we need to resize framebuffer in code
 //    void updateFBO(fbo_t fbo) { _fbo = std::move(fbo); }; // enable it if we really need to
 
+    void loadGL();
+    void unloadGL();
+
 protected:
     void updateCamera(const JsonValue &);
     void updateTransferFunction(const JsonValue &);
-    std::shared_ptr<RegularGridSceneGL> getSceneGrid()
-    { return _sceneGrid; }
-    std::shared_ptr<TetraGridSceneGL> getSceneTets()
-    { return _sceneTets; }
-    std::shared_ptr<RegularGridPipelineGL> getRendererGrid()
-    { return _rendererGrid; }
-    std::shared_ptr<TetraGridPipelineGL> getRendererTets()
-    { return _rendererTets; }
+    std::shared_ptr<RegularGridSceneGL> getSceneGrid() { return _sceneGrid; }
+    std::shared_ptr<TetraGridSceneGL>   getSceneTets() { return _sceneTets; }
+    std::shared_ptr<RegularGridPipelineGL> getRendererGrid() { return _rendererGrid; }
+    std::shared_ptr<TetraGridPipelineGL>   getRendererTets() { return _rendererTets; }
 
 protected:
     ivec2 _size;
     fbo_t _fbo;
+    mode_t _mode = INVALID;
 
     std::string _jsonFileName;
-    JsonValue _jsonRoot;
-    JsonValue _jsonData;
-    JsonValue _jsonView;
-    std::string _jsonViewMethod;
+    JsonValue   _jsonRoot;
+    JsonValue   _jsonData;
+    JsonValue   _jsonView;
+    std::string _jsonMethod;
 
-    V3DMedium _data;
+    V3DMedium   _data;
     V3DGeometry _volume;
 
     std::shared_ptr<Camera> _camera;
