@@ -45,6 +45,7 @@ Request::Request(clid_t id, clid_t exp, int type, json_t request, rply_t resolve
     , _request(std::move(request))
     , _resolve(std::move(resolve))
 {}
+
 void RequestQueues::Enqueue(clid_t client_id, clid_t request_id, int type, json_t json, rply_t resolve)
 {
     auto request = std::make_shared<Request>(client_id, request_id, type, json, std::move(resolve));
@@ -84,12 +85,14 @@ void RequestQueues::Enqueue(clid_t client_id, clid_t request_id, int type, json_
         default: throw std::runtime_error("[Error] unknown request type");
     }
 }
+
 void RequestQueues::EnqueueRequest(clid_t client_id, int type, json_t json, rply_t resolve)
 {
     // TODO should add lock -- DONE
     // TODO should decide which queue to add
     // TODO should compute expected request id for each request -- DONE
     _lock.lock();
+
     std::string method = json.get("method", "").toString();        
     // we create the client if not exist
     auto client = clients::get(client_id);
@@ -130,8 +133,9 @@ void RequestQueues::EnqueueRequest(clid_t client_id, int type, json_t json, rply
         // counter's value.
         Enqueue(client_id, request_id, type, json, std::move(resolve));
     }
-    debugQueue(QueueCPU);
-    debugQueue(QueueGPU);
+
+    //debugQueue(QueueCPU);
+    //debugQueue(QueueGPU);
 
     _lock.unlock();
 }
@@ -156,11 +160,14 @@ int RequestQueues::dequeue(std::deque<reqt_t> &queue,
                            rply_t &resolve)
 {
     _lock.lock();
+    // TODO we forgot to remove the executed request ??
     auto it = std::find_if(queue.begin(), queue.end(), [&](reqt_t &req) { return req->isReady(); });
     if (it != queue.end()) {
         client_id = (*it)->getClientId();
         request = (*it)->getRequest();
         resolve = (*it)->getResolve();
+        queue.erase(it);
+        debugQueue(queue);
         _lock.unlock();
         return 1;
     } else {

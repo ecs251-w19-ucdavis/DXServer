@@ -4,10 +4,14 @@
 
 #include "CPUTaskHandler.h"
 
-#include "Communication/WebSocketCommunicator.h"
+#include "Util/Resolve.h"
+
+#include "Util/Client.h"
+
+#include "Communicator.h"
+
 
 #include "Util/Log.h"
-#include "Client.h"
 
 #include <QBuffer>
 #include <QImage>
@@ -25,6 +29,12 @@ CPUTaskHandler::CPUTaskHandler(const std::string &database)
 {
     // Load database from disk
     loadDatabase(database);
+}
+
+void CPUTaskHandler::connectToCommunicator(const QObject *_receiver)
+{
+    const auto* receiver = qobject_cast<const Communicator*>(_receiver);
+    connect(this, &CPUTaskHandler::onResolve, receiver, &Communicator::onResolve);
 }
 
 void CPUTaskHandler::processNextRequest()
@@ -49,9 +59,9 @@ void CPUTaskHandler::processNextRequest()
 
         json_t output;
         handleQueryDatabase(id, output);
-        emit onResolve(WebSocketCommunicator::addReply([=]() {
+        emit onResolve(replies::add([=]() {
             resolve(output);
-            log() << "[CPU] resolve " << std::endl;
+            log() << "[CPU] resolve " << id << std::endl;
         }));
         clients::get(id)->incrementCurrCounter();
 
@@ -104,6 +114,9 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
         throw std::runtime_error("[Error] invalid database lookup file " + database);
     }
 }
+
+
+
 // Read Data From Database
 void CPUTaskHandler::handleQueryDatabase(clid_t clientId, json_t &output)
 {

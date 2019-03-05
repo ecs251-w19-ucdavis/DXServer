@@ -12,6 +12,7 @@
 #define V3D_MAIN_SERVER_H
 
 #include "RequestQueue.h"
+#include "Util/Resolve.h"
 
 #include <QWebSocket>
 #include <QWebSocketServer>
@@ -27,7 +28,7 @@
  */
 namespace v3d { namespace dx {
 
-class WebSocketCommunicator : public QObject {
+class Communicator : public QObject {
     Q_OBJECT
 public:
     /**
@@ -35,7 +36,7 @@ public:
      * @param port The network port this communicator will be listening to
      * @param parent Always a nullptr in our application
      */
-    explicit WebSocketCommunicator(quint16 port, QObject* parent = nullptr);
+    explicit Communicator(quint16 port, QObject* parent = nullptr);
 
     /**
      * Open the communicator and start to listen to connections
@@ -55,13 +56,23 @@ public:
      */
     void connectToRequestSlot(const QObject* receiver);
 
-    // enable if needed
+    /**
+     * Check if there is at least one connection.
+     */
     bool isConnected() const { return (_webSocketServer != nullptr) && !_clients.empty(); }
 
 protected:
+    // basic functionality
     void rpcNotify(QWebSocket* target, const std::string& method, const JsonValue& params);
     void rpcReply(QWebSocket* target, const JsonValue& result, const JsonValue& id);
     QWebSocket* getClient(clid_t clientId);
+
+    // call by onResolve
+    void notifyProjectOpened(std::string projFileName, clid_t clientId);
+    void notifyProjectClosed(clid_t clientId);
+    void sendScene(JsonValue scene, int64_t id, clid_t clientId);
+    void sendFrame(QImage img, clid_t clientId);
+    void sendDatabase(JsonValue database, int64_t id, clid_t clientId);
 
 public slots:
     // called by websocket
@@ -71,16 +82,8 @@ public slots:
     void processTextMessage(QString message);
     void processBinaryMessage(QByteArray message);
 
-    void onResolve(int id) {
-        getReply(id)();
-    };
-
-    // call by other components inside this project
-    void notifyProjectOpened(std::string projFileName, clid_t clientId);
-    void notifyProjectClosed(clid_t clientId);
-    void sendScene(JsonValue scene, int64_t id, clid_t clientId);
-    void sendFrame(QImage img, clid_t clientId);
-    void sendDatabase(JsonValue database, int64_t id, clid_t clientId);
+    // call by our server
+    void onResolve(int id) { replies::get(id)(); };
 
 signals:
     /**
@@ -94,13 +97,7 @@ signals:
      */
     void newRequest(clid_t clientId, int type, json_t request, rply_t resolve);
 
-public:
-    static int addReply(const std::function<void()>& foo);
-    static const std::function<void()>& getReply(int id);
 private:
-
-//    static std::vector<std::function<void()>> replies;
-
     bool _secureMode = false;
     quint16 _port = 8080;
     QWebSocketServer* _webSocketServer = nullptr;

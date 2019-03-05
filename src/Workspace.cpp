@@ -9,7 +9,7 @@
 
 #include "Workspace.h"
 
-#include "Client.h"
+#include "Util/Client.h"
 #include "Graphics/DXGL.h"
 
 #include <string>

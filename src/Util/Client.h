@@ -11,7 +11,7 @@
 #ifndef DXSERVER_CLIENT_H
 #define DXSERVER_CLIENT_H
 
-#include "Engine.h"
+#include "Graphics/Engine.h"
 #include "Renderer/FramebufferGL.h"
 
 #include <QImage>

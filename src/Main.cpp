@@ -18,7 +18,7 @@
 // The prototype/interface header for this implementation (ie, the .h/.hh file
 // that corresponds to this .cpp/.cc file).
 #include "Graphics/DXGL.h"
-#include "Communication/WebSocketCommunicator.h"
+#include "Communicator.h"
 #include "CPUTaskHandler.h"
 #include "Workspace.h"
 //#include "ToBeRemoved/RequestHandler.h"
@@ -62,39 +62,17 @@ int main(int argc, char* argv[])
 
     dx::queues::create();
 
-    dx::WebSocketCommunicator server(8080);
+    dx::Communicator server(8080);
     server.open();
     server.connectToRequestSlot(dx::queues::raw());
 
-//    std::thread cpu_thread([&]() {
-//        dx::CPUTaskHandler handler;
-//        while (true) {
-//            handler.processNextRequest();
-//        }
-//
-//    });
-
-//    typedef std::function<void()>
-//    Q_DECLARE_METATYPE(foo);
-
-        dx::CPUTaskHandler handler;
-        handler.ConnectToSlot(&server);
-        handler.start();
-
-//        while (true) {
-//            std::cout << "x\n";
-//            handler.processNextRequest();
-//        }
+    dx::CPUTaskHandler handler;
+    handler.connectToCommunicator(&server);
+    handler.start();
 
     dx::DXGL_create(); // load modules, load all shaders
     dx::DXGL_execute(argc, argv, [&]() {
         startWorkspace(&argc, const_cast<const char **>(argv));
-//
-//        dx::CPUTaskHandler handler;
-//        while (true) {
-//            std::cout << "x\n";
-//            handler.processNextRequest();
-//        }
     });
 
     return app.exec();

@@ -7,7 +7,7 @@
 #define DXSERVER_REQUESTHANDLER_H
 
 #include "RequestQueue.h"
-#include "Communication/WebSocketCommunicator.h"
+#include "Communicator.h"
 #include "Util/JsonParser.h"
 
 #include <QThread>
@@ -22,34 +22,19 @@ class CPUTaskHandler : public QThread {
     Q_OBJECT
 public:
     explicit CPUTaskHandler(const std::string& database = "database.json");
+    void run() override { while (true) processNextRequest(); }
     void processNextRequest();
-
-    void ConnectToSlot(const QObject* _receiver)
-    {
-        const auto* receiver = qobject_cast<const WebSocketCommunicator*>(_receiver);
-        connect(this, &CPUTaskHandler::onResolve, receiver, &WebSocketCommunicator::onResolve);
-    }
-
-signals:
-    void onResolve(int);
-
-public:
-    void run(void) override
-    {
-        while (true) processNextRequest();
-    }
+    void connectToCommunicator(const QObject *_receiver);
 
 private:
     void loadDatabase(const std::string& database);
     void handleQueryDatabase(clid_t clientId, json_t& output);
 
-private:
-    json_t _jsonDatabase;
+signals:
+    void onResolve(int);
 
-    /** TODO This is just an experimental implementation, we should change it to a client list instead. The length
-     *       of the client list should be identical to the length in WebSocketCommunicator
-     */
-//    std::shared_ptr<Engine> engine;
+private:
+    json_t _jsonDatabase; // here we cache the database file to avoid reloading
 };
 
 }}
