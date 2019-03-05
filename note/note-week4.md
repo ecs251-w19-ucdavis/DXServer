@@ -23,4 +23,6 @@ In one word, the "expected" counter value for each request is only related to th
 
 **Qi**: We don't need to set a fixed expectation value according to each request's name. Instead, upon enqueueing a request, we can check the client's largest expectation value currently in the queue, and set the enqueueing request's expectation to be that value + 1.
 
-But this solution 
+But this solution might need searching through the queue on every enqueue.
+
+**Qi**'s solution: Besides keeping a 
