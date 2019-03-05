@@ -19,6 +19,7 @@
 #include "Loader/RegularGridRawBinary.h"
 #include "Loader/TetraGridRawBinary.h"
 
+#include "Util/Log.h"
 #include "Util/Material.h"
 #include "Renderer/GeometryProperty.h"
 
@@ -29,29 +30,42 @@ namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace details {
-
-Engine::Engine(std::string project_name, fbo_t framebuffer_object,
-               int initial_width, int initial_height)
-    : _size{initial_width, initial_height}
-    , _fbo(std::move(framebuffer_object))
-    , _jsonFileName(std::move(project_name))
+namespace details
 {
+
+Engine::Engine(fbo_t fbo, int w, int h)
+    : _size{w, h}
+    , _fbo{std::move(fbo)}
+{}
+
+/**
+ * This function will open and parse the JSON configuration file from disk
+ * @param project_name The name of the JSON configuration file
+ */
+void Engine::loadJSONFile(std::string pname)
+{
+    // fix namespaces
     using namespace v3d::serializer;
     using namespace v3d::dx::serializer;
-    JsonParser().load(_jsonFileName, _jsonRoot);
+
+    // update local variable & and load the file
+    JsonParser().load(pname, _jsonRoot);
+    _jsonFileName = pname; // for backup purpose
+
+    // load the data source if present
+    // @note hard error will be thrown if there is no data specified
     if (_jsonRoot.contains(DATA_SOURCE)) {
         _jsonData = _jsonRoot[DATA_SOURCE];
-    }
-    else {
+    } else {
         throw std::runtime_error("[Error] thr project JSON does not contain a data specification, please fix this.");
     }
+
+    // load the view if present
     if (_jsonRoot.contains(VIEW)) {
-        _jsonView = _jsonRoot[VIEW];
-        _jsonViewMethod = _jsonView.get(METHOD_, "").toString();
-    }
-    else {
-        throw std::runtime_error("[Error] thr project JSON does not contain a view specification, please fix this.");
+        _jsonView   = _jsonRoot[VIEW];
+        _jsonMethod = _jsonView.get(METHOD_, "").toString();
+    } else {
+        log() << "[Warn] thr project JSON does not contain a view specification." << std::endl;
     }
 }
 
@@ -64,8 +78,7 @@ void Engine::initData()
     // analysis json file
     if (_jsonData.isNull()) {
         throw std::runtime_error("[Error] empty json node");
-    }
-    else {
+    } else {
         const JsonValue &jsonArray = _jsonData;
         if (!jsonArray.isArray()) {
             throw std::runtime_error("[error] In TetMesh::loadV3d(): Bad JSON format, DATA_SOURCE should be an array.");
@@ -78,28 +91,23 @@ void Engine::initData()
             std::string format = jsonData.get(FORMAT, "").toString();
             if (format == FOLDER) {
                 PING;
-            }
-            else if (format == MULTIVARIATE) {
+            } else if (format == MULTIVARIATE) {
                 PING;
-            }
-            else if (format == TIME_VARYING) {
+            } else if (format == TIME_VARYING) {
                 PING;
-            }
-            else if (format == REGULAR_GRID_RAW_BINARY) {
+            } else if (format == REGULAR_GRID_RAW_BINARY) {
+                _mode = REGULAR_GRID;
                 _data = v3d::load::RegularGridRawBinary(jsonData, _jsonFileName);
-#ifdef V3D_USE_PVM
-            }
-            else if (format == REGULAR_GRID_PVM) {
+#ifdef  V3D_USE_PVM
+            } else if (format == REGULAR_GRID_PVM) {
                 PING;
-#endif // V3D_USE_PVM
-            }
-            else if (format == TETRAHEDRAL_GRID_RAW_BINARY) {
+#endif//V3D_USE_PVM
+            } else if (format == TETRAHEDRAL_GRID_RAW_BINARY) {
+                _mode = TETRA_GRID;
                 _data = v3d::load::TetraGridRawBinaryData(jsonData, _jsonFileName);
-            }
-            else if (format == TETRAHEDRAL_GRID_FAST) {
+            } else if (format == TETRAHEDRAL_GRID_FAST) {
                 PING;
-            }
-            else {
+            } else {
                 throw std::runtime_error("[error] In TetMesh::loadV3d(): Unsupported Data Format " + format);
             }
         }
@@ -119,7 +127,7 @@ void Engine::initScene()
     _camera = std::make_shared<Camera>();
 
     // now we create volume and scene
-    if (_jsonViewMethod == "REGULAR_GRID_VOLUME_RAY_CASTING") {
+    if (_jsonMethod == "REGULAR_GRID_VOLUME_RAY_CASTING") {
 
         auto volume = std::make_shared<v3d::RegularGridVolumeGL>();
         auto data = std::dynamic_pointer_cast<RegularGridDataGL>(_data);
@@ -205,8 +213,7 @@ void Engine::initScene()
         _rendererGrid->setFramebufferObject(_fbo->sharedFramebufferObject());
         _rendererGrid->setScene(_sceneGrid);
 
-    }
-    else if (_jsonViewMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
+    } else if (_jsonMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
 
         auto volume = std::make_shared<TetraGridVolumeGL>();
         auto data = std::dynamic_pointer_cast<TetraGridDataGL>(_data);
@@ -268,8 +275,7 @@ void Engine::initScene()
         _rendererTets->setScene(_sceneTets);
         _rendererTets->setBoundaryGeometryProperty(boundaryGeometryProperty);
 
-    }
-    else {
+    } else {
         throw std::runtime_error("[Error] unknown volume type");
     }
 }
@@ -282,6 +288,7 @@ void Engine::updateView(const v3d::JsonValue &input)
 
     // if view is null, we use the default view value instead
     const JsonValue &view = input.isNull() ? _jsonView : input;
+    _jsonMethod = view.get(METHOD_, "").toString();
 
     // load transfer functions
     updateTransferFunction(view);
@@ -290,17 +297,15 @@ void Engine::updateView(const v3d::JsonValue &input)
     updateCamera(view);
 
     // load volume
-    if (_jsonViewMethod == "REGULAR_GRID_VOLUME_RAY_CASTING") {
+    if (_jsonMethod == "REGULAR_GRID_VOLUME_RAY_CASTING") {
         auto volume = std::dynamic_pointer_cast<v3d::RegularGridVolumeGL>(_volume);
         if (view.contains(VOLUME)) fromJson(view[VOLUME], *volume);
         fromJson(view, *_sceneGrid);
-    }
-    else if (_jsonViewMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
+    } else if (_jsonMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
         auto volume = std::dynamic_pointer_cast<v3d::TetraGridVolumeGL>(_volume);
         if (view.contains(VOLUME)) fromJson(view[VOLUME], *volume);
         fromJson(view, *_sceneTets);
-    }
-    else {
+    } else {
         throw std::runtime_error("[Error] unknown volume type");
     }
 }
@@ -354,6 +359,33 @@ std::shared_ptr<std::vector<uint8_t>> Engine::copyRenderedImage(bool fix_alpha) 
     return std::move(buffer);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void Engine::loadGL()
+{
+    if (_mode == REGULAR_GRID) {
+        std::dynamic_pointer_cast<RegularGridDataGL>(_data)->loadGL();
+    } else if (_mode == TETRA_GRID) {
+        std::dynamic_pointer_cast<TetraGridGL>(_data)->loadGL();
+        std::dynamic_pointer_cast<TetraGridDataGL>(_data)->loadGL();
+    } else {
+        throw std::runtime_error("[Error] unknown volume type");
+    }
+}
+
+void Engine::unloadGL()
+{
+    if (_mode == REGULAR_GRID) {
+        std::dynamic_pointer_cast<RegularGridDataGL>(_data)->unloadGL();
+    } else if (_mode == TETRA_GRID) {
+        std::dynamic_pointer_cast<TetraGridDataGL>(_data)->unloadGL();
+        std::dynamic_pointer_cast<TetraGridGL>(_data)->unloadGL();
+    } else {
+        throw std::runtime_error("[Error] unknown volume type");
+    }
+}
+
+
 void Engine::updateTransferFunction(const v3d::JsonValue &view)
 {
     // setup namespace
@@ -362,7 +394,7 @@ void Engine::updateTransferFunction(const v3d::JsonValue &view)
     // load TFN
     if (view.contains(VOLUME)) {
         const auto &jsonVol = view[VOLUME];
-        if (_jsonViewMethod == "REGULAR_GRID_VOLUME_RAY_CASTING") {
+        if (_jsonMethod == "REGULAR_GRID_VOLUME_RAY_CASTING") {
             auto volume = std::dynamic_pointer_cast<RegularGridVolumeGL>(_volume);
             if (jsonVol.contains(TRANSFER_FUNCTION)) {
                 *_ctf = fromJson<TransferFunction>(jsonVol[TRANSFER_FUNCTION]);
@@ -376,7 +408,7 @@ void Engine::updateTransferFunction(const v3d::JsonValue &view)
                 volume->setTransferFunction2DDirty(true);
             }
         }
-        else if (_jsonViewMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
+        else if (_jsonMethod == "TETRAHEDRAL_GRID_VOLUME_RAY_CASTING") {
             auto volume = std::dynamic_pointer_cast<TetraGridVolumeGL>(_volume);
             if (jsonVol.contains(TRANSFER_FUNCTION)) {
                 *_ctf = fromJson<TransferFunction>(jsonVol[TRANSFER_FUNCTION]);

@@ -55,8 +55,10 @@ api::V3DMedium TetraGridRawBinaryData(const JsonValue &json, std::string jsonFil
     medium->grid()->buildCellToCellConnectivity();
     medium->grid()->buildBoundaryMesh();
     medium->computePointGradient();
-    std::dynamic_pointer_cast<TetraGridGL>(medium)->loadGL();
-    medium->loadGL();
+
+    // load data to GPU
+//    std::dynamic_pointer_cast<TetraGridGL>(medium)->loadGL();
+//    medium->loadGL();
 
     // return
     return medium;
