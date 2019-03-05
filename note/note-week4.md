@@ -25,14 +25,7 @@ In one word, the "expected" counter value for each request is only related to th
 
 But this solution might need searching through the queue on every enqueue.
 
-<<<<<<< HEAD
-**Qi**'s solution: Besides keeping a 
-
-=======
 **Qi**'s solution: Besides keeping a current request counter for each client, we can also keep a ``next_request_id``, which will be incremented only when a request enqueues.
-
-
->>>>>>> 397de00153269d2703b36a2db3a62110766483cb
 
 
 ###Client-Webserver and Render Engine Connection
