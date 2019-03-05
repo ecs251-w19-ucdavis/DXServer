@@ -32,16 +32,20 @@ class RequestQueues;
 using queues_t = std::shared_ptr<RequestQueues>;
 
 namespace queues {
-[[deprecated]] void create(); // we can only have one instance of RequestQueues
+//[[deprecated]] void create(); // we can only have one instance of RequestQueues
 queues_t       get();
 RequestQueues* raw();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace details {
+queues_t createRequestQueues(); // we can only have one instance of RequestQueues
+}
+
 class RequestQueues : public QObject {
     Q_OBJECT
-    friend void queues::create();
+    friend queues_t details::createRequestQueues();
 public: 
 
     // TODO the name of this function is misleading

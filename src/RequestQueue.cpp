@@ -11,18 +11,18 @@
 #include "Util/Log.h"
 #include <queue>
 
-static v3d::dx::queues_t global_queue;
-
 namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace queues {
 
-void create()
-{
-    global_queue.reset(new RequestQueues());
-}
+static queues_t global_queue = details::createRequestQueues();
+
+//void create()
+//{
+//    global_queue.reset(new RequestQueues());
+//}
 
 queues_t get()
 {
@@ -37,6 +37,13 @@ RequestQueues* raw()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+queues_t details::createRequestQueues()
+{
+    queues_t ret;
+    ret.reset(new RequestQueues());
+    return std::move(ret);
+}
 
 void RequestQueues::enqueue(clid_t client_id, clid_t request_id, int type, json_t json, rply_t resolve)
 {
@@ -90,7 +97,7 @@ void RequestQueues::enqueueRequest(clid_t client_id, int type, json_t json, rply
     auto client = clients::get(client_id);
     if (!client) client = clients::add(client_id);
 
-    if(method == "openProject") //splitting into 2 subrequests: LoadData enters _queue_cpu, and InitGL enters _queue_gpu
+    if(method == "openProject") // splitting into 2 subrequests: LoadData enters _queue_cpu, and InitGL enters _queue_gpu
     {
         auto request_id1 = client -> nextCounterValue(),
              request_id2 = client -> nextCounterValue();
@@ -121,8 +128,8 @@ void RequestQueues::enqueueRequest(clid_t client_id, int type, json_t json, rply
     else
     {
         auto request_id = client->nextCounterValue(); // I implemented two counters in the Client class
-        // each time there is a new request coming in, we get the value of 'next request counter' and then increment the
-        // counter's value.
+        // each time there is a new request coming in, we get the value of 'next request counter' and
+        // then increment the counter's value.
         enqueue(client_id, request_id, type, json, std::move(resolve));
     }
 
