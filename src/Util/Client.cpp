@@ -136,7 +136,7 @@ void details::Client::renderDebug()
 
 	// save
 	QImage img = QImage(&(*buffer)[0], dx::winW, dx::winH, QImage::Format_RGB32).mirrored(false, true);
-	std::string filename = "image" + std::to_string(_id) + ".PNG";
+	std::string filename = "image" + _id + ".PNG";
 	img.save(filename.c_str(), nullptr, -1);
 	std::cout << "save file as " << filename << std::endl;
 

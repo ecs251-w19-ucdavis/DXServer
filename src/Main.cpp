@@ -19,7 +19,7 @@
 // that corresponds to this .cpp/.cc file).
 #include "Graphics/DXGL.h"
 #include "Communicator.h"
-#include "CPUTaskHandler.h"
+#include "TaskHandler.h"
 #include "Workspace.h"
 //#include "ToBeRemoved/RequestHandler.h"
 
@@ -48,8 +48,6 @@ namespace v3d {
 namespace dx { int winW = 800, winH = 800; }
 }
 
-//template std::function<void()>;
-
 int main(int argc, char* argv[])
 {
 #ifndef USE_QT_OPENGL
@@ -59,8 +57,6 @@ int main(int argc, char* argv[])
     QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QApplication app(argc, argv);
 #endif
-
-//    dx::queues::create(); // TODO why we need to call create ?? should not have to
 
     dx::Communicator server(8080);
     server.open();

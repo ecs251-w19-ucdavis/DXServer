@@ -26,7 +26,7 @@ namespace v3d { namespace dx {
 
 namespace details { class Client; }
 
-using clid_t = int;
+using clid_t = std::string;
 using client_t = std::shared_ptr<details::Client>;
 
 /**
@@ -157,7 +157,7 @@ private:
     std::atomic<size_t> _curr_request_counter;
     std::atomic<size_t> _next_request_counter;
 
-	clid_t _id = 0; // id == 0 means invalid
+	clid_t _id = clid_t(); // empty means invalid
 	std::shared_ptr<FramebufferGL> _fbo;
 	std::shared_ptr<dx::details::Engine> _handler;
 };

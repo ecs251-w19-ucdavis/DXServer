@@ -45,7 +45,7 @@ queues_t details::createRequestQueues()
     return std::move(ret);
 }
 
-void RequestQueues::enqueue(clid_t client_id, clid_t request_id, int type, json_t json, rply_t resolve)
+void RequestQueues::enqueue(clid_t client_id, size_t request_id, int type, json_t json, rply_t resolve)
 {
     auto request = requests::create(client_id, request_id, type, json, std::move(resolve));
     std::string method = json.get("method", "").toString();

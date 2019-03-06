@@ -32,7 +32,6 @@ class RequestQueues;
 using queues_t = std::shared_ptr<RequestQueues>;
 
 namespace queues {
-//[[deprecated]] void create(); // we can only have one instance of RequestQueues
 queues_t       get();
 RequestQueues* raw();
 }
@@ -49,7 +48,7 @@ class RequestQueues : public QObject {
 public: 
 
     // TODO the name of this function is misleading
-    void enqueue(clid_t client_id, clid_t request_id, int type, json_t json, rply_t resolve);
+    void enqueue(clid_t client_id, size_t request_id, int type, json_t json, rply_t resolve);
 
     /**
      * Dequeue from the CPU queue

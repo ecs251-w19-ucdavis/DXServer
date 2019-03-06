@@ -22,8 +22,8 @@ void startWorkspace(int *argc, const char **argv)
 {
 #if MULTI_CLIENT_MODE
 
-    auto c0 = dx::clients::add(100);
-    auto c1 = dx::clients::add(200);
+    auto c0 = dx::clients::add("100");
+    auto c1 = dx::clients::add("200");
     c0->initDebug(argv[1], dx::winW, dx::winH);
     c1->initDebug(argv[2], dx::winW, dx::winH);
     c0->renderDebug();

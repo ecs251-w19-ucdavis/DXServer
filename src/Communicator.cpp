@@ -14,6 +14,20 @@
 
 #include <QBuffer>
 
+#include <string>
+
+std::string genHash(const int len) {
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    std::string s = "";
+    for (int i = 0; i < len; ++i) {
+        s += alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+    return s;
+}
+
 using namespace v3d;
 
 v3d::dx::Communicator::Communicator(quint16 port, QObject *parent)
@@ -72,7 +86,7 @@ void v3d::dx::Communicator::rpcReply(QWebSocket *target, const JsonValue &result
 
 QWebSocket *v3d::dx::Communicator::getClient(clid_t clientId)
 {
-    return _clients.contains(clientId) ? _clients[clientId] : nullptr;
+    return contains(clientId) ? _clients[clientId] : nullptr;
 }
 
 void v3d::dx::Communicator::onNewConnection()
@@ -84,7 +98,7 @@ void v3d::dx::Communicator::onNewConnection()
     connect(socket, &QWebSocket::binaryMessageReceived, this, &Communicator::processBinaryMessage);
     connect(socket, &QWebSocket::disconnected, this, &Communicator::onClientClosure);
 
-    _clients.insert(_nextClientId, socket);
+    _clients[genHash(100)] = socket;
     ++_nextClientId;
 }
 
@@ -98,8 +112,10 @@ void v3d::dx::Communicator::onClientClosure()
     auto *client = qobject_cast<QWebSocket *>(sender());
     log() << "[RComm] Socket disconnected" << std::endl;
     if (client) {
-        int key = _clients.key(client, 0);
-        if (_clients.contains(key)) { _clients.remove(key); }
+        clid_t key;
+        if (findKey(client, key)) {
+            _clients.erase(key);
+        };
         client->deleteLater();
     }
 }
@@ -108,8 +124,8 @@ void v3d::dx::Communicator::processTextMessage(QString message)
 {
     // compute client Id
     auto *client = qobject_cast<QWebSocket *>(sender());
-    clid_t clientId = _clients.key(client, 0);
-    if (client == nullptr || !_clients.contains(clientId)) {
+    clid_t clientId;
+    if (client == nullptr || !findKey(client, clientId)) {
         log() << "[RComm] Message received from invalid client" << std::endl;
         return;
     }
@@ -201,7 +217,7 @@ void v3d::dx::Communicator::notifyProjectClosed(clid_t clientId)
 
 void v3d::dx::Communicator::sendScene(JsonValue scene, int64_t id, clid_t clientId)
 {
-    if (!_clients.contains(clientId))
+    if (!contains(clientId))
         return;
     QWebSocket *client = _clients[clientId];
     rpcReply(client, scene, JsonValue(id));
@@ -209,7 +225,7 @@ void v3d::dx::Communicator::sendScene(JsonValue scene, int64_t id, clid_t client
 
 void v3d::dx::Communicator::sendFrame(QImage img, clid_t clientId)
 {
-    if (!_clients.contains(clientId))
+    if (!contains(clientId))
         return;
     QWebSocket *client = _clients[clientId];
 
@@ -228,7 +244,8 @@ void v3d::dx::Communicator::sendFrame(QImage img, clid_t clientId)
 
 void v3d::dx::Communicator::sendDatabase(JsonValue database, int64_t id, clid_t clientId)
 {
-    if (!_clients.contains(clientId)) return;
+    if (!contains(clientId))
+        return;
     QWebSocket *client = _clients[clientId];
     rpcReply(client, database, JsonValue(id));
 }

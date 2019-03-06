@@ -19,6 +19,7 @@
 #include <QImage>
 
 #include <functional>
+#include <unordered_map>
 
 namespace v3d { namespace dx {
 
@@ -75,6 +76,20 @@ protected:
     void sendFrame(QImage img, clid_t clientId);
     void sendDatabase(JsonValue database, int64_t id, clid_t clientId);
 
+    // heper functions for hash table
+    bool contains(const clid_t& id) const { return _clients.find(id) != _clients.end(); }
+    bool findKey(const QWebSocket* socket, clid_t& key) const {
+        auto it = std::find_if (_clients.begin(), _clients.end(), [=](const std::pair<clid_t, QWebSocket*> p) {
+            return p.second == socket;
+        });
+        if (it != _clients.end()) {
+            key = it->first;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 public slots:
     // called by websocket
     void onNewConnection();
@@ -104,8 +119,8 @@ private:
     QWebSocketServer* _webSocketServer = nullptr;
     /// @note we do not need a lock here because all Qt slots are running on the same thread
     /// @note ref: https://doc.qt.io/qt-5/qt.html#ConnectionType-enum
-    QHash<clid_t, QWebSocket*> _clients;
-    clid_t _nextClientId = 1;
+    std::unordered_map<clid_t, QWebSocket*> _clients;
+    size_t _nextClientId = 1;
 };
 
 }}
