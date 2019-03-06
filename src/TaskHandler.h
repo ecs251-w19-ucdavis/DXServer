@@ -11,7 +11,7 @@
 
 #include "Util/JsonParser.h"
 
-#include <QThread>
+#include <QObject>
 
 #include <functional>
 #include <vector>
@@ -24,14 +24,14 @@ namespace v3d { namespace dx {
 /**
  * This class suppose to handle requests from the event queue. This class will run in a different thread.
  */
-class TaskHandler : public QThread {
+class TaskHandler : public QObject {
     Q_OBJECT
     using thread_t = std::shared_ptr<std::thread>;
 public:
     TaskHandler() = default;
     ~TaskHandler() override = default;
     virtual void processNextRequest() = 0;
-    void run() override { while (true) processNextRequest(); }
+    void run() { while (true) processNextRequest(); }
     void connectToCommunicator(const QObject *_receiver);
 
     void setPoolSize(size_t n) {

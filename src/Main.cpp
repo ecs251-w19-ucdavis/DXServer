@@ -69,7 +69,10 @@ int main(int argc, char* argv[])
 
     dx::CPUTaskHandler handler;
     handler.connectToCommunicator(&server);
-    handler.start();
+    std::thread cpu_thread([&]() {
+        handler.run();
+    });
+    cpu_thread.detach();
 
     int ret = app.exec();
     dx::DXGL_exit();
