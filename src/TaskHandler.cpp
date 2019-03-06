@@ -2,20 +2,18 @@
 // Created by Qi Wu on 2019-02-23.
 //
 
-#include "CPUTaskHandler.h"
-
-#include "Util/Resolve.h"
-
-#include "Util/Client.h"
+#include "TaskHandler.h"
 
 #include "Communicator.h"
-
+#include "Util/Resolve.h"
+#include "Util/Client.h"
 
 #include "Util/Log.h"
 
 #include <QBuffer>
 #include <QImage>
 
+///////////////////////////////////////////////////////////////////////////////
 
 /** Here are the part of requests we deal with in CPU.
  * First, we Load database from disk, and read/query data from the database.
@@ -25,16 +23,19 @@
  */
 namespace v3d { namespace dx {
 
+void TaskHandler::connectToCommunicator(const QObject *_receiver)
+{
+    const auto* receiver = qobject_cast<const Communicator*>(_receiver);
+    connect(this, &TaskHandler::onResolve, receiver, &Communicator::onResolve);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 CPUTaskHandler::CPUTaskHandler(const std::string &database)
+    : TaskHandler()
 {
     // Load database from disk
     loadDatabase(database);
-}
-
-void CPUTaskHandler::connectToCommunicator(const QObject *_receiver)
-{
-    const auto* receiver = qobject_cast<const Communicator*>(_receiver);
-    connect(this, &CPUTaskHandler::onResolve, receiver, &Communicator::onResolve);
 }
 
 void CPUTaskHandler::processNextRequest()
@@ -58,7 +59,7 @@ void CPUTaskHandler::processNextRequest()
     if (method == "queryDatabase") {
 
         json_t output;
-        handleQueryDatabase(id, output);
+        handle_QueryDatabase(id, output);
         emit onResolve(resolves::add([=]() {
             resolve(output);
             log() << "[CPU] resolve " << id << std::endl;
@@ -109,18 +110,19 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
                 throw std::runtime_error("[Error] failed to load data preview image " + ds["preview"].toString());
             }
         }
-    }
-    else {
+    } else {
         throw std::runtime_error("[Error] invalid database lookup file " + database);
     }
 }
 
-
-
 // Read Data From Database
-void CPUTaskHandler::handleQueryDatabase(clid_t clientId, json_t &output)
+void CPUTaskHandler::handle_QueryDatabase(clid_t clientId, json_t &output)
 {
     if (!_jsonDatabase.isNull()) { output = _jsonDatabase; } // make a copy
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 
 }}

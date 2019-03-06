@@ -34,8 +34,7 @@ set (vidi3d_dxserver_SOURCES
   Util/Request.cpp
 
   Communicator.cpp
-  GPUTaskHandler.cpp
-  CPUTaskHandler.cpp
+  TaskHandler.cpp
   RequestQueue.cpp
 
   Workspace.cpp
@@ -59,8 +58,7 @@ set (vidi3d_dxserver_HEADERS
   Util/Resolve.h
 
   Communicator.h
-  GPUTaskHandler.h
-  CPUTaskHandler.h
+  TaskHandler.h
   RequestQueue.h
 
   Workspace.h
