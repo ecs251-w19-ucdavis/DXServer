@@ -61,7 +61,10 @@ int main(int argc, char* argv[])
     dx::DXGL_create(); // load modules, load all shaders
     dx::DXGL_init(argc, argv);
 
-    startWorkspace(&argc, const_cast<const char **>(argv));
+    std::thread debug([&]() {
+        startWorkspace(&argc, const_cast<const char **>(argv));
+    });
+    debug.join();
 
     dx::Communicator server(8080);
     server.open();
