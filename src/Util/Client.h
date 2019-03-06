@@ -99,40 +99,18 @@ public:
      */
 	void incrementCurrCounter();
 
-
 	void init(int w, int h);
+	void initGL();
 
-//	void loadGL();
-//	void unloadGL();
+    void openProject(const std::string& fname);
+    void closeProject();
 
-    void openProject(const std::string& fname)
-    {
-		_handler->loadJSONFile(fname);
-    }
-
-    void loadDataToGPU() // GPU
-    {
-		// do nothing
-    }
-
-	void removeDataFromGPU() // GPU
-	{
-		_handler->unloadGL();
-	}
-
-	void closeProject()
-	{
-    	// do nothing
-	}
+    void loadDataToGPU(); // GPU
+	void removeDataFromGPU(); // GPU
 
 	json_t getScene();
 
-	void renderFrame()
-	{
-
-	}
-
-
+	void renderFrame();
 
 	void initDebug(const std::string& fname, int w, int h);
 	void renderDebug();

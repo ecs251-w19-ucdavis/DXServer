@@ -59,7 +59,7 @@ void v3d::dx::Communicator::close()
 void v3d::dx::Communicator::connectToRequestSlot(const QObject* _receiver)
 {
     const auto* receiver = qobject_cast<const RequestQueues*>(_receiver);
-    connect(this, &Communicator::newRequest, receiver, &RequestQueues::enqueueRequest);
+    connect(this, &Communicator::newRequest, receiver, &RequestQueues::newRequest);
 }
 
 void v3d::dx::Communicator::rpcNotify(QWebSocket *target, const std::string &method, const JsonValue &params)
@@ -80,7 +80,6 @@ void v3d::dx::Communicator::rpcReply(QWebSocket *target, const JsonValue &result
     json["result"] = result;
     json["id"] = id;
     QString msg = QString::fromStdString(JsonParser().stringify(json));
-    std::cout << "[RComm] database " << msg.toStdString() << std::endl;
     target->sendTextMessage(msg);
 }
 

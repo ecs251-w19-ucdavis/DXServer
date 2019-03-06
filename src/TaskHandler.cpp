@@ -76,6 +76,19 @@ void CPUTaskHandler::processNextRequest()
         }));
         clients::get(id)->incrementCurrCounter();
 
+    } else if (method == "loadData") {
+
+        std::string projFileName;
+        if (json.contains("params") &&
+            json["params"].isObject() &&
+            json["params"].contains("fileName") &&
+            json["params"]["fileName"].isString())
+        {
+            projFileName = json["params"]["fileName"].toString();
+            handle_loadData(id, projFileName);
+        }
+        clients::get(id)->incrementCurrCounter();
+
     } else {
 
     }
@@ -125,19 +138,57 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
     }
 }
 
-// Read Data From Database
-void CPUTaskHandler::handle_queryDatabase(clid_t clientId, json_t &output)
+void CPUTaskHandler::handle_queryDatabase(const clid_t& clientId, json_t &output)
 {
     if (!_jsonDatabase.isNull()) { output = _jsonDatabase; } // make a copy
 }
 
-void CPUTaskHandler::handle_getScene(clid_t clientId, json_t &output)
+void CPUTaskHandler::handle_getScene(const clid_t& clientId, json_t &output)
 {
     output = std::move(clients::get(clientId)->getScene());
 }
 
+void CPUTaskHandler::handle_loadData(const clid_t& clientId, const std::string& projectName)
+{
+    clients::get(clientId)->openProject(projectName);
+}
+
+void CPUTaskHandler::handle_delData(const clid_t& clientId)
+{
+    clients::get(clientId)->closeProject();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
+void GPUTaskHandler::processNextRequest()
+{
+    clid_t id;
+    rply_t resolve;
+    json_t json;
 
+    if (!queues::get()->dequeueGPU(id, json, resolve)) return;
+
+    std::string method = json.get("method", "").toString();
+    log() << " task handler " << method << std::endl;
+
+    if (method == "createClient") {
+        handle_createClient(id);
+        clients::get(id)->incrementCurrCounter();
+    }
+    else if (method == "loadGL") {
+        json_t dummy;
+        clients::get(id)->initGL();
+        emit onResolve(resolves::add([=]() {
+            resolve(dummy);
+            log() << "[GPU Task] resolve openProject " << id << std::endl;
+        }));
+        clients::get(id)->incrementCurrCounter();
+    }
+}
+
+void GPUTaskHandler::handle_createClient(const clid_t& clientId)
+{
+    clients::get(clientId)->init(600, 600);
+}
 
 }}

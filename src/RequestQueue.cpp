@@ -45,97 +45,117 @@ queues_t details::createRequestQueues()
     return std::move(ret);
 }
 
-void RequestQueues::enqueue(clid_t client_id, size_t request_id, int type, json_t json, rply_t resolve)
+void RequestQueues::enqueue(std::deque<rqst_t>& queue,
+                            const clid_t &client_id,
+                            size_t request_id,
+                            int type,
+                            const json_t &json,
+                            const rply_t &resolve)
 {
     auto request = requests::create(client_id, request_id, type, json, std::move(resolve));
-    std::string method = json.get("method", "").toString();
-    log() << "[RQueue] new request received from client " << client_id << ": " << method << std::endl;
+    auto method = json.get("method", "").toString();
     switch (type) {
         case 0: { // a call
-            _queue_cpu.push_back(request);
+            queue.push_back(request);
             break;
         }
         case 1: { // a notification
-            if(method == "LoadData" || method == "DelData") // CPU notifications
-            {
-                auto it = std::find_if(_queue_cpu.begin(), _queue_cpu.end(), [&](rqst_t &req) {
-                    return (req->getClientId() == client_id && req->getType() == type);
-                });
-                if (it != _queue_cpu.end()) { // if there is a previous notification, replace it with the new one
-                    *it = request;
-                } else {
-                    _queue_cpu.push_back(request);
-                }
-                break;
-            }
-            else // GPU notifications
-            {
-                auto it = std::find_if(_queue_gpu.begin(), _queue_gpu.end(), [&](rqst_t &req) {
-                    return (req->getClientId() == client_id && req->getType() == type);
-                });
-                if (it != _queue_gpu.end()) { // if there is a previous notification, replace it with the new one
-                    *it = request;
-                } else {
-                    _queue_gpu.push_back(request);
-                }
-                break;
-            }
+//            auto first = std::find_if(queue.begin(), queue.end(), [&](rqst_t &req) {
+//                return (req->getClientId() == client_id && req->getType() == type);
+//            });
+//            if (first != queue.end()) { // if there is a previous notification, replace it with the new one
+//                auto it = std::find_if(queue.begin(), first + 1, [&](rqst_t &req) {
+//                    const auto req_json = req->getRequest();
+//                    return (req_json.get("method", "").toString() == method);
+//                });
+//                if (it != queue.end()) { // if there is a previous notification, replace it with the new one
+//                    *it = request;
+//                }
+//            }
+            queue.push_back(request);
+            break;
         }
         default: throw std::runtime_error("[Error] unknown request type");
     }
+    log() << "[RQueue] new request received from client " << client_id << ": " << method << std::endl;
 }
 
-void RequestQueues::enqueueRequest(clid_t client_id, int type, json_t json, rply_t resolve)
+void RequestQueues::newRequest(clid_t client_id, int type, json_t json, rply_t resolve)
 {
-    // TODO should add lock -- DONE
-    // TODO should decide which queue to add
-    // TODO should compute expected request id for each request -- DONE
     _lock.lock();
 
-    std::string method = json.get("method", "").toString();        
     // we create the client if not exist
     auto client = clients::get(client_id);
     if (!client) client = clients::add(client_id);
 
-    if(method == "openProject") // splitting into 2 subrequests: LoadData enters _queue_cpu, and InitGL enters _queue_gpu
-    {
-        auto request_id1 = client -> nextCounterValue(),
-             request_id2 = client -> nextCounterValue();
-        json_t json1 = json;
-        json1["method"] = "LoadData";
-        json_t json2 = json;
-        json2["method"] = "InitGL";
-        std::cout << "json1" << json1.get("method", "").toString() << std::endl;
-        std::cout << "json2" << json2.get("method", "").toString() << std::endl;
-        // rply_t resolve1 = std::function<void(JsonValue)>{};
-        enqueue(client_id, request_id1, type, json1, std::move(rply_t{}));
-        enqueue(client_id, request_id2, type, json2, std::move(resolve));
-    }
-    else if(method == "closeProject") //splitting into 2 subrequests: LoadData enters _queue_cpu, and InitGL enters _queue_gpu
-    {
-        auto request_id1 = client -> nextCounterValue(),
-             request_id2 = client -> nextCounterValue();
-        json_t json1 = json;
-        json1["method"] = "DelData";
-        json_t json2 = json;
-        json2["method"] = "CloseGL";
-        std::cout << "json1" << json1.get("method", "").toString() << std::endl;
-        std::cout << "json2" << json2.get("method", "").toString() << std::endl;
-        // rply_t resolve1 = std::function<void(JsonValue)>{};
-        enqueue(client_id, request_id1, type, json1, std::move(rply_t{}));
-        enqueue(client_id, request_id2, type, json2, std::move(resolve));
-    }
-    else
-    {
+    // split requests
+    std::string method = json.get("method", "").toString();
+    if(method == "queryDatabase") {
+
         auto request_id = client->nextCounterValue(); // I implemented two counters in the Client class
         // each time there is a new request coming in, we get the value of 'next request counter' and
         // then increment the counter's value.
-        std::cout << "curr counter " << client->currCounterValue() << " next " << request_id << std::endl;
-        enqueue(client_id, request_id, type, json, std::move(resolve));
+        enqueue(_central_queue, client_id, request_id, type, json, std::move(resolve));
+
+    }
+    else if (method == "openProject") {
+
+        // splitting into 2 subrequests:
+        // -- createClient enters _graphic_queue
+        // -- loadData     enters _central_queue
+        // -- initGL       enters _graphic_queue
+
+        const auto request_create_gpu = client -> nextCounterValue();
+        const auto request_loadDT_cpu = client -> nextCounterValue();
+        const auto request_initGL_gpu = client -> nextCounterValue();
+        json_t &json_create_gpu = json;
+        json_t  json_loadDT_cpu = json;
+        json_t  json_initGL_gpu = json;
+        json_create_gpu["method"] = "createClient";
+        json_loadDT_cpu["method"] = "loadData";
+        json_initGL_gpu["method"] = "initGL";
+        std::cout << "gpu task " << json_create_gpu.get("method", "").toString() << std::endl;
+        std::cout << "cpu task " << json_loadDT_cpu.get("method", "").toString() << std::endl;
+        std::cout << "gpu task " << json_initGL_gpu.get("method", "").toString() << std::endl;
+        enqueue(_graphic_queue, client_id, request_create_gpu, type, json_create_gpu, std::move(rply_t{}));
+        enqueue(_central_queue, client_id, request_loadDT_cpu, type, json_loadDT_cpu, std::move(rply_t{}));
+        enqueue(_graphic_queue, client_id, request_initGL_gpu, type, json_initGL_gpu, resolve);
+
+    }
+    else if(method == "closeProject") {
+
+        // splitting into 2 subrequests:
+        // -- unloadGL enters _graphic_queue
+        // -- delData  enters _central_queue
+
+        const auto request_gpu = client -> nextCounterValue();
+        const auto request_cpu = client -> nextCounterValue();
+        json_t &json_gpu = json;
+        json_t  json_cpu = json;
+        json_gpu["method"] = "unloadGL";
+        json_cpu["method"] = "delData";
+        std::cout << "gpu task" << json_gpu.get("method", "").toString() << std::endl;
+        std::cout << "cpu task" << json_cpu.get("method", "").toString() << std::endl;
+        enqueue(_graphic_queue, client_id, request_gpu, type, json_gpu, std::move(rply_t{}));
+        enqueue(_central_queue, client_id, request_cpu, type, json_cpu, resolve);
+
+    }
+    else if (method == "getScene") {
+
+        enqueue(_central_queue, client_id, client->nextCounterValue(), type, json, std::move(resolve));
+
+    }
+    else if (method == "requestFrame") {
+
+        enqueue(_graphic_queue, client_id, client->nextCounterValue(), type, json, std::move(resolve));
+
+    }
+    else {
+        log() << "[Error] Unknown request " << method << std::endl;
     }
 
-    //debugQueue(_queue_cpu);
-    //debugQueue(_queue_gpu);
+    //debugQueue(_central_queue);
+    //debugQueue(_graphic_queue);
 
     _lock.unlock();
 }
@@ -144,14 +164,14 @@ int RequestQueues::dequeueCPU(clid_t &client_id,
                               json_t& request,
                               rply_t& resolve)
 {
-    return dequeue(_queue_cpu, client_id, request, resolve);
+    return dequeue(_central_queue, client_id, request, resolve);
 }
 
 int RequestQueues::dequeueGPU(clid_t &client_id,
                               json_t& request,
                               rply_t& resolve)
 {
-    return dequeue(_queue_gpu, client_id, request, resolve);
+    return dequeue(_graphic_queue, client_id, request, resolve);
 }
 
 int RequestQueues::dequeue(std::deque<rqst_t> &queue,
@@ -160,13 +180,12 @@ int RequestQueues::dequeue(std::deque<rqst_t> &queue,
                            rply_t &resolve)
 {
     _lock.lock();
-    // TODO we forgot to remove the executed request ?? DONE ?
     auto it = std::find_if(queue.begin(), queue.end(), [&](rqst_t &req) { return req->isReady(); });
     if (it != queue.end()) {
         client_id = (*it)->getClientId();
         request = (*it)->getRequest();
         resolve = (*it)->getResolve();
-        queue.erase(it); // << dequeue
+        queue.erase(it);
         debugQueue(queue);
         _lock.unlock();
         return 1;
@@ -182,7 +201,7 @@ void RequestQueues::debugQueue(const std::deque<rqst_t>& queue)
         auto json = x->getRequest();
         auto id = x->getClientId();
         std::string method = json.get("method", "").toString();
-        log() << "[Debug] new request received from client " << id << ": " << method << std::endl;
+        log() << "\t\t[Debug] new request received from client " << id << ": " << method << std::endl;
     }
 }
 

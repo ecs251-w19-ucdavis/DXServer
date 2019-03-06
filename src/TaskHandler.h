@@ -60,8 +60,10 @@ public:
 
 private:
     void loadDatabase(const std::string& database);
-    void handle_queryDatabase(clid_t clientId, json_t &output);
-    void handle_getScene(clid_t clientId, json_t &output);
+    void handle_queryDatabase(const clid_t& clientId, json_t &output);
+    void handle_getScene(const clid_t& clientId, json_t &output);
+    void handle_loadData(const clid_t& clientId, const std::string& projectName);
+    void handle_delData(const clid_t& clientId);
 
 private:
     json_t _jsonDatabase; // here we cache the database file to avoid reloading
@@ -76,9 +78,11 @@ class GPUTaskHandler : public TaskHandler {
     Q_OBJECT
 public:
     GPUTaskHandler() = default;
-    void processNextRequest() override {};
+    void processNextRequest() override;
 
 private:
+    void handle_createClient(const clid_t& clientId);
+
     void handle_initOpenGL();
     void handle_requestFrame();
 

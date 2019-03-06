@@ -100,6 +100,40 @@ void details::Client::init(int w, int h)
     _initialized = true;
 }
 
+void details::Client::initGL()
+{
+	_handler->loadGL();
+	_handler->updateScene();
+	_handler->updateView();
+	_handler->unloadGL();
+}
+
+void details::Client::openProject(const std::string& fname)
+{
+	_handler->loadJSONFile(fname);
+	_handler->updateData();
+}
+
+void details::Client::loadDataToGPU() // GPU
+{
+	// do nothing
+}
+
+void details::Client::removeDataFromGPU() // GPU
+{
+	_handler->unloadGL();
+}
+
+void details::Client::closeProject()
+{
+	// do nothing
+}
+
+void details::Client::renderFrame()
+{
+
+}
+
 json_t details::Client::getScene()
 {
 //	_currentProjectName = "/Users/qwu/Work/projects/vidi/dxserver/data/vorts1.json";

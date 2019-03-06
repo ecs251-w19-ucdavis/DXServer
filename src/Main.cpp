@@ -60,22 +60,33 @@ int main(int argc, char* argv[])
 
     dx::DXGL_create(); // load modules, load all shaders
 
+
     dx::Communicator server(8080);
     server.open();
     server.connectToRequestSlot(dx::queues::raw());
 
-    dx::CPUTaskHandler handler;
-    handler.connectToCommunicator(&server);
 
-    std::thread cpu_thread([&]() {
+    dx::CPUTaskHandler CPU_handler;
+    CPU_handler.connectToCommunicator(&server);
 
-        dx::DXGL_init(argc, argv);
+    dx::GPUTaskHandler GPU_handler;
+    GPU_handler.connectToCommunicator(&server);
 
-        startWorkspace(&argc, const_cast<const char **>(argv));
-        handler.run();
+
+    std::thread CPU_thread([&]() {
+        CPU_handler.run();
 
     });
-    cpu_thread.detach();
+    CPU_thread.detach();
+
+
+    std::thread GPU_thread([&]() {
+        dx::DXGL_init(argc, argv); // we should actually call this in the GPU thread
+        startWorkspace(&argc, const_cast<const char **>(argv));
+        GPU_handler.run();
+    });
+    GPU_thread.detach();
+
 
     int ret = app.exec();
     dx::DXGL_exit();

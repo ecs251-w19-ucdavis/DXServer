@@ -45,11 +45,7 @@ queues_t createRequestQueues(); // we can only have one instance of RequestQueue
 class RequestQueues : public QObject {
     Q_OBJECT
     friend queues_t details::createRequestQueues();
-public: 
-
-    // TODO the name of this function is misleading
-    void enqueue(clid_t client_id, size_t request_id, int type, json_t json, rply_t resolve);
-
+public:
     /**
      * Dequeue from the CPU queue
      * @param client_id
@@ -78,7 +74,7 @@ public slots: // <- NOTE don't forget this slots keyword defined by Qt
      * @param request
      * @param resolve
      */
-    void enqueueRequest(clid_t client_id, int type, json_t json, rply_t resolve);
+    void newRequest(clid_t client_id, int type, json_t json, rply_t resolve);
 
 private:
     /**
@@ -91,9 +87,11 @@ private:
     void debugQueue(const std::deque<rqst_t>&);
 
 private:
-    int dequeue(std::deque<rqst_t>&, clid_t &client_id, json_t&, rply_t&);
+    int  dequeue(std::deque<rqst_t>&, clid_t &client_id, json_t&, rply_t&);
+    void enqueue(std::deque<rqst_t>&, const clid_t &client_id, size_t request_id,
+                 int type, const json_t &json, const rply_t &resolve);
     std::mutex _lock;
-    std::deque<rqst_t> _queue_cpu, _queue_gpu;
+    std::deque<rqst_t> _central_queue, _graphic_queue; // I renamed them to avoid mis-reading
 };
 
 ///////////////////////////////////////////////////////////////////////////////
