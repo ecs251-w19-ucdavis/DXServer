@@ -72,7 +72,7 @@ protected:
     void notifyProjectOpened(std::string projFileName, clid_t clientId);
     void notifyProjectClosed(clid_t clientId);
     void sendScene(JsonValue scene, int64_t id, clid_t clientId);
-    void sendFrame(QImage img, clid_t clientId);
+    void sendFrame(JsonValue params, clid_t clientId);
     void sendDatabase(JsonValue database, int64_t id, clid_t clientId);
     void remapClientKey(QWebSocket* client, clid_t clientId, const JsonValue& data);
 

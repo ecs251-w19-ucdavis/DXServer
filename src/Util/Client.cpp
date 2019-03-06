@@ -103,7 +103,7 @@ void details::Client::init(int w, int h)
 void details::Client::initGL()
 {
 	_handler->loadGL();
-	_handler->updateScene();
+    _handler->initScene();
 	_handler->updateView();
 	_handler->unloadGL();
 }
@@ -111,27 +111,36 @@ void details::Client::initGL()
 void details::Client::openProject(const std::string& fname)
 {
 	_handler->loadJSONFile(fname);
-	_handler->updateData();
+    _handler->loadData();
 }
 
 void details::Client::loadDataToGPU() // GPU
 {
 	// do nothing
+	PING;
 }
 
 void details::Client::removeDataFromGPU() // GPU
 {
-	_handler->unloadGL();
+//	_handler->unloadGL();
+	PING;
 }
 
 void details::Client::closeProject()
 {
 	// do nothing
+	PING;
 }
 
-void details::Client::renderFrame()
+std::string details::Client::renderFrame(const JsonValue &input)
 {
-
+	_handler->loadGL();
+	_handler->updateView(input);
+	_handler->updateRenderer();
+	_handler->render();
+	const auto img = _handler->encodeRenderedImage();
+	_handler->unloadGL();
+	return img;
 }
 
 json_t details::Client::getScene()
@@ -140,8 +149,8 @@ json_t details::Client::getScene()
 //	_fbo = std::make_shared<FramebufferGL>(winW, winH);
 //	_handler = std::make_shared<Engine>(_fbo, winW, winH);
 //	_handler->loadJSONFile(_currentProjectName);
-//	_handler->updateData();
-//	_handler->updateScene();
+//	_handler->loadData();
+//	_handler->initScene();
 //	_handler->updateView();
 //	_handler->updateRenderer();
 	if (_handler) {
@@ -172,11 +181,11 @@ void details::Client::renderDebug()
 	// create renderer
 	_handler->loadJSONFile(_currentProjectName);
 
-    _handler->updateData();
+    _handler->loadData();
 
 	//_handler->loadGL();
 
-	_handler->updateScene();
+    _handler->initScene();
 	_handler->updateView();
 	_handler->updateRenderer();
 

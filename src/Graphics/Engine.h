@@ -62,12 +62,14 @@ public:
 
     JsonValue serializeScene();
 
-    void updateData();
-    void updateScene();
+    void loadData();
+    void initScene();
+
     void updateView(const JsonValue &input = JsonValue());
     void updateRenderer();
     void render();
     std::shared_ptr<std::vector<uint8_t>> copyRenderedImage(bool fix_alpha = true) const;
+    std::string encodeRenderedImage(bool fix_alpha = true) const;
 
 //    void resize(int w, int h); // TODO I am not sure we need to resize framebuffer in code
 //    void updateFBO(fbo_t fbo) { _fbo = std::move(fbo); }; // enable it if we really need to

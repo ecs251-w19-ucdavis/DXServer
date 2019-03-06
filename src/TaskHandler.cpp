@@ -13,6 +13,8 @@
 #include <QBuffer>
 #include <QImage>
 
+#include <unistd.h>
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /** Here are the part of requests we deal with in CPU.
@@ -52,6 +54,7 @@ void CPUTaskHandler::processNextRequest()
      * 
     */
     // get the
+    // TODO FIXME busy waiting !!!
     if (!queues::get()->dequeueCPU(id, json, resolve)) return;
 
     std::string method = json.get("method", "").toString();
@@ -84,14 +87,17 @@ void CPUTaskHandler::processNextRequest()
             json["params"].contains("fileName") &&
             json["params"]["fileName"].isString())
         {
+            std::cout << "open project " << projFileName << std::endl;
             projFileName = json["params"]["fileName"].toString();
             handle_loadData(id, projFileName);
         }
         clients::get(id)->incrementCurrCounter();
 
     } else {
-
+        std::cout << "unknown method " << method << std::endl;
     }
+    log() << "cpu handler current req id " << clients::get(id)->currCounterValue() << std::endl;
+    usleep(rand() % 1000);
 }
 
 void CPUTaskHandler::loadDatabase(const std::string& database)
@@ -166,16 +172,19 @@ void GPUTaskHandler::processNextRequest()
     rply_t resolve;
     json_t json;
 
+    // TODO FIXME busy waiting !!!
     if (!queues::get()->dequeueGPU(id, json, resolve)) return;
 
     std::string method = json.get("method", "").toString();
     log() << " task handler " << method << std::endl;
 
     if (method == "createClient") {
+
         handle_createClient(id);
         clients::get(id)->incrementCurrCounter();
-    }
-    else if (method == "loadGL") {
+
+    } else if (method == "initGL") {
+
         json_t dummy;
         clients::get(id)->initGL();
         emit onResolve(resolves::add([=]() {
@@ -183,7 +192,31 @@ void GPUTaskHandler::processNextRequest()
             log() << "[GPU Task] resolve openProject " << id << std::endl;
         }));
         clients::get(id)->incrementCurrCounter();
+
+    } else if (method == "requestFrame") {
+
+        JsonValue scene;
+        JsonValue params;
+        std::string img;
+
+        std::cout << JsonParser().stringify(json) << std::endl;
+
+        if (json.contains("params") && json["params"].isObject() && json["params"].contains("scene")) {
+            scene = json["params"]["scene"];
+            std::cout << JsonParser().stringify(scene) << std::endl;
+            img = clients::get(id)->renderFrame(scene);
+            img = "data:image/jpeg;base64," + img;
+        }
+        params["data"] = img;
+        emit onResolve(resolves::add([=]() {
+            resolve(params);
+            log() << "[GPU Task] resolve requestFrame " << id << std::endl;
+        }));
+        clients::get(id)->incrementCurrCounter();
+
     }
+    log() << "gpu handler current req id " << clients::get(id)->currCounterValue() << std::endl;
+    usleep(rand() % 1000);
 }
 
 void GPUTaskHandler::handle_createClient(const clid_t& clientId)

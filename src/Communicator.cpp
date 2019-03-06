@@ -16,7 +16,8 @@
 
 #include <string>
 
-std::string genHash(const int len) {
+std::string genHash(const int len)
+{
     static const char alphanum[] =
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -186,14 +187,15 @@ void v3d::dx::Communicator::processTextMessage(QString message)
     } else if (method == "getScene") {
 
         int64_t id = json.get("id", -1).toInt64();
-        std::cout << "[RComm] emitting signals" << std::endl;
         emit newRequest(clientId, 0, json, [=] (JsonValue scene) {
             sendScene(scene, id, clientId);
         });
 
     } else if (method == "requestFrame") {
 
-        PING;
+        emit newRequest(clientId, 0, json, [=] (JsonValue frame) {
+            sendFrame(frame, clientId);
+        });
 
     } else if (method == "clientKey") {
 
@@ -237,22 +239,22 @@ void v3d::dx::Communicator::sendScene(JsonValue scene, int64_t id, clid_t client
     rpcReply(client, scene, JsonValue(id));
 }
 
-void v3d::dx::Communicator::sendFrame(QImage img, clid_t clientId)
+void v3d::dx::Communicator::sendFrame(JsonValue params, clid_t clientId)
 {
     if (!contains(clientId))
         return;
     QWebSocket *client = _clients[clientId];
-    QByteArray base64;
-    {
-        QByteArray ba;
-        QBuffer buf(&ba);
-        buf.open(QIODevice::WriteOnly);
-        img.save(&buf, "JPG");
-        buf.close();
-        base64 = ba.toBase64();
-    }
-    JsonValue params;
-    params["data"] = "data:image/jpeg;base64," + base64.toStdString();
+//    QByteArray base64;
+//    {
+//        QByteArray ba;
+//        QBuffer buf(&ba);
+//        buf.open(QIODevice::WriteOnly);
+//        img.save(&buf, "JPG");
+//        buf.close();
+//        base64 = ba.toBase64();
+//    }
+//    JsonValue params;
+//    params["data"] = "data:image/jpeg;base64," + base64.toStdString();
     rpcNotify(client, "frame", params);
 }
 

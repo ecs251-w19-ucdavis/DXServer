@@ -120,7 +120,7 @@ void Engine::serializeTF(JsonValue& json) const
 }
 
 
-void Engine::updateData()
+void Engine::loadData()
 {
     // setup namespace
     using namespace v3d::serializer;
@@ -176,7 +176,7 @@ void Engine::updateData()
 /**
  * @note: we need an initialization because we will frequently update our scene file
  */
-void Engine::updateScene()
+void Engine::initScene()
 {
     // now we create transfer functions
     _ctf = std::move(TransferFunction::fromRainbowMap());
@@ -349,7 +349,8 @@ void Engine::updateView(const v3d::JsonValue &input)
 
     // if view is null, we use the default view value instead
     const JsonValue &view = input.isNull() ? _jsonView : input;
-    _jsonMethod = view.get(METHOD_, "").toString();
+    auto tmp = view.get(METHOD_, "").toString();
+    _jsonMethod = tmp.empty() ? _jsonMethod : tmp;
 
     // check consistency
     if (!(_mode == REGULAR_GRID && _jsonMethod == "REGULAR_GRID_VOLUME_RAY_CASTING") &&
@@ -431,6 +432,22 @@ std::shared_ptr<std::vector<uint8_t>> Engine::copyRenderedImage(bool fix_alpha) 
         for (int i = 0; i < _size.x * _size.y; i++) (*buffer)[i * 4 + 3] = 255;
     }
     return std::move(buffer);
+}
+
+std::string Engine::encodeRenderedImage(bool fix_alpha) const
+{
+    const auto raw = copyRenderedImage(true);
+
+    QImage img = QImage(&(*raw)[0], _size.x, _size.y, QImage::Format_RGB32).mirrored(false, true);
+    //img.copy(0, 0, _size.x, _size.y);
+    QByteArray base64;
+    QByteArray ba;
+    QBuffer buf(&ba);
+    buf.open(QIODevice::WriteOnly);
+    img.save(&buf, "JPG");
+    buf.close();
+    base64 = ba.toBase64();
+    return base64.toStdString();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

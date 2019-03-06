@@ -110,7 +110,7 @@ public:
 
 	json_t getScene();
 
-	void renderFrame();
+	std::string renderFrame(const JsonValue &input = JsonValue());
 
 	void initDebug(const std::string& fname, int w, int h);
 	void renderDebug();
