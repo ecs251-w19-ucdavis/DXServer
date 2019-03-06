@@ -77,7 +77,6 @@ protected:
 
     // heper functions for hash table
     bool contains(const clid_t& id) const;
-    //QWebSocket* getClient(clid_t clientId);
     bool getKey(const QWebSocket *socket, clid_t &key) const;
 
 public slots:
@@ -110,7 +109,6 @@ private:
     /// @note we do not need a lock here because all Qt slots are running on the same thread
     /// @note ref: https://doc.qt.io/qt-5/qt.html#ConnectionType-enum
     std::unordered_map<clid_t, QWebSocket*> _clients;
-    size_t _nextClientId = 1;
 };
 
 }}

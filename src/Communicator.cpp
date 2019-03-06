@@ -89,11 +89,6 @@ bool v3d::dx::Communicator::contains(const clid_t& id) const
     return _clients.find(id) != _clients.end();
 }
 
-//QWebSocket *v3d::dx::Communicator::getClient(clid_t clientId)
-//{
-//    return contains(clientId) ? _clients[clientId] : nullptr;
-//}
-
 bool v3d::dx::Communicator::getKey(const QWebSocket *socket, clid_t &key) const
 {
     auto it = std::find_if (_clients.begin(), _clients.end(), [=](const std::pair<clid_t, QWebSocket*> p) {
@@ -107,18 +102,17 @@ bool v3d::dx::Communicator::getKey(const QWebSocket *socket, clid_t &key) const
     }
 }
 
-
 void v3d::dx::Communicator::onNewConnection()
 {
-    log() << "[RComm] new connection from client " << _nextClientId << std::endl;
+    const auto key = genHash(100);
     QWebSocket *socket = _webSocketServer->nextPendingConnection();
-
+    // setup connections
     connect(socket, &QWebSocket::textMessageReceived, this, &Communicator::processTextMessage);
     connect(socket, &QWebSocket::binaryMessageReceived, this, &Communicator::processBinaryMessage);
     connect(socket, &QWebSocket::disconnected, this, &Communicator::onClientClosure);
-
-    _clients[genHash(100)] = socket;
-    ++_nextClientId;
+    // save client
+    _clients[key] = socket;
+    log() << "[RComm] new connection from client " << key << std::endl;
 }
 
 void v3d::dx::Communicator::onServerClosure()
@@ -129,14 +123,12 @@ void v3d::dx::Communicator::onServerClosure()
 void v3d::dx::Communicator::onClientClosure()
 {
     auto *client = qobject_cast<QWebSocket *>(sender());
-    log() << "[RComm] Socket disconnected" << std::endl;
     if (client) {
         clid_t key;
-        if (getKey(client, key)) {
-            _clients.erase(key);
-        };
+        if (getKey(client, key)) { _clients.erase(key); };
         client->deleteLater();
     }
+    log() << "[RComm] Socket disconnected" << std::endl;
 }
 
 void v3d::dx::Communicator::processTextMessage(QString message)
@@ -216,13 +208,9 @@ void v3d::dx::Communicator::processBinaryMessage(QByteArray message)
 void v3d::dx::Communicator::notifyProjectOpened(std::string projFileName, clid_t clientId)
 {
     log() << "[RComm] Project opened: " << projFileName << std::endl;
-
-//    QWebSocket *client = getClient(clientId);
     if (!contains(clientId))
         return;
     QWebSocket *client = _clients[clientId];
-//    if (client == nullptr)
-//        return;
     JsonValue params;
     params["fileName"] = projFileName;
     rpcNotify(client, "projectOpened", params);
@@ -234,8 +222,6 @@ void v3d::dx::Communicator::notifyProjectClosed(clid_t clientId)
     if (!contains(clientId))
         return;
     QWebSocket *client = _clients[clientId];
-//    if (client == nullptr)
-//        return;
     rpcNotify(client, "projectClosed", JsonValue());
 }
 
@@ -252,17 +238,17 @@ void v3d::dx::Communicator::sendFrame(QImage img, clid_t clientId)
     if (!contains(clientId))
         return;
     QWebSocket *client = _clients[clientId];
-
-    QByteArray ba;
-    QBuffer buf(&ba);
-    buf.open(QIODevice::WriteOnly);
-    img.save(&buf, "JPG");
-    buf.close();
-    QByteArray base64 = ba.toBase64();
-
+    QByteArray base64;
+    {
+        QByteArray ba;
+        QBuffer buf(&ba);
+        buf.open(QIODevice::WriteOnly);
+        img.save(&buf, "JPG");
+        buf.close();
+        base64 = ba.toBase64();
+    }
     JsonValue params;
     params["data"] = "data:image/jpeg;base64," + base64.toStdString();
-
     rpcNotify(client, "frame", params);
 }
 
