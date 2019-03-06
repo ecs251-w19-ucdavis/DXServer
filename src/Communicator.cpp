@@ -80,7 +80,7 @@ void v3d::dx::Communicator::rpcReply(QWebSocket *target, const JsonValue &result
     json["result"] = result;
     json["id"] = id;
     QString msg = QString::fromStdString(JsonParser().stringify(json));
-    std::cout << "[RComm] database " << msg.toCFString() << std::endl;
+    std::cout << "[RComm] database " << msg.toStdString() << std::endl;
     target->sendTextMessage(msg);
 }
 

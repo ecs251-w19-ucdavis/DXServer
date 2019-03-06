@@ -15,6 +15,7 @@
 
 #include <functional>
 #include <vector>
+#include <thread>
 
 namespace v3d { namespace dx {
 
