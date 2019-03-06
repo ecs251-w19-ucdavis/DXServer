@@ -102,14 +102,14 @@ void details::Client::init(int w, int h)
 
 json_t details::Client::getScene()
 {
-	_currentProjectName = "/home/qadwu/Work/projects/libvidi3d/DXServer/data/vorts1.json";
-	_fbo = std::make_shared<FramebufferGL>(winW, winH);
-	_handler = std::make_shared<Engine>(_fbo, winW, winH);
-	_handler->loadJSONFile(_currentProjectName);
-	_handler->updateData();
-	_handler->updateScene();
-	_handler->updateView();
-	_handler->updateRenderer();
+//	_currentProjectName = "/Users/qwu/Work/projects/vidi/dxserver/data/vorts1.json";
+//	_fbo = std::make_shared<FramebufferGL>(winW, winH);
+//	_handler = std::make_shared<Engine>(_fbo, winW, winH);
+//	_handler->loadJSONFile(_currentProjectName);
+//	_handler->updateData();
+//	_handler->updateScene();
+//	_handler->updateView();
+//	_handler->updateRenderer();
 	if (_handler) {
 		return std::move(_handler->serializeScene());
 	} else {

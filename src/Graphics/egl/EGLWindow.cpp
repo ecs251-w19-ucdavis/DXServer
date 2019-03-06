@@ -12,10 +12,6 @@
 #include <EGL/egl.h>
 #include <glad/glad.h>
 
-#include <thread>
-#include <mutex>
-#include <unordered_map>
-
 static const EGLint configAttribs[] = {
   EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
   EGL_BLUE_SIZE, 8,
@@ -43,14 +39,9 @@ static EGLint numConfigs;
 static EGLConfig eglCfg;
 static EGLSurface eglSurf;
 static EGLContext eglCtx;
-static std::unordered_map<int, EGLContext> localCtx;
-static int nextLocalCtxId = 1;
-static std::mutex lockCtx;
-    
+
 int DXGL_init(int argc, char *argv[])
 {
-    lockCtx.lock();
-  
     // 1. Initialize EGL
     eglDpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglInitialize(eglDpy, &major, &minor);
@@ -73,38 +64,8 @@ int DXGL_init(int argc, char *argv[])
         printf("Something went wrong!\n");
         exit(-1);
     }
-
-    // Release context ownership
-    //eglMakeCurrent(eglDpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
-    lockCtx.unlock();
     
     return 0;
-}
-
-int DXGL_createLocalContext(int& id)
-{
-    lockCtx.lock();
-
-    id = nextLocalCtxId++;
-    localCtx[id] = eglCreateContext(eglDpy, eglCfg, eglCtx, NULL);
-    //eglMakeCurrent(eglDpy, eglSurf, eglSurf, localCtx[id]);
-    //eglMakeCurrent(eglDpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
-    lockCtx.unlock();
-    return id;
-}
-    
-int DXGL_lockContext(const int& id)
-{
-    lockCtx.lock();
-    eglMakeCurrent(eglDpy, eglSurf, eglSurf, localCtx[id]);
-}
-
-int DXGL_unlockContext(const int& id)
-{
-    eglMakeCurrent(eglDpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    lockCtx.unlock();
 }
     
 int DXGL_exit()
