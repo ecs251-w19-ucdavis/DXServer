@@ -59,12 +59,20 @@ int main(int argc, char* argv[])
 #endif
 
     dx::DXGL_create(); // load modules, load all shaders
-    dx::DXGL_init(argc, argv);
+    //dx::DXGL_init(argc, argv);
 
-    std::thread debug([&]() {
-        startWorkspace(&argc, const_cast<const char **>(argv));
-    });
-    debug.join();
+    // std::thread debug([&]() {
+
+    // 	dx::DXGL_init(argc, argv);
+
+    // 	//int glCtx;
+    // 	//dx::DXGL_createLocalContext(glCtx);
+    // 	//std::cout << "ctx id " << glCtx << std::endl;
+    // 	//dx::DXGL_lockContext(glCtx);
+    //     startWorkspace(&argc, const_cast<const char **>(argv));
+    // 	//dx::DXGL_unlockContext(glCtx);
+    // });
+    // debug.join();
 
     dx::Communicator server(8080);
     server.open();
@@ -73,6 +81,7 @@ int main(int argc, char* argv[])
     dx::CPUTaskHandler handler;
     handler.connectToCommunicator(&server);
     std::thread cpu_thread([&]() {
+	dx::DXGL_init(argc, argv);
         handler.run();
     });
     cpu_thread.detach();

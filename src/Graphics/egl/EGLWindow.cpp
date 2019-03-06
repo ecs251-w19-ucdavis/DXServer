@@ -13,6 +13,8 @@
 #include <glad/glad.h>
 
 #include <thread>
+#include <mutex>
+#include <unordered_map>
 
 static const EGLint configAttribs[] = {
   EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
@@ -36,27 +38,34 @@ static const EGLint pbufferAttribs[] = {
 namespace v3d { namespace dx {
 
 static EGLDisplay eglDpy;
-
+static EGLint major, minor;
+static EGLint numConfigs;
+static EGLConfig eglCfg;
+static EGLSurface eglSurf;
+static EGLContext eglCtx;
+static std::unordered_map<int, EGLContext> localCtx;
+static int nextLocalCtxId = 1;
+static std::mutex lockCtx;
+    
 int DXGL_init(int argc, char *argv[])
 {
+    lockCtx.lock();
+  
     // 1. Initialize EGL
-    EGLDisplay eglDpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    EGLint major, minor;
+    eglDpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglInitialize(eglDpy, &major, &minor);
 
     // 2. Select an appropriate configuration
-    EGLint numConfigs;
-    EGLConfig eglCfg;
     eglChooseConfig(eglDpy, configAttribs, &eglCfg, 1, &numConfigs);
 
     // 3. Create a surface
-    EGLSurface eglSurf = eglCreatePbufferSurface(eglDpy, eglCfg, pbufferAttribs);
+    eglSurf = eglCreatePbufferSurface(eglDpy, eglCfg, pbufferAttribs);
 
     // 4. Bind the API
     eglBindAPI(EGL_OPENGL_API);
 
     // 5. Create a context and make it current
-    EGLContext eglCtx = eglCreateContext(eglDpy, eglCfg, EGL_NO_CONTEXT, NULL);
+    eglCtx = eglCreateContext(eglDpy, eglCfg, EGL_NO_CONTEXT, NULL);
     eglMakeCurrent(eglDpy, eglSurf, eglSurf, eglCtx);
 
     // from now on use your OpenGL context
@@ -65,9 +74,39 @@ int DXGL_init(int argc, char *argv[])
         exit(-1);
     }
 
+    // Release context ownership
+    //eglMakeCurrent(eglDpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+    lockCtx.unlock();
+    
     return 0;
 }
 
+int DXGL_createLocalContext(int& id)
+{
+    lockCtx.lock();
+
+    id = nextLocalCtxId++;
+    localCtx[id] = eglCreateContext(eglDpy, eglCfg, eglCtx, NULL);
+    //eglMakeCurrent(eglDpy, eglSurf, eglSurf, localCtx[id]);
+    //eglMakeCurrent(eglDpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+    lockCtx.unlock();
+    return id;
+}
+    
+int DXGL_lockContext(const int& id)
+{
+    lockCtx.lock();
+    eglMakeCurrent(eglDpy, eglSurf, eglSurf, localCtx[id]);
+}
+
+int DXGL_unlockContext(const int& id)
+{
+    eglMakeCurrent(eglDpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    lockCtx.unlock();
+}
+    
 int DXGL_exit()
 {
     // 6. Terminate EGL when finished

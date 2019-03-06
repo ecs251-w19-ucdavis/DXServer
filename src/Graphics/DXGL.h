@@ -21,8 +21,10 @@ namespace v3d { namespace dx {
 extern int winW, winH;
 int DXGL_create();
 int DXGL_init(int argc, char* argv[]);
+int DXGL_createLocalContext(int&);
+int DXGL_lockContext(const int&);
+int DXGL_unlockContext(const int&);
 int DXGL_exit();
-
 }}
 
 
