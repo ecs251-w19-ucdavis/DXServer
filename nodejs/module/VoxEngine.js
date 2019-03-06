@@ -41,6 +41,7 @@ class VoxEngine {
     this._Handler_frame_ = undefined
     this._Handler_queryDatabase_ = undefined
     this._Handler_getScene_ = undefined
+    this._Handler_clientKey_ = undefined
     this._Handler_projectOpened_ = (msg) => {
       console.log('project opened')
     }
@@ -121,6 +122,15 @@ class VoxEngine {
     this._Handler_projectClosed_ = func
   }
 
+  /** Notify: exchangeKey **/
+  NotifyClientKey (key) {
+    this._rpcNotify('clientKey', { 'key': key })
+  }
+
+  set OnClientKey (func) {
+    this._Handler_clientKey_ = func
+  }
+
   /**
    *
    * @param event
@@ -145,6 +155,10 @@ class VoxEngine {
         }
         case 'projectClosed': {
           this._Handler_projectClosed_(msg)
+          break
+        }
+        case 'clientKey': {
+          this._Handler_clientKey_(msg)
           break
         }
         default: {

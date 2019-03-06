@@ -196,6 +196,11 @@ void v3d::dx::Communicator::processTextMessage(QString message)
 
         PING;
 
+    } else if (method == "clientKey") {
+
+        log() << "current client key " << JsonParser().stringify(json) << std::endl;
+        remapClientKey(client, clientId, json);
+
     }
 
 }
@@ -258,4 +263,31 @@ void v3d::dx::Communicator::sendDatabase(JsonValue database, int64_t id, clid_t 
         return;
     QWebSocket *client = _clients[clientId];
     rpcReply(client, database, JsonValue(id));
+}
+
+void v3d::dx::Communicator::remapClientKey(QWebSocket* client, clid_t clientId, const JsonValue& data)
+{
+    std::string key;
+    bool old = false;
+    if (data.contains("params") &&
+        data["params"].isObject() &&
+        data["params"].contains("key") &&
+        data["params"]["key"].isString())
+    {
+        key = data["params"]["key"].toString();
+        if (clients::has(key)) old = true;
+    }
+    if (old) {
+        // now we should change current client's key
+        log() << "found an old client, change its current key back to the old key\n"
+              << "(old)\t" << key << std::endl
+              << "(new)\t" << clientId << std::endl;
+        _clients.erase(clientId);
+        _clients[key] = client;
+    } else {
+        log() << "found a new client " << clientId << std::endl;
+        JsonValue json;
+        json["key"] = clientId;
+        rpcNotify(client, "clientKey", json);
+    }
 }

@@ -130,6 +130,7 @@ void RequestQueues::enqueueRequest(clid_t client_id, int type, json_t json, rply
         auto request_id = client->nextCounterValue(); // I implemented two counters in the Client class
         // each time there is a new request coming in, we get the value of 'next request counter' and
         // then increment the counter's value.
+        std::cout << "curr counter " << client->currCounterValue() << " next " << request_id << std::endl;
         enqueue(client_id, request_id, type, json, std::move(resolve));
     }
 
