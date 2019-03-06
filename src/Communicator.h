@@ -67,7 +67,6 @@ protected:
     // basic functionality
     void rpcNotify(QWebSocket* target, const std::string& method, const JsonValue& params);
     void rpcReply(QWebSocket* target, const JsonValue& result, const JsonValue& id);
-    QWebSocket* getClient(clid_t clientId);
 
     // call by onResolve
     void notifyProjectOpened(std::string projFileName, clid_t clientId);
@@ -77,18 +76,9 @@ protected:
     void sendDatabase(JsonValue database, int64_t id, clid_t clientId);
 
     // heper functions for hash table
-    bool contains(const clid_t& id) const { return _clients.find(id) != _clients.end(); }
-    bool findKey(const QWebSocket* socket, clid_t& key) const {
-        auto it = std::find_if (_clients.begin(), _clients.end(), [=](const std::pair<clid_t, QWebSocket*> p) {
-            return p.second == socket;
-        });
-        if (it != _clients.end()) {
-            key = it->first;
-            return true;
-        } else {
-            return false;
-        }
-    }
+    bool contains(const clid_t& id) const;
+    //QWebSocket* getClient(clid_t clientId);
+    bool getKey(const QWebSocket *socket, clid_t &key) const;
 
 public slots:
     // called by websocket

@@ -84,10 +84,29 @@ void v3d::dx::Communicator::rpcReply(QWebSocket *target, const JsonValue &result
     target->sendTextMessage(msg);
 }
 
-QWebSocket *v3d::dx::Communicator::getClient(clid_t clientId)
+bool v3d::dx::Communicator::contains(const clid_t& id) const
 {
-    return contains(clientId) ? _clients[clientId] : nullptr;
+    return _clients.find(id) != _clients.end();
 }
+
+//QWebSocket *v3d::dx::Communicator::getClient(clid_t clientId)
+//{
+//    return contains(clientId) ? _clients[clientId] : nullptr;
+//}
+
+bool v3d::dx::Communicator::getKey(const QWebSocket *socket, clid_t &key) const
+{
+    auto it = std::find_if (_clients.begin(), _clients.end(), [=](const std::pair<clid_t, QWebSocket*> p) {
+        return p.second == socket;
+    });
+    if (it != _clients.end()) {
+        key = it->first;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 
 void v3d::dx::Communicator::onNewConnection()
 {
@@ -113,7 +132,7 @@ void v3d::dx::Communicator::onClientClosure()
     log() << "[RComm] Socket disconnected" << std::endl;
     if (client) {
         clid_t key;
-        if (findKey(client, key)) {
+        if (getKey(client, key)) {
             _clients.erase(key);
         };
         client->deleteLater();
@@ -125,7 +144,7 @@ void v3d::dx::Communicator::processTextMessage(QString message)
     // compute client Id
     auto *client = qobject_cast<QWebSocket *>(sender());
     clid_t clientId;
-    if (client == nullptr || !findKey(client, clientId)) {
+    if (client == nullptr || !getKey(client, clientId)) {
         log() << "[RComm] Message received from invalid client" << std::endl;
         return;
     }
@@ -198,9 +217,12 @@ void v3d::dx::Communicator::notifyProjectOpened(std::string projFileName, clid_t
 {
     log() << "[RComm] Project opened: " << projFileName << std::endl;
 
-    QWebSocket *client = getClient(clientId);
-    if (client == nullptr)
+//    QWebSocket *client = getClient(clientId);
+    if (!contains(clientId))
         return;
+    QWebSocket *client = _clients[clientId];
+//    if (client == nullptr)
+//        return;
     JsonValue params;
     params["fileName"] = projFileName;
     rpcNotify(client, "projectOpened", params);
@@ -209,9 +231,11 @@ void v3d::dx::Communicator::notifyProjectOpened(std::string projFileName, clid_t
 void v3d::dx::Communicator::notifyProjectClosed(clid_t clientId)
 {
     log() << "[RComm] Project closed" << std::endl;
-    QWebSocket *client = getClient(clientId);
-    if (client == nullptr)
+    if (!contains(clientId))
         return;
+    QWebSocket *client = _clients[clientId];
+//    if (client == nullptr)
+//        return;
     rpcNotify(client, "projectClosed", JsonValue());
 }
 
