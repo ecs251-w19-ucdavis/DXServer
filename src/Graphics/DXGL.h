@@ -20,7 +20,8 @@ namespace v3d { namespace dx {
 
 extern int winW, winH;
 int DXGL_create();
-int DXGL_execute(int argc, char* argv[], const std::function<void()>& render);
+int DXGL_init(int argc, char* argv[]);
+int DXGL_exit();
 
 }}
 

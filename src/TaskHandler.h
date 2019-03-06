@@ -60,7 +60,8 @@ public:
 
 private:
     void loadDatabase(const std::string& database);
-    void handle_QueryDatabase(clid_t clientId, json_t &output);
+    void handle_queryDatabase(clid_t clientId, json_t &output);
+    void handle_getScene(clid_t clientId, json_t &output);
 
 private:
     json_t _jsonDatabase; // here we cache the database file to avoid reloading
@@ -80,7 +81,7 @@ public:
 private:
     void handle_initOpenGL();
     void handle_requestFrame();
-    void handle_getScene();
+
     void handle_queryDatabase();
 };
 

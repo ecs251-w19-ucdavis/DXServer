@@ -25,7 +25,7 @@ namespace v3d { namespace dx {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace details { class Client; }
-
+using json_t = JsonValue;
 using clid_t = std::string;
 using client_t = std::shared_ptr<details::Client>;
 
@@ -107,7 +107,7 @@ public:
 
     void openProject(const std::string& fname)
     {
-		_handler->loadJSONFile(_currentProjectName);
+		_handler->loadJSONFile(fname);
     }
 
     void loadDataToGPU() // GPU
@@ -125,10 +125,7 @@ public:
     	// do nothing
 	}
 
-	void getScene() // GPU
-	{
-		_handler->loadGL();
-	}
+	json_t getScene();
 
 	void renderFrame()
 	{

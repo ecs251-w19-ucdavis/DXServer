@@ -100,6 +100,23 @@ void details::Client::init(int w, int h)
     _initialized = true;
 }
 
+json_t details::Client::getScene()
+{
+	_currentProjectName = "/Users/qwu/Work/projects/vidi/dxserver/data/engine.json";
+	_fbo = std::make_shared<FramebufferGL>(winW, winH);
+	_handler = std::make_shared<Engine>(_fbo, winW, winH);
+	_handler->loadJSONFile(_currentProjectName);
+	_handler->updateData();
+	_handler->updateScene();
+	_handler->updateView();
+	_handler->updateRenderer();
+	if (_handler) {
+		return std::move(_handler->serializeScene());
+	} else {
+		return json_t();
+	}
+}
+
 void details::Client::initDebug(const std::string& fname, int w, int h)
 {
 	if (_initialized)
@@ -119,14 +136,22 @@ void details::Client::initDebug(const std::string& fname, int w, int h)
 void details::Client::renderDebug()
 {
 	// create renderer
-    _handler->loadJSONFile(_currentProjectName);
+	_handler->loadJSONFile(_currentProjectName);
 
-	_handler->initData();
-    _handler->loadGL();
+    _handler->updateData();
 
-	_handler->initScene();
+	//_handler->loadGL();
+
+	_handler->updateScene();
 	_handler->updateView();
 	_handler->updateRenderer();
+
+	//_handler->unloadGL();
+
+	//auto x = _handler->serializeScene();
+	//std::cout << JsonParser().stringify(x) << std::endl;
+
+	_handler->loadGL();
 
 	// render
 	_handler->render();

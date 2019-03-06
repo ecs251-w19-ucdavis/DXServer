@@ -14,7 +14,6 @@ namespace v3d { namespace dx {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace details { class Request; }
-using json_t = JsonValue;
 using rply_t = std::function<void(JsonValue)>;
 using rqst_t = std::shared_ptr<details::Request>;
 

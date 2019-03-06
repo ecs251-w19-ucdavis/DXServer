@@ -58,6 +58,11 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 #endif
 
+    dx::DXGL_create(); // load modules, load all shaders
+    dx::DXGL_init(argc, argv);
+
+    startWorkspace(&argc, const_cast<const char **>(argv));
+
     dx::Communicator server(8080);
     server.open();
     server.connectToRequestSlot(dx::queues::raw());
@@ -66,10 +71,7 @@ int main(int argc, char* argv[])
     handler.connectToCommunicator(&server);
     handler.start();
 
-    dx::DXGL_create(); // load modules, load all shaders
-    dx::DXGL_execute(argc, argv, [&]() {
-        startWorkspace(&argc, const_cast<const char **>(argv));
-    });
-
-    return app.exec();
+    int ret = app.exec();
+    dx::DXGL_exit();
+    return ret;
 }

@@ -29,13 +29,15 @@ namespace v3d { namespace dx {
 // can be identical to the lifetime of the program !
 static std::shared_ptr<qt::OpenGLWindow> window;
 
-int DXGL_execute(int argc, char* argv[], const std::function<void()>& render)
+int DXGL_init(int argc, char* argv[])
 {
     window = std::make_shared<qt::OpenGLWindow>();
-	QTimer::singleShot(0, QApplication::instance(), [&]() {
-		render();
-	});
 	return 0;
+};
+
+int DXGL_exit()
+{
+    return 0;
 };
 
 namespace qt {

@@ -60,8 +60,10 @@ public:
      */
     void loadJSONFile(std::string pname);
 
-    void initData();
-    void initScene();
+    JsonValue serializeScene();
+
+    void updateData();
+    void updateScene();
     void updateView(const JsonValue &input = JsonValue());
     void updateRenderer();
     void render();
@@ -74,6 +76,9 @@ public:
     void unloadGL();
 
 protected:
+
+    void serializeTF(JsonValue& json) const;
+
     void updateCamera(const JsonValue &);
     void updateTransferFunction(const JsonValue &);
     std::shared_ptr<RegularGridSceneGL> getSceneGrid() { return _sceneGrid; }

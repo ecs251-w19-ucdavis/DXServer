@@ -59,10 +59,20 @@ void CPUTaskHandler::processNextRequest()
     if (method == "queryDatabase") {
 
         json_t output;
-        handle_QueryDatabase(id, output);
+        handle_queryDatabase(id, output);
         emit onResolve(resolves::add([=]() {
             resolve(output);
-            log() << "[CPU] resolve " << id << std::endl;
+            log() << "[CPU Task] resolve queryDatabase " << id << std::endl;
+        }));
+        clients::get(id)->incrementCurrCounter();
+
+    } else if (method == "getScene") {
+
+        json_t output;
+        handle_getScene(id, output);
+        emit onResolve(resolves::add([=]() {
+            resolve(output);
+            log() << "[CPU Task] resolve getScene " << id << std::endl;
         }));
         clients::get(id)->incrementCurrCounter();
 
@@ -116,9 +126,14 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
 }
 
 // Read Data From Database
-void CPUTaskHandler::handle_QueryDatabase(clid_t clientId, json_t &output)
+void CPUTaskHandler::handle_queryDatabase(clid_t clientId, json_t &output)
 {
     if (!_jsonDatabase.isNull()) { output = _jsonDatabase; } // make a copy
+}
+
+void CPUTaskHandler::handle_getScene(clid_t clientId, json_t &output)
+{
+    output = std::move(clients::get(clientId)->getScene());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -35,43 +35,44 @@ static const EGLint pbufferAttribs[] = {
 
 namespace v3d { namespace dx {
 
-int DXGL_execute(int argc, char *argv[], const std::function<void()> &render)
+static EGLDisplay eglDpy;
+
+int DXGL_init(int argc, char *argv[])
 {
-    std::thread main([&]()
-    {
-        // 1. Initialize EGL
-        EGLDisplay eglDpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-        EGLint major, minor;
-        eglInitialize(eglDpy, &major, &minor);
+    // 1. Initialize EGL
+    EGLDisplay eglDpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    EGLint major, minor;
+    eglInitialize(eglDpy, &major, &minor);
 
-        // 2. Select an appropriate configuration
-        EGLint numConfigs;
-        EGLConfig eglCfg;
-        eglChooseConfig(eglDpy, configAttribs, &eglCfg, 1, &numConfigs);
+    // 2. Select an appropriate configuration
+    EGLint numConfigs;
+    EGLConfig eglCfg;
+    eglChooseConfig(eglDpy, configAttribs, &eglCfg, 1, &numConfigs);
 
-        // 3. Create a surface
-        EGLSurface eglSurf = eglCreatePbufferSurface(eglDpy, eglCfg, pbufferAttribs);
+    // 3. Create a surface
+    EGLSurface eglSurf = eglCreatePbufferSurface(eglDpy, eglCfg, pbufferAttribs);
 
-        // 4. Bind the API
-        eglBindAPI(EGL_OPENGL_API);
+    // 4. Bind the API
+    eglBindAPI(EGL_OPENGL_API);
 
-        // 5. Create a context and make it current
-        EGLContext eglCtx = eglCreateContext(eglDpy, eglCfg, EGL_NO_CONTEXT, NULL);
-        eglMakeCurrent(eglDpy, eglSurf, eglSurf, eglCtx);
+    // 5. Create a context and make it current
+    EGLContext eglCtx = eglCreateContext(eglDpy, eglCfg, EGL_NO_CONTEXT, NULL);
+    eglMakeCurrent(eglDpy, eglSurf, eglSurf, eglCtx);
 
-        // from now on use your OpenGL context
-        if(!gladLoadGL()) {
-            printf("Something went wrong!\n");
-            exit(-1);
-        }
+    // from now on use your OpenGL context
+    if(!gladLoadGL()) {
+        printf("Something went wrong!\n");
+        exit(-1);
+    }
 
-        // do the work
-        render();
+    return 0;
+}
 
-        // 6. Terminate EGL when finished
-        eglTerminate(eglDpy);
-    });
-    main.detach(); // detach the rendering thread here because we can never join it.
+int DXGL_exit()
+{
+    // 6. Terminate EGL when finished
+    eglTerminate(eglDpy);
+
     return 0;
 }
 
