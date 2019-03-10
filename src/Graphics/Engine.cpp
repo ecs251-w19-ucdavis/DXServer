@@ -26,6 +26,9 @@
 #include "Util/Material.h"
 #include "Renderer/GeometryProperty.h"
 
+#include <QImage>
+#include <QBuffer>
+
 using v3d::JsonValue;
 using v3d::JsonParser;
 
