@@ -396,12 +396,12 @@ void Engine::updateRenderer()
     }
 }
 
-//void Engine::resize(int w, int h)
-//{
-//  _size.x = w;
-//  _size.y = h;
-//  updateRenderer();
-//}
+void Engine::resize(int w, int h)
+{
+    _size.x = w;
+    _size.y = h;
+    updateRenderer();
+}
 
 void Engine::render()
 {
@@ -526,8 +526,14 @@ void Engine::updateCamera(const v3d::JsonValue &view)
     using namespace v3d::dx::serializer;
     // load camera
     if (view.contains(CAMERA)) {
+        float aspect = _size.x / static_cast<float>(_size.y);
         *_camera = fromJson<Camera>(view[CAMERA]);
-        _camera->setAspect(_size.x / static_cast<float>(_size.y));
+        _camera->setAspect(aspect);
+        if (view[CAMERA].contains(FRAME_HEIGHT)) {
+            int h = view[CAMERA][FRAME_HEIGHT].toInt();
+            int w = int(aspect * h);
+            resize(w, h);
+        }
     }
 }
 
