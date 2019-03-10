@@ -42,6 +42,13 @@ CPUTaskHandler::CPUTaskHandler(const std::string &database)
 
 void CPUTaskHandler::processNextRequest()
 {
+    /**
+     * Handle requests in CPU
+     * @param id <- client id
+     * @param resolve <- respond to client
+     * @param json <- request format
+     * 
+     */
     clid_t id;
     rply_t resolve;
     json_t json;
@@ -53,8 +60,8 @@ void CPUTaskHandler::processNextRequest()
      *  Here in CPU we deal with the load data request  
      * 
     */
-    // get the
-    // TODO FIXME busy waiting !!!
+  
+    // TODO FIXME busy waiting 
     if (!queues::get()->dequeueCPU(id, json, resolve)) return;
 
     std::string method = json.get("method", "").toString();
@@ -63,6 +70,8 @@ void CPUTaskHandler::processNextRequest()
 
         json_t output;
         handle_queryDatabase(id, output);
+
+        // onResolve is used to respond to client
         emit onResolve(resolves::add([=]() {
             resolve(output);
             log() << "[CPU Task] resolve queryDatabase " << id << std::endl;
@@ -105,6 +114,7 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
     // open the database file as a string
     std::ifstream dsFile(database);
     if (!dsFile.is_open()) {
+
         // I want to avoid crashing simply because database.json does not exists.
         log() << "[error] cannot open database lookup file "
               << "'"
@@ -144,21 +154,25 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
     }
 }
 
+// Query database in CPU
 void CPUTaskHandler::handle_queryDatabase(const clid_t& clientId, json_t &output)
 {
     if (!_jsonDatabase.isNull()) { output = _jsonDatabase; } // make a copy
 }
 
+// Get scene in CPU
 void CPUTaskHandler::handle_getScene(const clid_t& clientId, json_t &output)
 {
     output = std::move(clients::get(clientId)->getScene());
 }
 
+// Load data in CPU
 void CPUTaskHandler::handle_loadData(const clid_t& clientId, const std::string& projectName)
 {
     clients::get(clientId)->openProject(projectName);
 }
 
+// Delete data after disconnection in CPU
 void CPUTaskHandler::handle_delData(const clid_t& clientId)
 {
     clients::get(clientId)->closeProject();
@@ -168,6 +182,13 @@ void CPUTaskHandler::handle_delData(const clid_t& clientId)
 
 void GPUTaskHandler::processNextRequest()
 {
+    /**
+     * Handle requests in CPU
+     * @param id <- client id
+     * @param resolve <- respond to client
+     * @param json <- request format
+     * 
+     */
     clid_t id;
     rply_t resolve;
     json_t json;
@@ -186,7 +207,8 @@ void GPUTaskHandler::processNextRequest()
     } else if (method == "initGL") {
 
         json_t dummy;
-        clients::get(id)->initGL();
+        handle_initOpenGL(id);
+        // clients::get(id)->initGL();
         emit onResolve(resolves::add([=]() {
             resolve(dummy);
             log() << "[GPU Task] resolve openProject " << id << std::endl;
@@ -204,7 +226,8 @@ void GPUTaskHandler::processNextRequest()
         if (json.contains("params") && json["params"].isObject() && json["params"].contains("scene")) {
             scene = json["params"]["scene"];
             std::cout << JsonParser().stringify(scene) << std::endl;
-            img = clients::get(id)->renderFrame(scene);
+            handle_requestFrame(id, img);
+            // img = clients::get(id)->renderFrame(scene);
             img = "data:image/jpeg;base64," + img;
         }
         params["data"] = img;
@@ -214,14 +237,53 @@ void GPUTaskHandler::processNextRequest()
         }));
         clients::get(id)->incrementCurrCounter();
 
+    } else if(method == "unloadGL") {
+        // TODO
+        handle_closeOpenGL(id);
+        // emit onResolve(resolves::pop([=]() {
+        //     log() << "[GPU Task] resolve closeOpenGL" << id << std::endl;
+        // }));
+
+
+        // emit onResolve(resolves::add([=]() {
+        //     // resolve(params);
+        //     log() << "[GPU Task] resolve closeOpenGL" << id << std::endl;
+        // }));
+        clients::get(id)->incrementCurrCounter();
     }
+
     log() << "gpu handler current req id " << clients::get(id)->currCounterValue() << std::endl;
     usleep(rand() % 1000);
 }
 
+
+// Create client 
 void GPUTaskHandler::handle_createClient(const clid_t& clientId)
 {
     clients::get(clientId)->init(600, 600);
 }
+
+
+// Initialize OpenGL
+void GPUTaskHandler::handle_initOpenGL(const clid_t& clientId)
+{
+    clients::get(clientId)->initGL();
+}
+
+
+// Request Frame
+void GPUTaskHandler::handle_requestFrame(const clid_t& clientId, std::string& img) 
+{
+    img = std::move(clients::get(clientId)->renderFrame(scene));
+}
+
+
+// Close OpenGL
+void GPUTaskHandler::handle_closeOpenGL(const clid_t clientId) 
+{
+    // clients::get(clientId)->closeProject();
+    clients::get(clientId)->removeDataFromGPU();
+}
+
 
 }}
