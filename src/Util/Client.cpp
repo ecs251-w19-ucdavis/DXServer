@@ -135,7 +135,7 @@ void details::Client::closeProject()
 std::string details::Client::renderFrame(const JsonValue &input)
 {
 	_handler->loadGL();
-	_handler->updateView(input);
+    _handler->updateView(input);
 	_handler->updateRenderer();
 	_handler->render();
 	const auto img = _handler->encodeRenderedImage();

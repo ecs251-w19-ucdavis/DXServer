@@ -45,6 +45,7 @@ const char* const OCCLUSION_TRANSFER_FUNCTION = "occlusionTransferFunction";
 const char* const VARIABLE_TYPE = "variableType";
 const char* const VIEW = "view";
 const char* const VOLUME = "volume";
+const char* const FRAME_HEIGHT = "frameHeight";
 
 // from DataSourceModel.h
 const char *const FOLDER = "FOLDER";

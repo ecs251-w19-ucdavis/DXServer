@@ -22,12 +22,16 @@ void startWorkspace(int *argc, const char **argv)
 {
 #if MULTI_CLIENT_MODE
 
-    auto c0 = dx::clients::add("100");
-    auto c1 = dx::clients::add("200");
-    c0->initDebug(argv[1], dx::winW, dx::winH);
-    c1->initDebug(argv[2], dx::winW, dx::winH);
-    c0->renderDebug();
-    c1->renderDebug();
+    for (int i = 1; i < *argc; ++i) {
+        dx::clients::add("-ex" + std::to_string(i));
+    }
+    for (int i = 1; i < *argc; ++i) {
+        dx::clients::get("-ex" + std::to_string(i))->initDebug(argv[i], dx::winW, dx::winH);
+    }
+    for (int i = 1; i < *argc; ++i) {
+        dx::clients::get("-ex" + std::to_string(i))->renderDebug();
+    }
+
 
 #else
 
