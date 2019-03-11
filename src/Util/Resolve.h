@@ -21,23 +21,11 @@ namespace resolves {
  */
 int add(const std::function<void()>&);
 
-///**
-// * TODO DOC
-// * @return
-// */
-//const std::function<void()> get(int);
-
 /**
  * TODO DOC
  * @return
  */
 const std::function<void()> pop(int);
-
-///**
-// * TODO DOC
-// * @return
-// */
-//bool has(int);
 
 }
 

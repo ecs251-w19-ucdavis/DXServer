@@ -391,7 +391,8 @@ void Engine::updateRenderer()
     }
     else if (_mode == TETRA_GRID) {
         _rendererTets->resize(_size.x, _size.y);
-    } else {
+    }
+    else {
         throw std::runtime_error("[Error] unknown volume type");
     }
 }
@@ -411,7 +412,8 @@ void Engine::render()
     }
     else if (_mode == TETRA_GRID) {
         _rendererTets->render();
-    } else {
+    }
+    else {
         throw std::runtime_error("[Error] unknown volume type");
     }
     glFinish();
@@ -440,9 +442,7 @@ std::shared_ptr<std::vector<uint8_t>> Engine::copyRenderedImage(bool fix_alpha) 
 std::string Engine::encodeRenderedImage(bool fix_alpha) const
 {
     const auto raw = copyRenderedImage(true);
-
     QImage img = QImage(&(*raw)[0], _size.x, _size.y, QImage::Format_RGB32).mirrored(false, true);
-    //img.copy(0, 0, _size.x, _size.y);
     QByteArray base64;
     QByteArray ba;
     QBuffer buf(&ba);

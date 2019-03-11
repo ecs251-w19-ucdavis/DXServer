@@ -24,6 +24,8 @@ namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+using lock_t = std::unique_lock<std::mutex>;
+
 namespace details { class Client; }
 using json_t = JsonValue;
 using clid_t = std::string;
@@ -108,7 +110,7 @@ public:
     void openProject(const std::string& fname);
     void closeProject();
 
-    void loadDataToGPU(); // GPU
+//    void loadDataToGPU(); // GPU
 	void removeDataFromGPU(); // GPU
 
 	json_t getScene();

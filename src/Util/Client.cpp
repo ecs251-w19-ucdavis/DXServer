@@ -20,68 +20,68 @@ using namespace v3d::dx;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static std::map<clid_t, client_t> client_queue;
-static std::mutex                 client_mutex; // lock for the client queue
+static std::map<clid_t, client_t> _client_queue;
+static std::mutex                 _client_mutex; // lock for the client queue
 
 void clients::lock()
 {
-	client_mutex.lock();
+	_client_mutex.lock();
 }
 
 void clients::unlock()
 {
-	client_mutex.unlock();
+	_client_mutex.unlock();
 }
 
 int clients::pop(clid_t id)
 {
-	client_mutex.lock();
+	_client_mutex.lock();
 	{
-		auto it = client_queue.find(id);
-		if (it != client_queue.end()) { client_queue.erase(it); }
+		auto it = _client_queue.find(id);
+		if (it != _client_queue.end()) { _client_queue.erase(it); }
 	}
-	client_mutex.unlock();
+	_client_mutex.unlock();
 	return 0;
 }
 
 client_t clients::add(clid_t id)
 {
 	client_t client;
-	client_mutex.lock();
+	_client_mutex.lock();
 	{
 		client.reset(new details::Client());
 		client->setId(id);
-		client_queue[id] = client;
+		_client_queue[id] = client;
 	}
-	client_mutex.unlock();
+	_client_mutex.unlock();
 	return client;
 }
 
 client_t clients::get(clid_t id)
 {
 	client_t ret(nullptr);
-	client_mutex.lock();
+	_client_mutex.lock();
 	{
-		auto it = client_queue.find(id);
-		if (it != client_queue.end()) {
+		auto it = _client_queue.find(id);
+		if (it != _client_queue.end()) {
 			ret = it->second;
 		}
 	}
-	client_mutex.unlock();
+	_client_mutex.unlock();
 	return ret;
 }
 
 bool clients::has(clid_t id)
 {
 	bool ret = false;
-	client_mutex.lock();
+	_client_mutex.lock();
 	{
-		auto it = client_queue.find(id);
-		if (it != client_queue.end()) {
+		auto it = _client_queue.find(id);
+		if (it != _client_queue.end()) {
 			ret = true;
 		}
 	}
-	client_mutex.unlock();
+	_client_mutex.unlock();
 	return ret;
 }
 
@@ -126,11 +126,11 @@ void details::Client::openProject(const std::string& fname)
     _handler->loadData();
 }
 
-void details::Client::loadDataToGPU() // GPU
-{
-	// do nothing
-	PING;
-}
+//void details::Client::loadDataToGPU() // GPU
+//{
+//	// do nothing
+//	PING;
+//}
 
 void details::Client::removeDataFromGPU() // GPU
 {

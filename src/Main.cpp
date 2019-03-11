@@ -69,7 +69,8 @@ int main(int argc, char* argv[])
 
 
     queue = std::make_shared<dx::RequestQueue>();
-
+    queue->connectToHandlerCPU(CPU_handler);
+    queue->connectToHandlerGPU(GPU_handler);
 
     server = std::make_shared<dx::Communicator>(8080);
     server->open();

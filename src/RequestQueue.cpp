@@ -48,7 +48,7 @@ void RequestQueue::enqueue(std::deque<rqst_t>& queue, const clid_t &client_id,
 void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t resolve)
 {
     // acquire a lock
-    _lock.lock();
+    std::unique_lock<std::mutex> lk(_lock);
 
     // we create the client if not exist
     // -- there is a potential bug here. get and add should be one atomic operation
@@ -125,8 +125,6 @@ void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t re
     //debugQueue(_central_queue);
     //debugQueue(_graphic_queue);
 
-    // unlock
-    _lock.unlock();
 }
 
 int RequestQueue::dequeueCPU(clid_t &client_id,
@@ -148,7 +146,9 @@ int RequestQueue::dequeue(std::deque<rqst_t> &queue,
                           json_t &request,
                           rply_t &resolve)
 {
-    _lock.lock();
+    // acquire a lock
+    std::unique_lock<std::mutex> lk(_lock);
+    // attempt to remove one request from the queue
     auto it = std::find_if(queue.begin(), queue.end(), [&](rqst_t &req) { return req->isReady(); });
     if (it != queue.end()) {
         client_id = (*it)->getClientId();
@@ -156,10 +156,8 @@ int RequestQueue::dequeue(std::deque<rqst_t> &queue,
         resolve = (*it)->getResolve();
         queue.erase(it);
         debugQueue(queue);
-        _lock.unlock();
         return 1;
     } else {
-        _lock.unlock();
         return 0;
     }
 };

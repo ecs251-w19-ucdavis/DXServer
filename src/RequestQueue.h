@@ -28,30 +28,31 @@ namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//class RequestQueue;
-//
-//using queues_t = std::shared_ptr<RequestQueue>;
-
-//namespace queues {
-//queues_t       get();
-//RequestQueue* raw();
-//}
+class TaskHandler;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//namespace details {
-//queues_t createRequestQueues(); // we can only have one instance of RequestQueue
-//}
-
 class RequestQueue : public QObject {
     Q_OBJECT
-//    friend queues_t details::createRequestQueues();
 public:
     /**
      * Constructor
      * @note This constructor is protected because there can be only one instance of this class.
      */
     RequestQueue() = default;
+
+    /**
+     *
+     * @param handler
+     */
+    void connectToHandlerCPU(std::shared_ptr<TaskHandler> handler) { _central_hanlder = std::move(handler); }
+
+    /**
+     *
+     * @param handler
+     */
+    void connectToHandlerGPU(std::shared_ptr<TaskHandler> handler) { _graphic_hanlder = std::move(handler); }
+
     /**
      * Dequeue from the CPU queue
      * @param client_id
@@ -83,17 +84,36 @@ public slots: // <- NOTE don't forget this slots keyword defined by Qt
     void newRequest(clid_t client_id, int type, json_t json, rply_t resolve);
 
 private:
-
-
     //! debugger
     void debugQueue(const std::deque<rqst_t>&);
-
+    /**
+     * Helper function for dequeue
+     * @param queue
+     * @param client_id
+     * @return
+     */
+    int  dequeue(std::deque<rqst_t>& queue, clid_t &client_id, json_t&, rply_t&);
+    /**
+     * Helper function for enqueue
+     * @param queue
+     * @param client_id
+     * @param request_id
+     * @param type
+     * @param json
+     * @param resolve
+     */
+    void enqueue(std::deque<rqst_t>& queue,
+                 const clid_t &client_id,
+                 const size_t &request_id,
+                 const int    &type,
+                 const json_t &json,
+                 const rply_t &resolve);
 private:
-    int  dequeue(std::deque<rqst_t>&, clid_t &client_id, json_t&, rply_t&);
-    void enqueue(std::deque<rqst_t>&, const clid_t &client_id, const size_t &request_id,
-                 const int &type, const json_t &json, const rply_t &resolve);
     std::mutex         _lock;
-    std::deque<rqst_t> _central_queue, _graphic_queue; // I renamed them to avoid mis-reading
+    std::deque<rqst_t> _central_queue;
+    std::deque<rqst_t> _graphic_queue; // I renamed them to avoid mis-reading
+    std::shared_ptr<TaskHandler> _central_hanlder;
+    std::shared_ptr<TaskHandler> _graphic_hanlder;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

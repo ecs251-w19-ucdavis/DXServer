@@ -22,7 +22,8 @@ namespace v3d { namespace dx {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * This class suppose to handle requests from the event queue. This class will run in a different thread.
+ * This class suppose to handle requests from the event queue. This class will
+ * run in a different thread.
  */
 class TaskHandler : public QObject {
     Q_OBJECT
@@ -45,7 +46,14 @@ public:
         _pool.resize(n);
     }
 
-    void signal();
+    void signal() {
+        _cv_var.notify_one();
+    }
+
+    template<class Pred>
+    void wait(const Pred& p) {
+
+    }
 
 signals:
     void onResolve(int);
@@ -56,8 +64,8 @@ protected:
     std::vector<thread_t> _pool;
     size_t                _size = 1;
 
-    std::condition_variable cv;
-    std::mutex              lock;
+    std::condition_variable _cv_var;
+    std::mutex              _cv_lck;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
