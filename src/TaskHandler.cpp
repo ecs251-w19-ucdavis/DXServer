@@ -25,16 +25,20 @@
  */
 namespace v3d { namespace dx {
 
-void TaskHandler::connectToCommunicator(const QObject *_receiver)
+void TaskHandler::connectToRequestQueue(std::shared_ptr<RequestQueue> queue)
 {
-    const auto* receiver = qobject_cast<const Communicator*>(_receiver);
-    connect(this, &TaskHandler::onResolve, receiver, &Communicator::onResolve);
+    _queue = std::move(queue);
+}
+
+void TaskHandler::connectToCommunicator(std::shared_ptr<Communicator> receiver)
+{
+    connect(this, &TaskHandler::onResolve, receiver.get(), &Communicator::onResolve);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-CPUTaskHandler::CPUTaskHandler(RequestQueues &queue, const std::string &database)
-    : TaskHandler(queue)
+CPUTaskHandler::CPUTaskHandler(const std::string &database)
+    : TaskHandler()
 {
     // Load database from disk
     loadDatabase(database);
@@ -108,7 +112,7 @@ void CPUTaskHandler::processNextRequest()
 
     // get the
     // TODO FIXME busy waiting !!!
-    const int err = _queue.dequeueCPU(id, json, resolve);
+    const int err = _queue->dequeueCPU(id, json, resolve);
     if (err == 0) return;
 
     std::string method = json.get("method", "").toString();
@@ -195,7 +199,7 @@ void GPUTaskHandler::processNextRequest()
     json_t json;
 
     // TODO FIXME busy waiting !!!
-    const int err = _queue.dequeueGPU(id, json, resolve);
+    const int err = _queue->dequeueGPU(id, json, resolve);
     if (err == 0) return;
 
     std::string method = json.get("method", "").toString();

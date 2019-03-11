@@ -21,7 +21,7 @@ namespace v3d { namespace dx {
 
 //void create()
 //{
-//    global_queue.reset(new RequestQueues());
+//    global_queue.reset(new RequestQueue());
 //}
 
 //queues_t get()
@@ -29,7 +29,7 @@ namespace v3d { namespace dx {
 //    return global_queue;
 //}
 //
-//RequestQueues* raw()
+//RequestQueue* raw()
 //{
 //    return global_queue.get();
 //}
@@ -41,11 +41,11 @@ namespace v3d { namespace dx {
 //queues_t details::createRequestQueues()
 //{
 //    queues_t ret;
-//    ret.reset(new RequestQueues());
+//    ret.reset(new RequestQueue());
 //    return std::move(ret);
 //}
 
-void RequestQueues::enqueue(std::deque<rqst_t>& queue,
+void RequestQueue::enqueue(std::deque<rqst_t>& queue,
                             const clid_t &client_id,
                             size_t request_id,
                             int type,
@@ -80,11 +80,12 @@ void RequestQueues::enqueue(std::deque<rqst_t>& queue,
     log() << "[RQueue] new request received from client " << client_id << ": " << method << std::endl;
 }
 
-void RequestQueues::newRequest(clid_t client_id, int type, json_t json, rply_t resolve)
+void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t resolve)
 {
     _lock.lock();
 
     // we create the client if not exist
+    // TODO there is a potential bug here. get and add should be one atomic operation
     auto client = clients::get(client_id);
     if (!client) client = clients::add(client_id);
 
@@ -160,21 +161,21 @@ void RequestQueues::newRequest(clid_t client_id, int type, json_t json, rply_t r
     _lock.unlock();
 }
 
-int RequestQueues::dequeueCPU(clid_t &client_id,
+int RequestQueue::dequeueCPU(clid_t &client_id,
                               json_t& request,
                               rply_t& resolve)
 {
     return dequeue(_central_queue, client_id, request, resolve);
 }
 
-int RequestQueues::dequeueGPU(clid_t &client_id,
+int RequestQueue::dequeueGPU(clid_t &client_id,
                               json_t& request,
                               rply_t& resolve)
 {
     return dequeue(_graphic_queue, client_id, request, resolve);
 }
 
-int RequestQueues::dequeue(std::deque<rqst_t> &queue,
+int RequestQueue::dequeue(std::deque<rqst_t> &queue,
                            clid_t &client_id,
                            json_t &request,
                            rply_t &resolve)
@@ -195,7 +196,7 @@ int RequestQueues::dequeue(std::deque<rqst_t> &queue,
     }
 };
 
-void RequestQueues::debugQueue(const std::deque<rqst_t>& queue)
+void RequestQueue::debugQueue(const std::deque<rqst_t>& queue)
 {
 //    for (const auto& x : queue) {
 //        auto json = x->getRequest();

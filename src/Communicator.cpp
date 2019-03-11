@@ -60,10 +60,9 @@ void v3d::dx::Communicator::close()
     _webSocketServer = nullptr;
 }
 
-void v3d::dx::Communicator::connectToRequestSlot(const QObject* _receiver)
+void v3d::dx::Communicator::connectToRequestQueue(std::shared_ptr<RequestQueue> receiver)
 {
-    const auto* receiver = qobject_cast<const RequestQueues*>(_receiver);
-    connect(this, &Communicator::newRequest, receiver, &RequestQueues::newRequest);
+    connect(this, &Communicator::newRequest, receiver.get(), &RequestQueue::newRequest);
 }
 
 void v3d::dx::Communicator::rpcNotify(QWebSocket *target, const std::string &method, const JsonValue &params)
@@ -260,6 +259,13 @@ void v3d::dx::Communicator::sendDatabase(JsonValue database, int64_t id, clid_t 
 
 void v3d::dx::Communicator::remapClientKey(QWebSocket* client, clid_t clientId, const JsonValue& data)
 {
+
+    // TODO To implement a cancel function, we need a global lock
+    //  this lock should lock
+    //  1. lock remap function
+    //  2. lock clients
+    //  3. lock request queue
+
     std::string key;
     bool old = false;
     if (data.contains("params") &&

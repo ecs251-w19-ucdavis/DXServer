@@ -27,25 +27,38 @@ namespace v3d { namespace dx {
 class TaskHandler : public QObject {
     Q_OBJECT
     using thread_t = std::shared_ptr<std::thread>;
+
 public:
-    explicit TaskHandler(RequestQueues & q) : _queue(q) {}
+    explicit TaskHandler() = default;
+    void connectToRequestQueue(std::shared_ptr<RequestQueue> queue);
+    void connectToCommunicator(std::shared_ptr<Communicator> receiver);
 
     virtual void processNextRequest() = 0;
-    void run() { while (true) processNextRequest(); }
-    void connectToCommunicator(const QObject *_receiver);
+    void run() {
+        if (!_queue) {
+            throw std::runtime_error("[Error] request queue hasn't been created.");
+        }
+        while (true) processNextRequest();
+    }
 
     void setPoolSize(size_t n) {
         _size = n;
         _pool.resize(n);
     }
 
+    void signal();
+
 signals:
     void onResolve(int);
+
 protected:
-    RequestQueues &_queue;
-private:
+    std::shared_ptr<RequestQueue> _queue;
+
     std::vector<thread_t> _pool;
     size_t                _size = 1;
+
+    std::condition_variable cv;
+    std::mutex              lock;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -56,7 +69,7 @@ private:
 class CPUTaskHandler : public TaskHandler {
     Q_OBJECT
 public:
-    explicit CPUTaskHandler(RequestQueues &queue, const std::string& database = "database.json");
+    explicit CPUTaskHandler(const std::string& database = "database.json");
     void processNextRequest() override;
 
 private:
@@ -103,7 +116,7 @@ private:
 class GPUTaskHandler : public TaskHandler {
     Q_OBJECT
 public:
-    explicit GPUTaskHandler(RequestQueues & queue) : TaskHandler(queue) {}
+    GPUTaskHandler() = default;
     void processNextRequest() override;
 
 private:

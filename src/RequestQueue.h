@@ -28,22 +28,22 @@ namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//class RequestQueues;
+//class RequestQueue;
 //
-//using queues_t = std::shared_ptr<RequestQueues>;
+//using queues_t = std::shared_ptr<RequestQueue>;
 
 //namespace queues {
 //queues_t       get();
-//RequestQueues* raw();
+//RequestQueue* raw();
 //}
 
 ///////////////////////////////////////////////////////////////////////////////
 
 //namespace details {
-//queues_t createRequestQueues(); // we can only have one instance of RequestQueues
+//queues_t createRequestQueues(); // we can only have one instance of RequestQueue
 //}
 
-class RequestQueues : public QObject {
+class RequestQueue : public QObject {
     Q_OBJECT
 //    friend queues_t details::createRequestQueues();
 public:
@@ -51,7 +51,7 @@ public:
      * Constructor
      * @note This constructor is protected because there can be only one instance of this class.
      */
-    RequestQueues() = default;
+    RequestQueue() = default;
     /**
      * Dequeue from the CPU queue
      * @param client_id
@@ -92,7 +92,7 @@ private:
     int  dequeue(std::deque<rqst_t>&, clid_t &client_id, json_t&, rply_t&);
     void enqueue(std::deque<rqst_t>&, const clid_t &client_id, size_t request_id,
                  int type, const json_t &json, const rply_t &resolve);
-    std::mutex _lock;
+    std::mutex         _lock;
     std::deque<rqst_t> _central_queue, _graphic_queue; // I renamed them to avoid mis-reading
 };
 
