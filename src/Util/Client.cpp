@@ -23,6 +23,16 @@ using namespace v3d::dx;
 static std::map<clid_t, client_t> client_queue;
 static std::mutex                 client_mutex; // lock for the client queue
 
+void clients::lock()
+{
+	client_mutex.lock();
+}
+
+void clients::unlock()
+{
+	client_mutex.unlock();
+}
+
 int clients::pop(clid_t id)
 {
 	client_mutex.lock();

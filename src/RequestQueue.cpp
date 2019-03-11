@@ -46,11 +46,11 @@ namespace v3d { namespace dx {
 //}
 
 void RequestQueue::enqueue(std::deque<rqst_t>& queue,
-                            const clid_t &client_id,
-                            size_t request_id,
-                            int type,
-                            const json_t &json,
-                            const rply_t &resolve)
+                           const clid_t &client_id,
+                           const size_t &request_id,
+                           const int    &type,
+                           const json_t &json,
+                           const rply_t &resolve)
 {
     auto request = requests::create(client_id, request_id, type, json, std::move(resolve));
     auto method = json.get("method", "").toString();
@@ -85,7 +85,8 @@ void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t re
     _lock.lock();
 
     // we create the client if not exist
-    // TODO there is a potential bug here. get and add should be one atomic operation
+    // -- there is a potential bug here. get and add should be one atomic operation
+    // -- but this might not be a real error since we have a request queue lock
     auto client = clients::get(client_id);
     if (!client) client = clients::add(client_id);
 

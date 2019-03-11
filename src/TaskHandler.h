@@ -84,7 +84,7 @@ private:
     void handle_queryDatabase(const clid_t& id, const rply_t& resolve, const json_t& json);
 
     /**
-     *
+     * Get scene in CPU
      * @param id
      * @param resolve
      * @param json
@@ -92,17 +92,20 @@ private:
     void handle_getScene(const clid_t& id, const rply_t& resolve, const json_t& json);
 
     /**
-     *
+     * Load data in CPU
      * @param id
-     * @param projectName
+     * @param resolve
+     * @param json
      */
-    void handle_loadData(const clid_t& id, const std::string& projectName);
+    void handle_loadData(const clid_t& id, const rply_t& resolve, const json_t& json);
 
     /**
-     *
+     * Delete data after disconnection in CPU
      * @param id
+     * @param resolve
+     * @param json
      */
-    void handle_delData(const clid_t& id);
+    void handle_delData(const clid_t& id, const rply_t& resolve, const json_t& json);
 
 private:
     json_t _jsonDatabase; // here we cache the database file to avoid reloading
@@ -120,39 +123,39 @@ public:
     void processNextRequest() override;
 
 private:
-/**
- * Create client
- * Requset: OpenProject, initialize OpenGL, pass data to GPU 
- * Request: RequestFrame
- * Request: QuerryData
- * Request: CloseProject, clean OpenGL
- */
-
 
    /**
-   * Query database in GPU
-   * @param id
-   */
+    * Create client
+    * Requset: OpenProject, initialize OpenGL, pass data to GPU
+    * Request: RequestFrame
+    * Request: QuerryData
+    * Request: CloseProject, clean OpenGL
+    */
+
+   /**
+    * Query database in GPU
+    * @param id
+    */
     void handle_createClient(const clid_t& id);
     
    /**
-   * @param id
-   * @param resolve
-   * @param json
-   */
+    * @param id
+    * @param resolve
+    * @param json
+    */
     void handle_initOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json);
 
    /**
-   * @param id
-   * @param resolve
-   * @param json
-   */
+    * @param id
+    * @param resolve
+    * @param json
+    */
     void handle_requestFrame(const clid_t& id, const rply_t& resolve, const json_t& json);
 
    /**
    * @param id
    */
-    void handle_closeOpenGL(const clid_t& id);
+    void handle_closeOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json);
 };
 
 }}

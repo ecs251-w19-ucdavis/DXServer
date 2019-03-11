@@ -91,32 +91,25 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
 
 void CPUTaskHandler::processNextRequest()
 {
-    /**
-     * Handle requests in CPU
-     * @param id <- client id
-     * @param resolve <- respond to client
-     * @param json <- request format
-     * 
-     */
-    clid_t id;
-    rply_t resolve;
-    json_t json;
+    // variables from a request
+    clid_t id; // client id
+    rply_t resolve; //< respond to client
+    json_t json; //< request format
 
-    /** get the data from the RequestQueue, since we split the openProject request into two parts:
+    /*
+     * Get the data from the RequestQueue, since we split the openProject request into two parts:
      *  1. load data (in CPU)
      *  2. initilize OpenGL (in GPU)
      * 
-     *  Here in CPU we deal with the load data request  
-     * 
-    */
+     *  Here in CPU we deal with the load data request
+     */
 
-    // get the
     // TODO FIXME busy waiting !!!
     const int err = _queue->dequeueCPU(id, json, resolve);
     if (err == 0) return;
 
+    // check each request
     std::string method = json.get("method", "").toString();
-
     if (method == "queryDatabase") {
 
         handle_queryDatabase(id, resolve, json);
@@ -129,16 +122,7 @@ void CPUTaskHandler::processNextRequest()
 
     } else if (method == "loadData") {
 
-        std::string projFileName;
-        if (json.contains("params") &&
-            json["params"].isObject() &&
-            json["params"].contains("fileName") &&
-            json["params"]["fileName"].isString())
-        {
-            std::cout << "open project " << projFileName << std::endl;
-            projFileName = json["params"]["fileName"].toString();
-            handle_loadData(id, projFileName);
-        }
+        handle_loadData(id, resolve, json);
         clients::get(id)->incrementCurrCounter();
 
     } else {
@@ -172,38 +156,41 @@ void CPUTaskHandler::handle_getScene(const clid_t& id, const rply_t& resolve, co
 }
 
 // Load data in CPU
-void CPUTaskHandler::handle_loadData(const clid_t& clientId, const std::string& projectName)
+void CPUTaskHandler::handle_loadData(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
-    clients::get(clientId)->openProject(projectName);
+    std::string projFileName;
+    if (json.contains("params") &&
+        json["params"].isObject() &&
+        json["params"].contains("fileName") &&
+        json["params"]["fileName"].isString())
+    {
+        std::cout << "open project " << projFileName << std::endl;
+        projFileName = json["params"]["fileName"].toString();
+        clients::get(id)->openProject(projFileName);
+    }
 }
 
 // Delete data after disconnection in CPU
-void CPUTaskHandler::handle_delData(const clid_t& clientId)
+void CPUTaskHandler::handle_delData(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
-    clients::get(clientId)->closeProject();
+//    clients::get(id)->closeProject();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void GPUTaskHandler::processNextRequest()
 {
-    /**
-     * Handle requests in CPU
-     * @param id <- client id
-     * @param resolve <- respond to client
-     * @param json <- request format
-     * 
-     */
-    clid_t id;
-    rply_t resolve;
-    json_t json;
+    // variables from a request
+    clid_t id; // client id
+    rply_t resolve; //< respond to client
+    json_t json; //< request format
 
     // TODO FIXME busy waiting !!!
     const int err = _queue->dequeueGPU(id, json, resolve);
     if (err == 0) return;
 
+    // check each request
     std::string method = json.get("method", "").toString();
-
     if (method == "createClient") {
 
         handle_createClient(id);
@@ -211,48 +198,22 @@ void GPUTaskHandler::processNextRequest()
 
     } else if (method == "initGL") {
 
-        json_t dummy;
-        handle_initOpenGL(id);
-        // clients::get(id)->initGL();
-        emit onResolve(resolves::add([=]() {
-            resolve(dummy);
-            log() << "[GPU Task] resolve openProject " << id << std::endl;
-        }));
+        handle_initOpenGL(id, resolve, json);
         clients::get(id)->incrementCurrCounter();
 
     } else if (method == "requestFrame") {
 
-        JsonValue scene;
-        if (json.contains("params") &&
-            json["params"].isObject() &&
-            json["params"].contains("scene"))
-        {
-            scene = json["params"]["scene"];
-        }
-        JsonValue params = clients::get(id)->renderFrame(scene);
-        emit onResolve(resolves::add([=]() {
-            resolve(params);
-            log() << "[GPU Task] resolve requestFrame " << id << std::endl;
-        }));
+        handle_requestFrame(id, resolve, json);
         clients::get(id)->incrementCurrCounter();
 
     } else if(method == "unloadGL") {
-        // TODO
-        handle_closeOpenGL(id);
-        // emit onResolve(resolves::pop([=]() {
-        //     log() << "[GPU Task] resolve closeOpenGL" << id << std::endl;
-        // }));
 
-
-        // emit onResolve(resolves::add([=]() {
-        //     // resolve(params);
-        //     log() << "[GPU Task] resolve closeOpenGL" << id << std::endl;
-        // }));
+        handle_closeOpenGL(id, resolve, json);
         clients::get(id)->incrementCurrCounter();
+
     }
 
 }
-
 
 // Create client 
 void GPUTaskHandler::handle_createClient(const clid_t& clientId)
@@ -260,26 +221,39 @@ void GPUTaskHandler::handle_createClient(const clid_t& clientId)
     clients::get(clientId)->init(600, 600);
 }
 
-
 // Initialize OpenGL
-void GPUTaskHandler::handle_initOpenGL(const clid_t& clientId)
+void GPUTaskHandler::handle_initOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
-    clients::get(clientId)->initGL();
+    json_t dummy;
+    clients::get(id)->initGL();
+    emit onResolve(resolves::add([=]() {
+        resolve(dummy);
+        log() << "[GPU Task] resolve openProject " << id << std::endl;
+    }));
 }
 
-
 // Request Frame
-//void GPUTaskHandler::handle_requestFrame(const clid_t& clientId, std::string& img)
-//{
-//    img = std::move(clients::get(clientId)->renderFrame(scene));
-//}
-
+void GPUTaskHandler::handle_requestFrame(const clid_t& id, const rply_t& resolve, const json_t& json)
+{
+    JsonValue scene;
+    if (json.contains("params") &&
+        json["params"].isObject() &&
+        json["params"].contains("scene"))
+    {
+        scene = json["params"]["scene"];
+    }
+    JsonValue params = clients::get(id)->renderFrame(scene);
+    emit onResolve(resolves::add([=]() {
+        resolve(params);
+        log() << "[GPU Task] resolve requestFrame " << id << std::endl;
+    }));
+}
 
 // Close OpenGL
-void GPUTaskHandler::handle_closeOpenGL(const clid_t& clientId)
+void GPUTaskHandler::handle_closeOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
     // clients::get(clientId)->closeProject();
-    clients::get(clientId)->removeDataFromGPU();
+    clients::get(id)->removeDataFromGPU();
 }
 
 

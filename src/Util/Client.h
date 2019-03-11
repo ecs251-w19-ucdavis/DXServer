@@ -35,6 +35,9 @@ using client_t = std::shared_ptr<details::Client>;
  */
 namespace clients {
 
+void lock();
+void unlock();
+
 /**
  * TODO DOC
  * @return value 1 means okay, value 0 means error

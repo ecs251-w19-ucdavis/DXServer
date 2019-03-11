@@ -58,7 +58,9 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 #endif
 
+
     dx::DXGL_create(); // load modules, load all shaders
+
 
     std::shared_ptr<dx::RequestQueue> queue;
     std::shared_ptr<dx::Communicator> server;
@@ -68,17 +70,21 @@ int main(int argc, char* argv[])
 
     queue = std::make_shared<dx::RequestQueue>();
 
+
     server = std::make_shared<dx::Communicator>(8080);
     server->open();
     server->connectToRequestQueue(queue);
+
 
     CPU_handler = std::make_shared<dx::CPUTaskHandler>();
     CPU_handler->connectToCommunicator(server);
     CPU_handler->connectToRequestQueue(queue);
 
+
     GPU_handler = std::make_shared<dx::GPUTaskHandler>();
     GPU_handler->connectToCommunicator(server);
     GPU_handler->connectToRequestQueue(queue);
+
 
     std::thread CPU_thread([&]() {
         CPU_handler->run();
