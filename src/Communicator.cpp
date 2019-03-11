@@ -259,6 +259,13 @@ void v3d::dx::Communicator::sendDatabase(JsonValue database, int64_t id, clid_t 
 
 void v3d::dx::Communicator::remapClientKey(QWebSocket* client, clid_t clientId, const JsonValue& data)
 {
+
+    // TODO To implement a cancel function, we need a global lock
+    //  this lock should lock
+    //  1. lock remap function
+    //  2. lock clients
+    //  3. lock request queue
+
     std::string key;
     bool old = false;
     if (data.contains("params") &&

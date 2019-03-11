@@ -85,6 +85,7 @@ void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t re
     _lock.lock();
 
     // we create the client if not exist
+    // TODO there is a potential bug here. get and add should be one atomic operation
     auto client = clients::get(client_id);
     if (!client) client = clients::add(client_id);
 
