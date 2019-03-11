@@ -33,7 +33,7 @@ void TaskHandler::connectToCommunicator(const QObject *_receiver)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-CPUTaskHandler::CPUTaskHandler(RequestQueues &queue, const std::string &database)
+CPUTaskHandler::CPUTaskHandler(RequestQueue &queue, const std::string &database)
     : TaskHandler(queue)
 {
     // Load database from disk

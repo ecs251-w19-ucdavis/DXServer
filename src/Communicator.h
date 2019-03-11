@@ -56,14 +56,14 @@ public:
      * _RequestHandler.h_ and _RequestHandler.cpp_.
      * @param receiver
      */
-    void connectToRequestSlot(const QObject* receiver);
+    void connectToRequestQueue(const RequestQueue *receiver);
 
     /**
      * Check if there is at least one connection.
      */
     bool isConnected() const { return (_webSocketServer != nullptr) && !_clients.empty(); }
 
-protected:
+private:
     // basic functionality
     void rpcNotify(QWebSocket* target, const std::string& method, const JsonValue& params);
     void rpcReply(QWebSocket* target, const JsonValue& result, const JsonValue& id);
