@@ -91,9 +91,9 @@ private:
  */
     void handle_createClient(const clid_t& clientId);
     
-    void handle_initOpenGL(const clid_t& clientId, const std::string& projectName);
+    void handle_initOpenGL(const clid_t& clientId);
     void handle_requestFrame(const clid_t& clientId, json_t &output);
-    void handle_queryDatabase(const clid_t& clientId, json_t &output);
+    // void handle_queryDatabase(const clid_t& clientId, json_t &output);
     void handle_closeOpenGL(const clid_t& clientId);
 };
 
