@@ -16,6 +16,9 @@
 
 #include <string>
 
+static bool _v3d_debug = false;
+#define DLOG if (_v3d_debug) log()
+
 std::string genHash(const int len)
 {
     static const char alphanum[] =
@@ -104,7 +107,7 @@ bool v3d::dx::Communicator::getKey(const QWebSocket *socket, clid_t &key) const
 
 void v3d::dx::Communicator::onNewConnection()
 {
-    const auto key = genHash(100);
+    const auto key = genHash(20);
     QWebSocket *socket = _webSocketServer->nextPendingConnection();
     // setup connections
     connect(socket, &QWebSocket::textMessageReceived, this, &Communicator::processTextMessage);
@@ -112,12 +115,12 @@ void v3d::dx::Communicator::onNewConnection()
     connect(socket, &QWebSocket::disconnected, this, &Communicator::onClientClosure);
     // save client
     _clients[key] = socket;
-    log() << "[RComm] new connection from client " << key << std::endl;
+    DLOG << "[RComm] new connection from client " << key << std::endl;
 }
 
 void v3d::dx::Communicator::onServerClosure()
 {
-    log() << "[RComm] Connection closed" << std::endl;
+    DLOG << "[RComm] Connection closed" << std::endl;
 }
 
 void v3d::dx::Communicator::onClientClosure()
@@ -128,7 +131,7 @@ void v3d::dx::Communicator::onClientClosure()
         if (getKey(client, key)) { _clients.erase(key); };
         client->deleteLater();
     }
-    log() << "[RComm] Socket disconnected" << std::endl;
+    DLOG << "[RComm] Socket disconnected" << std::endl;
 }
 
 void v3d::dx::Communicator::processTextMessage(QString message)
@@ -137,10 +140,10 @@ void v3d::dx::Communicator::processTextMessage(QString message)
     auto *client = qobject_cast<QWebSocket *>(sender());
     clid_t clientId;
     if (client == nullptr || !getKey(client, clientId)) {
-        log() << "[RComm] Message received from invalid client" << std::endl;
+        DLOG << "[RComm] Message received from invalid client" << std::endl;
         return;
     }
-    log() << "[RComm] Message received from client " << clientId << ": " << message.toStdString() << std::endl;
+    DLOG << "[RComm] Message received from client " << clientId << ": " << message.toStdString() << std::endl;
 
     // parse the message into a JSON
     JsonValue json;
@@ -148,7 +151,7 @@ void v3d::dx::Communicator::processTextMessage(QString message)
         json = JsonParser().parse(message.toStdString());
     }
     catch (std::exception &) {
-        log() << "[Error] Invalid JSON message: " << __FILE__ << " " << __LINE__ << std::endl;
+        DLOG << "[Error] Invalid JSON message: " << __FILE__ << " " << __LINE__ << std::endl;
         return;
     }
 
@@ -159,7 +162,7 @@ void v3d::dx::Communicator::processTextMessage(QString message)
 
         int64_t id = json.get("id", -1).toInt64();
         emit newRequest(clientId, 0, json, [=] (JsonValue result) {
-            log() << "[RComm] inner resolved" << std::endl;
+            DLOG << "[RComm] inner resolved" << std::endl;
             sendDatabase(result, id, clientId);
         });
 
@@ -199,7 +202,7 @@ void v3d::dx::Communicator::processTextMessage(QString message)
 
     } else if (method == "clientKey") {
 
-        log() << "current client key " << JsonParser().stringify(json) << std::endl;
+        DLOG << "current client key " << JsonParser().stringify(json) << std::endl;
         remapClientKey(client, clientId, json);
 
     }
@@ -208,12 +211,12 @@ void v3d::dx::Communicator::processTextMessage(QString message)
 
 void v3d::dx::Communicator::processBinaryMessage(QByteArray message)
 {
-    log() << "[RComm] Binary Message ignored" << std::endl;
+    DLOG << "[RComm] Binary Message ignored" << std::endl;
 }
 
 void v3d::dx::Communicator::notifyProjectOpened(std::string projFileName, clid_t clientId)
 {
-    log() << "[RComm] Project opened: " << projFileName << std::endl;
+    DLOG << "[RComm] Project opened: " << projFileName << std::endl;
     if (!contains(clientId))
         return;
     QWebSocket *client = _clients[clientId];
@@ -224,7 +227,7 @@ void v3d::dx::Communicator::notifyProjectOpened(std::string projFileName, clid_t
 
 void v3d::dx::Communicator::notifyProjectClosed(clid_t clientId)
 {
-    log() << "[RComm] Project closed" << std::endl;
+    DLOG << "[RComm] Project closed" << std::endl;
     if (!contains(clientId))
         return;
     QWebSocket *client = _clients[clientId];
@@ -244,17 +247,6 @@ void v3d::dx::Communicator::sendFrame(JsonValue params, clid_t clientId)
     if (!contains(clientId))
         return;
     QWebSocket *client = _clients[clientId];
-//    QByteArray base64;
-//    {
-//        QByteArray ba;
-//        QBuffer buf(&ba);
-//        buf.open(QIODevice::WriteOnly);
-//        img.save(&buf, "JPG");
-//        buf.close();
-//        base64 = ba.toBase64();
-//    }
-//    JsonValue params;
-//    params["data"] = "data:image/jpeg;base64," + base64.toStdString();
     rpcNotify(client, "frame", params);
 }
 
@@ -280,13 +272,13 @@ void v3d::dx::Communicator::remapClientKey(QWebSocket* client, clid_t clientId, 
     }
     if (old) {
         // now we should change current client's key
-        log() << "found an old client, change its current key back to the old key\n"
+        DLOG << "found an old client, change its current key back to the old key\n"
               << "(old)\t" << key << std::endl
               << "(new)\t" << clientId << std::endl;
         _clients.erase(clientId);
         _clients[key] = client;
     } else {
-        log() << "found a new client " << clientId << std::endl;
+        DLOG << "found a new client " << clientId << std::endl;
         JsonValue json;
         json["key"] = clientId;
         rpcNotify(client, "clientKey", json);
