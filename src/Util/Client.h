@@ -104,10 +104,10 @@ public:
      */
 	void incrementCurrCounter();
 
-	void init(int w, int h);
+//	void init();
 	void initGL();
 
-    void openProject(const std::string& fname);
+    void openProject(const std::string& fname, int w, int h);
     void closeProject();
 
 //    void loadDataToGPU(); // GPU
@@ -139,7 +139,6 @@ private:
     std::atomic<size_t> _next_request_counter;
 
 	clid_t _id = clid_t(); // empty means invalid
-	std::shared_ptr<FramebufferGL> _fbo;
 	std::shared_ptr<dx::details::Engine> _handler;
 };
 }

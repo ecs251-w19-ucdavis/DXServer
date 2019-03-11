@@ -166,7 +166,7 @@ void CPUTaskHandler::handle_loadData(const clid_t& id, const rply_t& resolve, co
     {
         std::cout << "open project " << projFileName << std::endl;
         projFileName = json["params"]["fileName"].toString();
-        clients::get(id)->openProject(projFileName);
+        clients::get(id)->openProject(projFileName, 600, 600);
     }
 }
 
@@ -191,12 +191,13 @@ void GPUTaskHandler::processNextRequest()
 
     // check each request
     std::string method = json.get("method", "").toString();
-    if (method == "createClient") {
-
-        handle_createClient(id, resolve, json);
-        clients::get(id)->incrementCurrCounter();
-
-    } else if (method == "initGL") {
+//    if (method == "createClient") {
+//
+//        handle_createClient(id, resolve, json);
+//        clients::get(id)->incrementCurrCounter();
+//
+//    } else
+    if (method == "initGL") {
 
         handle_initOpenGL(id, resolve, json);
         clients::get(id)->incrementCurrCounter();
@@ -216,10 +217,10 @@ void GPUTaskHandler::processNextRequest()
 }
 
 // Create client 
-void GPUTaskHandler::handle_createClient(const clid_t& id, const rply_t& resolve, const json_t& json)
-{
-    clients::get(id)->init(600, 600);
-}
+//void GPUTaskHandler::handle_createClient(const clid_t& id, const rply_t& resolve, const json_t& json)
+//{
+//    clients::get(id)->init(600, 600);
+//}
 
 // Initialize OpenGL
 void GPUTaskHandler::handle_initOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json)

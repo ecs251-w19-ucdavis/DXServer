@@ -48,7 +48,7 @@ void RequestQueue::enqueue(std::deque<rqst_t>& queue, const clid_t &client_id,
 void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t resolve)
 {
     // acquire a lock
-    std::unique_lock<std::mutex> lk(_lock);
+    std::unique_lock<std::mutex> lock(_lock);
 
     // we create the client if not exist
     // -- there is a potential bug here. get and add should be one atomic operation
@@ -73,19 +73,19 @@ void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t re
         // -- loadData     enters _central_queue
         // -- initGL       enters _graphic_queue
 
-        const auto request_create_gpu = client -> nextCounterValue();
+//        const auto request_create_gpu = client -> nextCounterValue();
         const auto request_loadDT_cpu = client -> nextCounterValue();
         const auto request_initGL_gpu = client -> nextCounterValue();
-        json_t &json_create_gpu = json;
-        json_t  json_loadDT_cpu = json;
+//        json_t &json_create_gpu = json;
+        json_t &json_loadDT_cpu = json;
         json_t  json_initGL_gpu = json;
-        json_create_gpu["method"] = "createClient";
+//        json_create_gpu["method"] = "createClient";
         json_loadDT_cpu["method"] = "loadData";
         json_initGL_gpu["method"] = "initGL";
 //        std::cout << "gpu task " << json_create_gpu.get("method", "").toString() << " " << request_create_gpu << std::endl;
 //        std::cout << "cpu task " << json_loadDT_cpu.get("method", "").toString() << " " << request_loadDT_cpu << std::endl;
 //        std::cout << "gpu task " << json_initGL_gpu.get("method", "").toString() << " " << request_initGL_gpu << std::endl;
-        enqueue(_graphic_queue, client_id, request_create_gpu, type, json_create_gpu, rply_t{});
+//        enqueue(_graphic_queue, client_id, request_create_gpu, type, json_create_gpu, rply_t{});
         enqueue(_central_queue, client_id, request_loadDT_cpu, type, json_loadDT_cpu, rply_t{});
         enqueue(_graphic_queue, client_id, request_initGL_gpu, type, json_initGL_gpu, resolve);
 
@@ -147,7 +147,7 @@ int RequestQueue::dequeue(std::deque<rqst_t> &queue,
                           rply_t &resolve)
 {
     // acquire a lock
-    std::unique_lock<std::mutex> lk(_lock);
+    std::unique_lock<std::mutex> lock(_lock);
     // attempt to remove one request from the queue
     auto it = std::find_if(queue.begin(), queue.end(), [&](rqst_t &req) { return req->isReady(); });
     if (it != queue.end()) {

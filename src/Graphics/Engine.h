@@ -48,11 +48,19 @@ class Engine {
 public:
     /**
      * Constructor
-     * @param fbo We always need a framebuffer object for drawing
      * @param w The initial framebuffer width
      * @param h The initial framebuffer height
      */
-    Engine(fbo_t fbo, int w, int h);
+    Engine(int w, int h);
+
+    /**
+     * @param fbo We always need a framebuffer object for drawing
+     */
+    void createFBO() {
+        if (!_fbo) {
+            _fbo = std::make_shared<FramebufferGL>(_size.x, _size.y);
+        }
+    }
 
     /**
      * This function will open and parse the JSON configuration file from disk

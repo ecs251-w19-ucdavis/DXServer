@@ -38,9 +38,8 @@ namespace v3d { namespace dx {
 
 namespace details {
 
-Engine::Engine(fbo_t fbo, int w, int h)
+Engine::Engine(int w, int h)
     : _size{w, h}
-    , _fbo{std::move(fbo)}
 {}
 
 /**

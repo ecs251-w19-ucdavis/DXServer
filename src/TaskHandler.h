@@ -143,7 +143,7 @@ private:
     * Query database in GPU
     * @param id
     */
-    void handle_createClient(const clid_t& id, const rply_t& resolve, const json_t& json);
+//    void handle_createClient(const clid_t& id, const rply_t& resolve, const json_t& json);
     
    /**
     *

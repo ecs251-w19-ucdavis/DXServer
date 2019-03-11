@@ -102,17 +102,14 @@ void details::Client::incrementCurrCounter()
 	_curr_request_counter += 1;
 }
 
-void details::Client::init(int w, int h)
-{
-    if (!_created) {
-		_fbo = std::make_shared<FramebufferGL>(w, h);
-		_handler = std::make_shared<Engine>(_fbo, w, h);
-		_created = true;
-    }
-}
+//void details::Client::init(int w, int h)
+//{
+//
+//}
 
 void details::Client::initGL()
 {
+	_handler->createFBO();
 	_handler->loadGL();
     _handler->initScene();
 	_handler->updateView();
@@ -120,8 +117,12 @@ void details::Client::initGL()
 	_ready = true;
 }
 
-void details::Client::openProject(const std::string& fname)
+void details::Client::openProject(const std::string& fname, int w, int h)
 {
+    if (!_created) {
+        _handler = std::make_shared<Engine>(w, h);
+        _created = true;
+    }
 	_handler->loadJSONFile(fname);
     _handler->loadData();
 }
@@ -187,9 +188,8 @@ void details::Client::initDebug(const std::string& fname, int w, int h)
 
 	_currentProjectName = fname;
 
-	_fbo = std::make_shared<FramebufferGL>(w, h);
-
-	_handler = std::make_shared<Engine>(_fbo, w, h);
+	_handler = std::make_shared<Engine>(w, h);
+	_handler->createFBO();
 
 	_created = true;
 }
