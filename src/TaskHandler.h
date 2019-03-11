@@ -27,7 +27,6 @@ namespace v3d { namespace dx {
 class TaskHandler : public QObject {
     Q_OBJECT
     using thread_t = std::shared_ptr<std::thread>;
-
 public:
     explicit TaskHandler() = default;
     void connectToRequestQueue(std::shared_ptr<RequestQueue> queue);
@@ -136,9 +135,10 @@ private:
     * Query database in GPU
     * @param id
     */
-    void handle_createClient(const clid_t& id);
+    void handle_createClient(const clid_t& id, const rply_t& resolve, const json_t& json);
     
    /**
+    *
     * @param id
     * @param resolve
     * @param json
@@ -146,6 +146,7 @@ private:
     void handle_initOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json);
 
    /**
+    *
     * @param id
     * @param resolve
     * @param json
@@ -153,8 +154,10 @@ private:
     void handle_requestFrame(const clid_t& id, const rply_t& resolve, const json_t& json);
 
    /**
-   * @param id
-   */
+    * @param id
+    * @param resolve
+    * @param json
+    */
     void handle_closeOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json);
 };
 
