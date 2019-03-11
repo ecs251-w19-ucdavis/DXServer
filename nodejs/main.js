@@ -7,6 +7,8 @@
 //                                                                           //
 //===========================================================================//
 
+const remote = process.argv.length > 2 ? process.argv[2] : 'localhost'
+
 /* eslint-disable no-console */
 const vox = require('./module/index')
 
@@ -82,7 +84,7 @@ function MainLoop(socket) {
     })
 
     // seriously, let's connect
-    engine.connect('localhost')
+    engine.connect(remote)
 
   })
 
