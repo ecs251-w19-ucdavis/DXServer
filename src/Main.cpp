@@ -60,16 +60,16 @@ int main(int argc, char* argv[])
 
     dx::DXGL_create(); // load modules, load all shaders
 
+    dx::RequestQueues queue;
 
     dx::Communicator server(8080);
     server.open();
-    server.connectToRequestSlot(dx::queues::raw());
+    server.connectToRequestSlot(&queue);
 
-
-    dx::CPUTaskHandler CPU_handler;
+    dx::CPUTaskHandler CPU_handler(queue);
     CPU_handler.connectToCommunicator(&server);
 
-    dx::GPUTaskHandler GPU_handler;
+    dx::GPUTaskHandler GPU_handler(queue);
     GPU_handler.connectToCommunicator(&server);
 
 

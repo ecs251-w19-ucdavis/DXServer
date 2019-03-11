@@ -94,10 +94,11 @@ void details::Client::incrementCurrCounter()
 
 void details::Client::init(int w, int h)
 {
-    if (_initialized) { log() << "[Warn] you initialized the client twice" << std::endl; }
-    _fbo = std::make_shared<FramebufferGL>(w, h);
-    _handler = std::make_shared<Engine>(_fbo, w, h);
-    _initialized = true;
+    if (!_created) {
+		_fbo = std::make_shared<FramebufferGL>(w, h);
+		_handler = std::make_shared<Engine>(_fbo, w, h);
+		_created = true;
+    }
 }
 
 void details::Client::initGL()
@@ -106,6 +107,7 @@ void details::Client::initGL()
     _handler->initScene();
 	_handler->updateView();
 	_handler->unloadGL();
+	_ready = true;
 }
 
 void details::Client::openProject(const std::string& fname)
@@ -132,15 +134,21 @@ void details::Client::closeProject()
 	PING;
 }
 
-std::string details::Client::renderFrame(const JsonValue &input)
+json_t details::Client::renderFrame(const JsonValue &input)
 {
-	_handler->loadGL();
-    _handler->updateView(input);
-	_handler->updateRenderer();
-	_handler->render();
-	const auto img = _handler->encodeRenderedImage();
-	_handler->unloadGL();
-	return img;
+	JsonValue params;
+	if (_ready) {
+		_handler->loadGL();
+		_handler->updateView(input);
+		_handler->updateRenderer();
+		_handler->render();
+		params["data"] = "data:image/jpeg;base64," + _handler->encodeRenderedImage();
+		_handler->unloadGL();
+		return params;
+	} else {
+		params["data"] = "";
+		return params;
+	}
 }
 
 json_t details::Client::getScene()
@@ -162,7 +170,7 @@ json_t details::Client::getScene()
 
 void details::Client::initDebug(const std::string& fname, int w, int h)
 {
-	if (_initialized)
+	if (_created)
 	{
 		std::cout << "you initialized the client twice" << std::endl;
 	}
@@ -173,7 +181,7 @@ void details::Client::initDebug(const std::string& fname, int w, int h)
 
 	_handler = std::make_shared<Engine>(_fbo, w, h);
 
-	_initialized = true;
+	_created = true;
 }
 
 void details::Client::renderDebug()

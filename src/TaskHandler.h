@@ -28,8 +28,8 @@ class TaskHandler : public QObject {
     Q_OBJECT
     using thread_t = std::shared_ptr<std::thread>;
 public:
-    TaskHandler() = default;
-    ~TaskHandler() override = default;
+    explicit TaskHandler(RequestQueues & q) : _queue(q) {}
+
     virtual void processNextRequest() = 0;
     void run() { while (true) processNextRequest(); }
     void connectToCommunicator(const QObject *_receiver);
@@ -41,7 +41,8 @@ public:
 
 signals:
     void onResolve(int);
-
+protected:
+    RequestQueues &_queue;
 private:
     std::vector<thread_t> _pool;
     size_t                _size = 1;
@@ -55,7 +56,7 @@ private:
 class CPUTaskHandler : public TaskHandler {
     Q_OBJECT
 public:
-    explicit CPUTaskHandler(const std::string& database = "database.json");
+    explicit CPUTaskHandler(RequestQueues &queue, const std::string& database = "database.json");
     void processNextRequest() override;
 
 private:
@@ -77,8 +78,7 @@ private:
 class GPUTaskHandler : public TaskHandler {
     Q_OBJECT
 public:
-    GPUTaskHandler() = default;
-
+    explicit GPUTaskHandler(RequestQueues & queue) : TaskHandler(queue) {}
     void processNextRequest() override;
 
 private:

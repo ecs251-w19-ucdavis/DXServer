@@ -110,7 +110,7 @@ public:
 
 	json_t getScene();
 
-	std::string renderFrame(const JsonValue &input = JsonValue());
+	json_t renderFrame(const JsonValue &input = JsonValue());
 
 	void initDebug(const std::string& fname, int w, int h);
 	void renderDebug();
@@ -123,7 +123,8 @@ private:
 
     std::string _currentProjectName;
 
-	bool _initialized = false;
+	bool _created = false; // to avoid initializing the client for too many times
+	bool _ready = false;
 
 //	std::mutex _lock;
 //	size_t _curr_request_counter = 0;

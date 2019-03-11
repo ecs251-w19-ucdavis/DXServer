@@ -28,24 +28,30 @@ namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class RequestQueues;
-using queues_t = std::shared_ptr<RequestQueues>;
+//class RequestQueues;
+//
+//using queues_t = std::shared_ptr<RequestQueues>;
 
-namespace queues {
-queues_t       get();
-RequestQueues* raw();
-}
+//namespace queues {
+//queues_t       get();
+//RequestQueues* raw();
+//}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace details {
-queues_t createRequestQueues(); // we can only have one instance of RequestQueues
-}
+//namespace details {
+//queues_t createRequestQueues(); // we can only have one instance of RequestQueues
+//}
 
 class RequestQueues : public QObject {
     Q_OBJECT
-    friend queues_t details::createRequestQueues();
+//    friend queues_t details::createRequestQueues();
 public:
+    /**
+     * Constructor
+     * @note This constructor is protected because there can be only one instance of this class.
+     */
+    RequestQueues() = default;
     /**
      * Dequeue from the CPU queue
      * @param client_id
@@ -77,11 +83,7 @@ public slots: // <- NOTE don't forget this slots keyword defined by Qt
     void newRequest(clid_t client_id, int type, json_t json, rply_t resolve);
 
 private:
-    /**
-     * Constructor
-     * @note This constructor is protected because there can be only one instance of this class.
-     */
-    RequestQueues() = default;
+
 
     //! debugger
     void debugQueue(const std::deque<rqst_t>&);

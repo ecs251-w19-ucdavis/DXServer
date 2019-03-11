@@ -15,35 +15,35 @@ namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace queues {
+//namespace queues {
 
-static queues_t global_queue = details::createRequestQueues();
+//static queues_t global_queue = details::createRequestQueues();
 
 //void create()
 //{
 //    global_queue.reset(new RequestQueues());
 //}
 
-queues_t get()
-{
-    return global_queue;
-}
-
-RequestQueues* raw()
-{
-    return global_queue.get();
-}
-
-}
+//queues_t get()
+//{
+//    return global_queue;
+//}
+//
+//RequestQueues* raw()
+//{
+//    return global_queue.get();
+//}
+//
+//}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-queues_t details::createRequestQueues()
-{
-    queues_t ret;
-    ret.reset(new RequestQueues());
-    return std::move(ret);
-}
+//queues_t details::createRequestQueues()
+//{
+//    queues_t ret;
+//    ret.reset(new RequestQueues());
+//    return std::move(ret);
+//}
 
 void RequestQueues::enqueue(std::deque<rqst_t>& queue,
                             const clid_t &client_id,
@@ -60,18 +60,18 @@ void RequestQueues::enqueue(std::deque<rqst_t>& queue,
             break;
         }
         case 1: { // a notification
-//            auto first = std::find_if(queue.begin(), queue.end(), [&](rqst_t &req) {
-//                return (req->getClientId() == client_id && req->getType() == type);
-//            });
-//            if (first != queue.end()) { // if there is a previous notification, replace it with the new one
-//                auto it = std::find_if(queue.begin(), first + 1, [&](rqst_t &req) {
-//                    const auto req_json = req->getRequest();
-//                    return (req_json.get("method", "").toString() == method);
-//                });
-//                if (it != queue.end()) { // if there is a previous notification, replace it with the new one
-//                    *it = request;
-//                }
-//            }
+            auto first = std::find_if(queue.begin(), queue.end(), [&](rqst_t &req) {
+                return (req->getClientId() == client_id && req->getType() == type);
+            });
+            if (first != queue.end()) { // if there is a previous notification, replace it with the new one
+                auto it = std::find_if(queue.begin(), first + 1, [&](rqst_t &req) {
+                    const auto req_json = req->getRequest();
+                    return (req_json.get("method", "").toString() == method);
+                });
+                if (it != queue.end()) { // if there is a previous notification, replace it with the new one
+                    *it = request;
+                }
+            }
             queue.push_back(request);
             break;
         }
@@ -114,9 +114,9 @@ void RequestQueues::newRequest(clid_t client_id, int type, json_t json, rply_t r
         json_create_gpu["method"] = "createClient";
         json_loadDT_cpu["method"] = "loadData";
         json_initGL_gpu["method"] = "initGL";
-        std::cout << "gpu task " << json_create_gpu.get("method", "").toString() << " " << request_create_gpu << std::endl;
-        std::cout << "cpu task " << json_loadDT_cpu.get("method", "").toString() << " " << request_loadDT_cpu << std::endl;
-        std::cout << "gpu task " << json_initGL_gpu.get("method", "").toString() << " " << request_initGL_gpu << std::endl;
+//        std::cout << "gpu task " << json_create_gpu.get("method", "").toString() << " " << request_create_gpu << std::endl;
+//        std::cout << "cpu task " << json_loadDT_cpu.get("method", "").toString() << " " << request_loadDT_cpu << std::endl;
+//        std::cout << "gpu task " << json_initGL_gpu.get("method", "").toString() << " " << request_initGL_gpu << std::endl;
         enqueue(_graphic_queue, client_id, request_create_gpu, type, json_create_gpu, std::move(rply_t{}));
         enqueue(_central_queue, client_id, request_loadDT_cpu, type, json_loadDT_cpu, std::move(rply_t{}));
         enqueue(_graphic_queue, client_id, request_initGL_gpu, type, json_initGL_gpu, resolve);
@@ -134,8 +134,8 @@ void RequestQueues::newRequest(clid_t client_id, int type, json_t json, rply_t r
         json_t  json_cpu = json;
         json_gpu["method"] = "unloadGL";
         json_cpu["method"] = "delData";
-        std::cout << "gpu task" << json_gpu.get("method", "").toString() << " " << request_gpu << std::endl;
-        std::cout << "cpu task" << json_cpu.get("method", "").toString() << " " << request_cpu << std::endl;
+//        std::cout << "gpu task" << json_gpu.get("method", "").toString() << " " << request_gpu << std::endl;
+//        std::cout << "cpu task" << json_cpu.get("method", "").toString() << " " << request_cpu << std::endl;
         enqueue(_graphic_queue, client_id, request_gpu, type, json_gpu, std::move(rply_t{}));
         enqueue(_central_queue, client_id, request_cpu, type, json_cpu, resolve);
 
@@ -180,12 +180,6 @@ int RequestQueues::dequeue(std::deque<rqst_t> &queue,
                            rply_t &resolve)
 {
     _lock.lock();
-//    if ((&queue) == (&_central_queue)) {
-//        std::cout << "cpu mode\n";
-//
-//    } else {
-//        std::cout << "gpu mode\n";
-//    }
     auto it = std::find_if(queue.begin(), queue.end(), [&](rqst_t &req) { return req->isReady(); });
     if (it != queue.end()) {
         client_id = (*it)->getClientId();
@@ -203,12 +197,12 @@ int RequestQueues::dequeue(std::deque<rqst_t> &queue,
 
 void RequestQueues::debugQueue(const std::deque<rqst_t>& queue)
 {
-    for (const auto& x : queue) {
-        auto json = x->getRequest();
-        auto id = x->getClientId();
-        std::string method = json.get("method", "").toString();
-        log() << "\t\t[Debug] new request received from client " << id << ": " << method << std::endl;
-    }
+//    for (const auto& x : queue) {
+//        auto json = x->getRequest();
+//        auto id = x->getClientId();
+//        std::string method = json.get("method", "").toString();
+//        log() << "\t\t[Debug] new request received from client " << id << ": " << method << std::endl;
+//    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
