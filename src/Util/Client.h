@@ -19,6 +19,7 @@
 #include <string>
 #include <memory>
 #include <atomic>
+#include <mutex>
 
 namespace v3d { void startExperiment(int *argc, const char **argv); }
 namespace v3d { namespace dx {
