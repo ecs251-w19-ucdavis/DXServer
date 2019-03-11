@@ -18,17 +18,16 @@
 #include <QOffscreenSurface>
 
 namespace v3d { namespace dx {
+namespace qt {
 
-namespace qt
-{
-
-class OpenGLWindow: public QWindow
-{
+/**
+ * This is the class to create OpenGL on MacOS and Windows
+ */
+class OpenGLWindow: public QWindow {
     Q_OBJECT
 public:
     explicit OpenGLWindow(QWindow *parent = nullptr);
     ~OpenGLWindow() final;
-
 private:
     void makeCurrent()
     {

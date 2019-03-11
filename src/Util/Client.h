@@ -37,33 +37,27 @@ using client_t = std::shared_ptr<details::Client>;
  * underlying client list.
  */
 namespace clients {
-
 void lock();
 void unlock();
-
 /**
  * TODO DOC
  * @return value 1 means okay, value 0 means error
  */
 int /* err */ pop(clid_t);
-
 /**
  * TODO DOC
  * @return nullptr means error
  */
 client_t add(clid_t);
-
 /**
  * TODO DOC
  * @return nullptr means error
  */
 client_t get(clid_t);
-
 /**
  * Check if this client exists
  */
 bool has(clid_t);
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,20 +80,17 @@ public:
 	 * @return The client ID
 	 */
 	clid_t getId() const { return _id; }
-
 	/**
      * @note Can be read by RequestQueues
      * @return counter value
      */
 	size_t currCounterValue();
-
 	/**
 	 * Increment the next request counter and return the value before
 	 * @note Can be read by RequestQueues
 	 * @return
 	 */
 	size_t nextCounterValue();
-
 	/**
      * @note Be incremented by RequestHandler
      */
@@ -119,8 +110,7 @@ private:
     /**
      * Constructor
      */
-	Client() : _curr_request_counter{0} , _next_request_counter{0} {}
-
+	Client(): _curr_request_counter{0} , _next_request_counter{0} {}
 	/**
 	 * This is a function for debugging
 	 */
