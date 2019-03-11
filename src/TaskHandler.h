@@ -78,8 +78,18 @@ private:
      */
     void handle_getScene(const clid_t& id, const rply_t& resolve, const json_t& json);
 
-    void handle_loadData(const clid_t& clientId, const std::string& projectName);
-    void handle_delData(const clid_t& clientId);
+    /**
+     *
+     * @param id
+     * @param projectName
+     */
+    void handle_loadData(const clid_t& id, const std::string& projectName);
+
+    /**
+     *
+     * @param id
+     */
+    void handle_delData(const clid_t& id);
 
 private:
     json_t _jsonDatabase; // here we cache the database file to avoid reloading
@@ -104,12 +114,32 @@ private:
  * Request: QuerryData
  * Request: CloseProject, clean OpenGL
  */
-    void handle_createClient(const clid_t& clientId);
+
+
+   /**
+   * Query database in GPU
+   * @param id
+   */
+    void handle_createClient(const clid_t& id);
     
-    void handle_initOpenGL(const clid_t& clientId);
-    void handle_requestFrame(const clid_t& clientId, json_t &output);
-    // void handle_queryDatabase(const clid_t& clientId, json_t &output);
-    void handle_closeOpenGL(const clid_t& clientId);
+   /**
+   * @param id
+   * @param resolve
+   * @param json
+   */
+    void handle_initOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json);
+
+   /**
+   * @param id
+   * @param resolve
+   * @param json
+   */
+    void handle_requestFrame(const clid_t& id, const rply_t& resolve, const json_t& json);
+
+   /**
+   * @param id
+   */
+    void handle_closeOpenGL(const clid_t& id);
 };
 
 }}
