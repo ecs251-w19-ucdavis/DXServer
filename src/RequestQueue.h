@@ -109,7 +109,7 @@ private:
                  const json_t &json,
                  const rply_t &resolve);
 private:
-    std::mutex         _lock;
+    std::mutex         _queue_lock;
     std::deque<rqst_t> _central_queue;
     std::deque<rqst_t> _graphic_queue; // I renamed them to avoid mis-reading
     std::shared_ptr<TaskHandler> _central_hanlder;

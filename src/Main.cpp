@@ -20,7 +20,7 @@
 #include "Graphics/DXGL.h"
 #include "Communicator.h"
 #include "TaskHandler.h"
-#include "Workspace.h"
+#include "Experiment.h"
 //#include "ToBeRemoved/RequestHandler.h"
 
 // Other headers from the same project, as needed.
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 
     std::thread GPU_thread([&]() {
         dx::DXGL_init(argc, argv); // we should actually call this in the GPU thread
-        startWorkspace(&argc, const_cast<const char **>(argv));
+        startExperiment(&argc, const_cast<const char **>(argv));
         GPU_handler->run();
     });
     GPU_thread.detach();

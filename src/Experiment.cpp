@@ -7,7 +7,7 @@
 //                                                                           //
 //===========================================================================//
 
-#include "Workspace.h"
+#include "Experiment.h"
 
 #include "Util/Client.h"
 #include "Graphics/DXGL.h"
@@ -18,7 +18,7 @@
 
 namespace v3d {
 
-void startWorkspace(int *argc, const char **argv)
+void startExperiment(int *argc, const char **argv)
 {
 #if MULTI_CLIENT_MODE
 
@@ -26,12 +26,25 @@ void startWorkspace(int *argc, const char **argv)
         dx::clients::add("-ex" + std::to_string(i));
     }
     for (int i = 1; i < *argc; ++i) {
-        dx::clients::get("-ex" + std::to_string(i))->initDebug(argv[i], dx::winW, dx::winH);
+        auto c = dx::clients::get("-ex" + std::to_string(i));
+        c->openProject(argv[i], dx::winW, dx::winH);
+        c->initGL();
     }
     for (int i = 1; i < *argc; ++i) {
-        dx::clients::get("-ex" + std::to_string(i))->renderDebug();
+        // render
+        auto c = dx::clients::get("-ex" + std::to_string(i));
+        auto _handler = c->getEngine();
+        _handler->loadGL();
+        _handler->updateView();
+        _handler->updateRenderer();
+        _handler->render();
+        auto buffer = _handler->copyRenderedImage();
+        // save
+        QImage img = QImage(&(*buffer)[0], dx::winW, dx::winH, QImage::Format_RGB32).mirrored(false, true);
+        std::string filename = "image" + c->getId() + ".PNG";
+        img.save(filename.c_str(), nullptr, -1);
+        std::cout << "save file as " << filename << std::endl;
     }
-
 
 #else
 

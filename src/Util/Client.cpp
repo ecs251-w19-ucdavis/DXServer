@@ -102,11 +102,6 @@ void details::Client::incrementCurrCounter()
 	_curr_request_counter += 1;
 }
 
-//void details::Client::init(int w, int h)
-//{
-//
-//}
-
 void details::Client::initGL()
 {
 	_handler->createFBO();
@@ -127,11 +122,6 @@ void details::Client::openProject(const std::string& fname, int w, int h)
     _handler->loadData();
 }
 
-//void details::Client::loadDataToGPU() // GPU
-//{
-//	// do nothing
-//	PING;
-//}
 
 void details::Client::removeDataFromGPU() // GPU
 {
@@ -164,69 +154,11 @@ json_t details::Client::renderFrame(const JsonValue &input)
 
 json_t details::Client::getScene()
 {
-//	_currentProjectName = "/Users/qwu/Work/projects/vidi/dxserver/data/vorts1.json";
-//	_fbo = std::make_shared<FramebufferGL>(winW, winH);
-//	_handler = std::make_shared<Engine>(_fbo, winW, winH);
-//	_handler->loadJSONFile(_currentProjectName);
-//	_handler->loadData();
-//	_handler->initScene();
-//	_handler->updateView();
-//	_handler->updateRenderer();
 	if (_handler) {
 		return std::move(_handler->serializeScene());
 	} else {
 		return json_t();
 	}
-}
-
-void details::Client::initDebug(const std::string& fname, int w, int h)
-{
-	if (_created)
-	{
-		std::cout << "you initialized the client twice" << std::endl;
-	}
-
-	_currentProjectName = fname;
-
-	_handler = std::make_shared<Engine>(w, h);
-	_handler->createFBO();
-
-	_created = true;
-}
-
-void details::Client::renderDebug()
-{
-	// create renderer
-	_handler->loadJSONFile(_currentProjectName);
-
-    _handler->loadData();
-
-	//_handler->loadGL();
-
-    _handler->initScene();
-	_handler->updateView();
-	_handler->updateRenderer();
-
-	//_handler->unloadGL();
-
-	//auto x = _handler->serializeScene();
-	//std::cout << JsonParser().stringify(x) << std::endl;
-
-	_handler->loadGL();
-
-	// render
-	_handler->render();
-
-	// get framebuffer image
-	auto buffer = _handler->copyRenderedImage();
-
-	// save
-	QImage img = QImage(&(*buffer)[0], dx::winW, dx::winH, QImage::Format_RGB32).mirrored(false, true);
-	std::string filename = "image" + _id + ".PNG";
-	img.save(filename.c_str(), nullptr, -1);
-	std::cout << "save file as " << filename << std::endl;
-
-	_handler->unloadGL();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

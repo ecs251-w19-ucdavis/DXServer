@@ -37,7 +37,7 @@ set (vidi3d_dxserver_SOURCES
   TaskHandler.cpp
   RequestQueue.cpp
 
-  Workspace.cpp
+  Experiment.cpp
   Main.cpp
   )
 
@@ -61,7 +61,7 @@ set (vidi3d_dxserver_HEADERS
   TaskHandler.h
   RequestQueue.h
 
-  Workspace.h
+  Experiment.h
   )
 
 get_property(_egl_available GLOBAL PROPERTY V3D_USE_EGL)

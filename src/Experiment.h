@@ -14,7 +14,7 @@
 #include <QImage>
 
 namespace v3d {
-void startWorkspace(int *argc, const char **argv);
+void startExperiment(int *argc, const char **argv);
 }
 
 #endif // DXSERVER_WORKSPACE_H

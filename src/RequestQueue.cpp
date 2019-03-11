@@ -48,7 +48,7 @@ void RequestQueue::enqueue(std::deque<rqst_t>& queue, const clid_t &client_id,
 void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t resolve)
 {
     // acquire a lock
-    std::unique_lock<std::mutex> lock(_lock);
+    std::unique_lock<std::mutex> lock(_queue_lock);
 
     // we create the client if not exist
     // -- there is a potential bug here. get and add should be one atomic operation
@@ -147,7 +147,7 @@ int RequestQueue::dequeue(std::deque<rqst_t> &queue,
                           rply_t &resolve)
 {
     // acquire a lock
-    std::unique_lock<std::mutex> lock(_lock);
+    std::unique_lock<std::mutex> lock(_queue_lock);
     // attempt to remove one request from the queue
     auto it = std::find_if(queue.begin(), queue.end(), [&](rqst_t &req) { return req->isReady(); });
     if (it != queue.end()) {

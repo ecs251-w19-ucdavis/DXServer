@@ -191,12 +191,6 @@ void GPUTaskHandler::processNextRequest()
 
     // check each request
     std::string method = json.get("method", "").toString();
-//    if (method == "createClient") {
-//
-//        handle_createClient(id, resolve, json);
-//        clients::get(id)->incrementCurrCounter();
-//
-//    } else
     if (method == "initGL") {
 
         handle_initOpenGL(id, resolve, json);
@@ -215,12 +209,6 @@ void GPUTaskHandler::processNextRequest()
     }
 
 }
-
-// Create client 
-//void GPUTaskHandler::handle_createClient(const clid_t& id, const rply_t& resolve, const json_t& json)
-//{
-//    clients::get(id)->init(600, 600);
-//}
 
 // Initialize OpenGL
 void GPUTaskHandler::handle_initOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json)
@@ -254,7 +242,7 @@ void GPUTaskHandler::handle_requestFrame(const clid_t& id, const rply_t& resolve
 void GPUTaskHandler::handle_closeOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
     // clients::get(clientId)->closeProject();
-    clients::get(id)->removeDataFromGPU();
+//    clients::get(id)->removeDataFromGPU();
 }
 
 

@@ -20,6 +20,7 @@
 #include <memory>
 #include <atomic>
 
+namespace v3d { void startExperiment(int *argc, const char **argv); }
 namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,14 +73,14 @@ namespace details {
  * This class defines the behavior of each client
  */
 class Client {
+    friend void v3d::startExperiment(int *argc, const char **argv);
 	friend client_t clients::add(clid_t);
 public:
-
 	/**
 	 * Set the client ID
 	 * @param id The client ID
 	 */
-	void   setId(clid_t id) { _id = id; }
+	void   setId(clid_t id) { _id = std::move(id); }
 	/**
 	 * Access the client ID
 	 * @return The client ID
@@ -104,40 +105,32 @@ public:
      */
 	void incrementCurrCounter();
 
-//	void init();
-	void initGL();
-
+	/** @name Request Handlers */
+	///@{
     void openProject(const std::string& fname, int w, int h);
-    void closeProject();
-
-//    void loadDataToGPU(); // GPU
-	void removeDataFromGPU(); // GPU
-
+	void initGL();
 	json_t getScene();
-
 	json_t renderFrame(const JsonValue &input = JsonValue());
-
-	void initDebug(const std::string& fname, int w, int h);
-	void renderDebug();
-
-
-private:
-	Client() : _curr_request_counter{0}, _next_request_counter{0} {}
+    void closeProject();
+    void removeDataFromGPU();
+    ///@}
 
 private:
+    /**
+     * Constructor
+     */
+	Client() : _curr_request_counter{0} , _next_request_counter{0} {}
 
-    std::string _currentProjectName;
+	/**
+	 * This is a function for debugging
+	 */
+    std::shared_ptr<dx::details::Engine> getEngine() { return _handler; }
 
+private:
 	bool _created = false; // to avoid initializing the client for too many times
-	bool _ready = false;
-
-//	std::mutex _lock;
-//	size_t _curr_request_counter = 0;
-//	size_t _next_request_counter = 0;
-
+	bool _ready   = false;
     std::atomic<size_t> _curr_request_counter;
     std::atomic<size_t> _next_request_counter;
-
 	clid_t _id = clid_t(); // empty means invalid
 	std::shared_ptr<dx::details::Engine> _handler;
 };
