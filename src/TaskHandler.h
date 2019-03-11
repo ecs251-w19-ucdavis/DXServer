@@ -61,8 +61,23 @@ public:
 
 private:
     void loadDatabase(const std::string& database);
-    void handle_queryDatabase(const clid_t& clientId, json_t &output);
-    void handle_getScene(const clid_t& clientId, json_t &output);
+
+    /**
+     * Query database in CPU
+     * @param id
+     * @param resolve
+     * @param json
+     */
+    void handle_queryDatabase(const clid_t& id, const rply_t& resolve, const json_t& json);
+
+    /**
+     *
+     * @param id
+     * @param resolve
+     * @param json
+     */
+    void handle_getScene(const clid_t& id, const rply_t& resolve, const json_t& json);
+
     void handle_loadData(const clid_t& clientId, const std::string& projectName);
     void handle_delData(const clid_t& clientId);
 

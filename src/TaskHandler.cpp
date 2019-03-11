@@ -40,76 +40,6 @@ CPUTaskHandler::CPUTaskHandler(RequestQueues &queue, const std::string &database
     loadDatabase(database);
 }
 
-void CPUTaskHandler::processNextRequest()
-{
-    /**
-     * Handle requests in CPU
-     * @param id <- client id
-     * @param resolve <- respond to client
-     * @param json <- request format
-     * 
-     */
-    clid_t id;
-    rply_t resolve;
-    json_t json;
-
-    /** get the data from the RequestQueue, since we split the openProject request into two parts:
-     *  1. load data (in CPU)
-     *  2. initilize OpenGL (in GPU)
-     * 
-     *  Here in CPU we deal with the load data request  
-     * 
-    */
-
-    // get the
-    // TODO FIXME busy waiting !!!
-    const int err = _queue.dequeueCPU(id, json, resolve);
-    if (err == 0) return;
-
-    std::string method = json.get("method", "").toString();
-
-    if (method == "queryDatabase") {
-
-        json_t output;
-        handle_queryDatabase(id, output);
-
-        // onResolve is used to respond to client
-        emit onResolve(resolves::add([=]() {
-            resolve(output);
-            log() << "[CPU Task] resolve queryDatabase " << id << std::endl;
-        }));
-        clients::get(id)->incrementCurrCounter();
-
-    } else if (method == "getScene") {
-
-        json_t output;
-        handle_getScene(id, output);
-        emit onResolve(resolves::add([=]() {
-            resolve(output);
-            log() << "[CPU Task] resolve getScene " << id << std::endl;
-        }));
-        clients::get(id)->incrementCurrCounter();
-
-    } else if (method == "loadData") {
-
-        std::string projFileName;
-        if (json.contains("params") &&
-            json["params"].isObject() &&
-            json["params"].contains("fileName") &&
-            json["params"]["fileName"].isString())
-        {
-            std::cout << "open project " << projFileName << std::endl;
-            projFileName = json["params"]["fileName"].toString();
-            handle_loadData(id, projFileName);
-        }
-        clients::get(id)->incrementCurrCounter();
-
-    } else {
-        std::cout << "unknown method " << method << std::endl;
-    }
-
-}
-
 void CPUTaskHandler::loadDatabase(const std::string& database)
 {
     // open the database file as a string
@@ -155,16 +85,86 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
     }
 }
 
-// Query database in CPU
-void CPUTaskHandler::handle_queryDatabase(const clid_t& clientId, json_t &output)
+void CPUTaskHandler::processNextRequest()
 {
+    /**
+     * Handle requests in CPU
+     * @param id <- client id
+     * @param resolve <- respond to client
+     * @param json <- request format
+     * 
+     */
+    clid_t id;
+    rply_t resolve;
+    json_t json;
+
+    /** get the data from the RequestQueue, since we split the openProject request into two parts:
+     *  1. load data (in CPU)
+     *  2. initilize OpenGL (in GPU)
+     * 
+     *  Here in CPU we deal with the load data request  
+     * 
+    */
+
+    // get the
+    // TODO FIXME busy waiting !!!
+    const int err = _queue.dequeueCPU(id, json, resolve);
+    if (err == 0) return;
+
+    std::string method = json.get("method", "").toString();
+
+    if (method == "queryDatabase") {
+
+        handle_queryDatabase(id, resolve, json);
+        clients::get(id)->incrementCurrCounter();
+
+    } else if (method == "getScene") {
+
+        handle_getScene(id, resolve, json);
+        clients::get(id)->incrementCurrCounter();
+
+    } else if (method == "loadData") {
+
+        std::string projFileName;
+        if (json.contains("params") &&
+            json["params"].isObject() &&
+            json["params"].contains("fileName") &&
+            json["params"]["fileName"].isString())
+        {
+            std::cout << "open project " << projFileName << std::endl;
+            projFileName = json["params"]["fileName"].toString();
+            handle_loadData(id, projFileName);
+        }
+        clients::get(id)->incrementCurrCounter();
+
+    } else {
+        std::cout << "unknown method " << method << std::endl;
+    }
+
+}
+
+// Query database in CPU
+void CPUTaskHandler::handle_queryDatabase(const clid_t& id, const rply_t& resolve, const json_t& json)
+{
+    json_t output;
+    // make a copy of the cached database if exists
     if (!_jsonDatabase.isNull()) { output = _jsonDatabase; } // make a copy
+    // this is used to respond to client
+    emit onResolve(resolves::add([=]() {
+        resolve(output);
+        log() << "[CPU Task] resolve queryDatabase " << id << std::endl;
+    }));
 }
 
 // Get scene in CPU
-void CPUTaskHandler::handle_getScene(const clid_t& clientId, json_t &output)
+void CPUTaskHandler::handle_getScene(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
-    output = std::move(clients::get(clientId)->getScene());
+    json_t output;
+    output = std::move(clients::get(id)->getScene());
+    emit onResolve(resolves::add([=]() {
+        resolve(output);
+        log() << "[CPU Task] resolve getScene " << id << std::endl;
+    }));
 }
 
 // Load data in CPU
