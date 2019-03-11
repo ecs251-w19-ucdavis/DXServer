@@ -58,10 +58,6 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 #endif
 
-
-    dx::DXGL_create(); // load modules, load all shaders
-
-
     std::shared_ptr<dx::RequestQueue> queue;
     std::shared_ptr<dx::Communicator> server;
     std::shared_ptr<dx::CPUTaskHandler> CPU_handler;
@@ -95,6 +91,7 @@ int main(int argc, char* argv[])
 
 
     std::thread GPU_thread([&]() {
+        dx::DXGL_create(); // load modules, load all shaders
         dx::DXGL_init(argc, argv); // we should actually call this in the GPU thread
         startExperiment(&argc, const_cast<const char **>(argv));
         GPU_handler->run();

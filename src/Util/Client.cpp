@@ -23,14 +23,21 @@ using namespace v3d::dx;
 static std::map<clid_t, client_t> _client_queue;
 static std::mutex                 _client_mutex; // lock for the client queue
 
+/** TODO Need a redesign here
+ * Not finished yet, but the principle should be:
+ * -> when one access the client, we actually should share the ownership of that client.
+ * -> if the client is deleted after sharing, its fine, since the deletion will only remove the entry in our internal queue.
+ * -> the client should be able to cleanup himself automatically in its destructor !
+ * -> request queue is in charge of calling the **pop** function !
+ */
 void clients::lock()
 {
-	_client_mutex.lock();
+//	_client_mutex.lock();
 }
 
 void clients::unlock()
 {
-	_client_mutex.unlock();
+//	_client_mutex.unlock();
 }
 
 int clients::pop(clid_t id)
