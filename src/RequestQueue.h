@@ -92,7 +92,7 @@ private:
     int  dequeue(std::deque<rqst_t>&, clid_t &client_id, json_t&, rply_t&);
     void enqueue(std::deque<rqst_t>&, const clid_t &client_id, size_t request_id,
                  int type, const json_t &json, const rply_t &resolve);
-    std::mutex _lock;
+    std::mutex         _lock;
     std::deque<rqst_t> _central_queue, _graphic_queue; // I renamed them to avoid mis-reading
 };
 

@@ -60,9 +60,9 @@ void v3d::dx::Communicator::close()
     _webSocketServer = nullptr;
 }
 
-void v3d::dx::Communicator::connectToRequestQueue(const RequestQueue * receiver)
+void v3d::dx::Communicator::connectToRequestQueue(std::shared_ptr<RequestQueue> receiver)
 {
-    connect(this, &Communicator::newRequest, receiver, &RequestQueue::newRequest);
+    connect(this, &Communicator::newRequest, receiver.get(), &RequestQueue::newRequest);
 }
 
 void v3d::dx::Communicator::rpcNotify(QWebSocket *target, const std::string &method, const JsonValue &params)

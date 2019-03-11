@@ -28,16 +28,18 @@ class TaskHandler : public QObject {
     Q_OBJECT
     using thread_t = std::shared_ptr<std::thread>;
 
-signals:
-    void onResolve(int);
-
 public:
-    explicit TaskHandler(RequestQueue & queue) : _queue(queue) {}
+    explicit TaskHandler() = default;
+    void connectToRequestQueue(std::shared_ptr<RequestQueue> queue);
+    void connectToCommunicator(std::shared_ptr<Communicator> receiver);
 
     virtual void processNextRequest() = 0;
-    void run() { while (true) processNextRequest(); }
-
-    void connectToCommunicator(const QObject *_receiver);
+    void run() {
+        if (!_queue) {
+            throw std::runtime_error("[Error] request queue hasn't been created.");
+        }
+        while (true) processNextRequest();
+    }
 
     void setPoolSize(size_t n) {
         _size = n;
@@ -46,9 +48,12 @@ public:
 
     void signal();
 
+signals:
+    void onResolve(int);
+
 protected:
-    RequestQueue &_queue;
-private:
+    std::shared_ptr<RequestQueue> _queue;
+
     std::vector<thread_t> _pool;
     size_t                _size = 1;
 
@@ -64,7 +69,7 @@ private:
 class CPUTaskHandler : public TaskHandler {
     Q_OBJECT
 public:
-    explicit CPUTaskHandler(RequestQueue &queue, const std::string& database = "database.json");
+    explicit CPUTaskHandler(const std::string& database = "database.json");
     void processNextRequest() override;
 
 private:
@@ -101,7 +106,7 @@ private:
 class GPUTaskHandler : public TaskHandler {
     Q_OBJECT
 public:
-    explicit GPUTaskHandler(RequestQueue & queue) : TaskHandler(queue) {}
+    GPUTaskHandler() = default;
     void processNextRequest() override;
 
 private:

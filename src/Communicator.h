@@ -56,7 +56,7 @@ public:
      * _RequestHandler.h_ and _RequestHandler.cpp_.
      * @param receiver
      */
-    void connectToRequestQueue(const RequestQueue *receiver);
+    void connectToRequestQueue(std::shared_ptr<RequestQueue> receiver);
 
     /**
      * Check if there is at least one connection.
