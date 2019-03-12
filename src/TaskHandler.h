@@ -96,13 +96,13 @@ private:
      * @param id
      * @param projectName
      */
-    void handle_loadData(const clid_t& id, const std::string& projectName);
+    void handle_loadData(const clid_t& id, const rply_t& resolve, const json_t& json);
 
     /**
      *
      * @param id
      */
-    void handle_delData(const clid_t& id);
+    void handle_delData(const clid_t& id, const rply_t& resolve, const json_t& json);
 
 private:
     json_t _jsonDatabase; // here we cache the database file to avoid reloading
@@ -133,7 +133,7 @@ private:
    * Query database in GPU
    * @param id
    */
-    void handle_createClient(const clid_t& id);
+    void handle_createClient(const clid_t& id, const rply_t& resolve, const json_t& json);
     
    /**
    * @param id
@@ -152,7 +152,7 @@ private:
    /**
    * @param id
    */
-    void handle_closeOpenGL(const clid_t& id);
+    void handle_closeOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json);
 };
 
 }}
