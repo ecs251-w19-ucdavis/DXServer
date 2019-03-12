@@ -15,44 +15,11 @@ namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//namespace queues {
-
-//static queues_t global_queue = details::createRequestQueues();
-
-//void create()
-//{
-//    global_queue.reset(new RequestQueue());
-//}
-
-//queues_t get()
-//{
-//    return global_queue;
-//}
-//
-//RequestQueue* raw()
-//{
-//    return global_queue.get();
-//}
-//
-//}
-
-///////////////////////////////////////////////////////////////////////////////
-
-//queues_t details::createRequestQueues()
-//{
-//    queues_t ret;
-//    ret.reset(new RequestQueue());
-//    return std::move(ret);
-//}
-
-void RequestQueue::enqueue(std::deque<rqst_t>& queue,
-                            const clid_t &client_id,
-                            size_t request_id,
-                            int type,
-                            const json_t &json,
-                            const rply_t &resolve)
+void RequestQueue::enqueue(std::deque<rqst_t>& queue, const clid_t &client_id,
+                           const size_t &request_id,  const int    &type,
+                           const json_t &json,        const rply_t &resolve)
 {
-    auto request = requests::create(client_id, request_id, type, json, std::move(resolve));
+    auto request = requests::create(client_id, request_id, type, json, resolve);
     auto method = json.get("method", "").toString();
     switch (type) {
         case 0: { // a call
@@ -60,17 +27,15 @@ void RequestQueue::enqueue(std::deque<rqst_t>& queue,
             break;
         }
         case 1: { // a notification
-            auto first = std::find_if(queue.begin(), queue.end(), [&](rqst_t &req) {
-                return (req->getClientId() == client_id && req->getType() == type);
+            // if there is a previous notification, replace it with the new one
+            auto it = std::find_if(queue.begin(), queue.end(), [&](rqst_t &req) {
+                const auto _json = req->getRequest();
+                return (_json.get("method", "").toString() == method) &&
+                       (req->getClientId() == client_id) &&
+                       (req->getType() == type);
             });
-            if (first != queue.end()) { // if there is a previous notification, replace it with the new one
-                auto it = std::find_if(queue.begin(), first + 1, [&](rqst_t &req) {
-                    const auto req_json = req->getRequest();
-                    return (req_json.get("method", "").toString() == method);
-                });
-                if (it != queue.end()) { // if there is a previous notification, replace it with the new one
-                    *it = request;
-                }
+            if (it != queue.end()) { // if there is a previous notification, replace it with the new one
+                *it = request;
             }
             queue.push_back(request);
             break;
@@ -82,10 +47,12 @@ void RequestQueue::enqueue(std::deque<rqst_t>& queue,
 
 void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t resolve)
 {
-    _lock.lock();
+    // acquire a lock
+    std::unique_lock<std::mutex> lock(_queue_lock);
 
     // we create the client if not exist
-    // TODO there is a potential bug here. get and add should be one atomic operation
+    // -- there is a potential bug here. get and add should be one atomic operation
+    // -- but this might not be a real error since we have a request queue lock
     auto client = clients::get(client_id);
     if (!client) client = clients::add(client_id);
 
@@ -96,7 +63,7 @@ void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t re
         auto request_id = client->nextCounterValue(); // I implemented two counters in the Client class
         // each time there is a new request coming in, we get the value of 'next request counter' and
         // then increment the counter's value.
-        enqueue(_central_queue, client_id, request_id, type, json, std::move(resolve));
+        enqueue(_central_queue, client_id, request_id, type, json, resolve);
 
     }
     else if (method == "openProject") {
@@ -106,20 +73,20 @@ void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t re
         // -- loadData     enters _central_queue
         // -- initGL       enters _graphic_queue
 
-        const auto request_create_gpu = client -> nextCounterValue();
+//        const auto request_create_gpu = client -> nextCounterValue();
         const auto request_loadDT_cpu = client -> nextCounterValue();
         const auto request_initGL_gpu = client -> nextCounterValue();
-        json_t &json_create_gpu = json;
-        json_t  json_loadDT_cpu = json;
+//        json_t &json_create_gpu = json;
+        json_t &json_loadDT_cpu = json;
         json_t  json_initGL_gpu = json;
-        json_create_gpu["method"] = "createClient";
+//        json_create_gpu["method"] = "createClient";
         json_loadDT_cpu["method"] = "loadData";
         json_initGL_gpu["method"] = "initGL";
 //        std::cout << "gpu task " << json_create_gpu.get("method", "").toString() << " " << request_create_gpu << std::endl;
 //        std::cout << "cpu task " << json_loadDT_cpu.get("method", "").toString() << " " << request_loadDT_cpu << std::endl;
 //        std::cout << "gpu task " << json_initGL_gpu.get("method", "").toString() << " " << request_initGL_gpu << std::endl;
-        enqueue(_graphic_queue, client_id, request_create_gpu, type, json_create_gpu, std::move(rply_t{}));
-        enqueue(_central_queue, client_id, request_loadDT_cpu, type, json_loadDT_cpu, std::move(rply_t{}));
+//        enqueue(_graphic_queue, client_id, request_create_gpu, type, json_create_gpu, rply_t{});
+        enqueue(_central_queue, client_id, request_loadDT_cpu, type, json_loadDT_cpu, rply_t{});
         enqueue(_graphic_queue, client_id, request_initGL_gpu, type, json_initGL_gpu, resolve);
 
     }
@@ -137,7 +104,7 @@ void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t re
         json_cpu["method"] = "delData";
 //        std::cout << "gpu task" << json_gpu.get("method", "").toString() << " " << request_gpu << std::endl;
 //        std::cout << "cpu task" << json_cpu.get("method", "").toString() << " " << request_cpu << std::endl;
-        enqueue(_graphic_queue, client_id, request_gpu, type, json_gpu, std::move(rply_t{}));
+        enqueue(_graphic_queue, client_id, request_gpu, type, json_gpu, rply_t{});
         enqueue(_central_queue, client_id, request_cpu, type, json_cpu, resolve);
 
     }
@@ -158,29 +125,30 @@ void RequestQueue::newRequest(clid_t client_id, int type, json_t json, rply_t re
     //debugQueue(_central_queue);
     //debugQueue(_graphic_queue);
 
-    _lock.unlock();
 }
 
 int RequestQueue::dequeueCPU(clid_t &client_id,
-                              json_t& request,
-                              rply_t& resolve)
+                             json_t& request,
+                             rply_t& resolve)
 {
     return dequeue(_central_queue, client_id, request, resolve);
 }
 
 int RequestQueue::dequeueGPU(clid_t &client_id,
-                              json_t& request,
-                              rply_t& resolve)
+                             json_t& request,
+                             rply_t& resolve)
 {
     return dequeue(_graphic_queue, client_id, request, resolve);
 }
 
 int RequestQueue::dequeue(std::deque<rqst_t> &queue,
-                           clid_t &client_id,
-                           json_t &request,
-                           rply_t &resolve)
+                          clid_t &client_id,
+                          json_t &request,
+                          rply_t &resolve)
 {
-    _lock.lock();
+    // acquire a lock
+    std::unique_lock<std::mutex> lock(_queue_lock);
+    // attempt to remove one request from the queue
     auto it = std::find_if(queue.begin(), queue.end(), [&](rqst_t &req) { return req->isReady(); });
     if (it != queue.end()) {
         client_id = (*it)->getClientId();
@@ -188,10 +156,8 @@ int RequestQueue::dequeue(std::deque<rqst_t> &queue,
         resolve = (*it)->getResolve();
         queue.erase(it);
         debugQueue(queue);
-        _lock.unlock();
         return 1;
     } else {
-        _lock.unlock();
         return 0;
     }
 };

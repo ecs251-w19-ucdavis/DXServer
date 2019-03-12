@@ -16,18 +16,19 @@
 #include <functional>
 #include <vector>
 #include <thread>
+#include <condition_variable>
 
 namespace v3d { namespace dx {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * This class suppose to handle requests from the event queue. This class will run in a different thread.
+ * This class suppose to handle requests from the event queue. This class will
+ * run in a different thread.
  */
 class TaskHandler : public QObject {
     Q_OBJECT
     using thread_t = std::shared_ptr<std::thread>;
-
 public:
     explicit TaskHandler() = default;
     void connectToRequestQueue(std::shared_ptr<RequestQueue> queue);
@@ -46,7 +47,14 @@ public:
         _pool.resize(n);
     }
 
-    void signal();
+    void signal() {
+        _cv_var.notify_one();
+    }
+
+    template<class Pred>
+    void wait(const Pred& p) {
+
+    }
 
 signals:
     void onResolve(int);
@@ -57,8 +65,8 @@ protected:
     std::vector<thread_t> _pool;
     size_t                _size = 1;
 
-    std::condition_variable cv;
-    std::mutex              lock;
+    std::condition_variable _cv_var;
+    std::mutex              _cv_lck;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,7 +92,7 @@ private:
     void handle_queryDatabase(const clid_t& id, const rply_t& resolve, const json_t& json);
 
     /**
-     *
+     * Get scene in CPU
      * @param id
      * @param resolve
      * @param json
@@ -92,15 +100,18 @@ private:
     void handle_getScene(const clid_t& id, const rply_t& resolve, const json_t& json);
 
     /**
-     *
+     * Load data in CPU
      * @param id
-     * @param projectName
+     * @param resolve
+     * @param json
      */
     void handle_loadData(const clid_t& id, const rply_t& resolve, const json_t& json);
 
     /**
-     *
+     * Delete data after disconnection in CPU
      * @param id
+     * @param resolve
+     * @param json
      */
     void handle_delData(const clid_t& id, const rply_t& resolve, const json_t& json);
 
@@ -120,38 +131,49 @@ public:
     void processNextRequest() override;
 
 private:
-/**
- * Create client
- * Requset: OpenProject, initialize OpenGL, pass data to GPU 
- * Request: RequestFrame
- * Request: QuerryData
- * Request: CloseProject, clean OpenGL
- */
-
 
    /**
+<<<<<<< HEAD
    * Query database in GPU
    * @param id
    */
     void handle_createClient(const clid_t& id, const rply_t& resolve, const json_t& json);
     
+=======
+    * Create client
+    * Requset: OpenProject, initialize OpenGL, pass data to GPU
+    * Request: RequestFrame
+    * Request: QuerryData
+    * Request: CloseProject, clean OpenGL
+    */
+
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
    /**
-   * @param id
-   * @param resolve
-   * @param json
-   */
+    *
+    * @param id
+    * @param resolve
+    * @param json
+    */
     void handle_initOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json);
 
    /**
-   * @param id
-   * @param resolve
-   * @param json
-   */
+    *
+    * @param id
+    * @param resolve
+    * @param json
+    */
     void handle_requestFrame(const clid_t& id, const rply_t& resolve, const json_t& json);
 
    /**
+<<<<<<< HEAD
    * @param id
    */
+=======
+    * @param id
+    * @param resolve
+    * @param json
+    */
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
     void handle_closeOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json);
 };
 

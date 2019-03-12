@@ -13,7 +13,7 @@
 #include <QBuffer>
 #include <QImage>
 
-#include <unistd.h>
+#include <mutex>
 
 #include <iostream>
 #include <numeric>
@@ -96,32 +96,25 @@ void CPUTaskHandler::loadDatabase(const std::string& database)
 
 void CPUTaskHandler::processNextRequest()
 {
-    /**
-     * Handle requests in CPU
-     * @param id <- client id
-     * @param resolve <- respond to client
-     * @param json <- request format
-     * 
-     */
-    clid_t id;
-    rply_t resolve;
-    json_t json;
+    // variables from a request
+    clid_t id; // client id
+    rply_t resolve; //< respond to client
+    json_t json; //< request format
 
-    /** get the data from the RequestQueue, since we split the openProject request into two parts:
+    /*
+     * Get the data from the RequestQueue, since we split the openProject request into two parts:
      *  1. load data (in CPU)
      *  2. initilize OpenGL (in GPU)
      * 
-     *  Here in CPU we deal with the load data request  
-     * 
-    */
+     *  Here in CPU we deal with the load data request
+     */
 
-    // get the
     // TODO FIXME busy waiting !!!
     const int err = _queue->dequeueCPU(id, json, resolve);
     if (err == 0) return;
 
+    // check each request
     std::string method = json.get("method", "").toString();
-
     if (method == "queryDatabase") {
 
         handle_queryDatabase(id, resolve, json);
@@ -195,9 +188,12 @@ void CPUTaskHandler::handle_getScene(const clid_t& id, const rply_t& resolve, co
 // Load data in CPU
 void CPUTaskHandler::handle_loadData(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
+<<<<<<< HEAD
     // record start time
     auto start = std::chrono::high_resolution_clock::now();
 
+=======
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
     std::string projFileName;
     if (json.contains("params") &&
         json["params"].isObject() &&
@@ -206,6 +202,7 @@ void CPUTaskHandler::handle_loadData(const clid_t& id, const rply_t& resolve, co
     {
         std::cout << "open project " << projFileName << std::endl;
         projFileName = json["params"]["fileName"].toString();
+<<<<<<< HEAD
     }
     clients::get(id)->openProject(projFileName);
 
@@ -219,35 +216,40 @@ void CPUTaskHandler::handle_loadData(const clid_t& id, const rply_t& resolve, co
           << std::endl;   
 
     
+=======
+        clients::get(id)->openProject(projFileName, 600, 600);
+    }
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
 }
 
 // Delete data after disconnection in CPU
 void CPUTaskHandler::handle_delData(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
+<<<<<<< HEAD
     clients::get(id)->closeProject();
+=======
+//    clients::get(id)->closeProject();
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void GPUTaskHandler::processNextRequest()
 {
-    /**
-     * Handle requests in CPU
-     * @param id <- client id
-     * @param resolve <- respond to client
-     * @param json <- request format
-     * 
-     */
-    clid_t id;
-    rply_t resolve;
-    json_t json;
+    // variables from a request
+    clid_t id; // client id
+    rply_t resolve; //< respond to client
+    json_t json; //< request format
 
     // TODO FIXME busy waiting !!!
     const int err = _queue->dequeueGPU(id, json, resolve);
     if (err == 0) return;
 
+    // check each request
     std::string method = json.get("method", "").toString();
+    if (method == "initGL") {
 
+<<<<<<< HEAD
     if (method == "createClient") {
 
         handle_createClient(id, resolve, json);
@@ -255,6 +257,8 @@ void GPUTaskHandler::processNextRequest()
 
     } else if (method == "initGL") {
 
+=======
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
         handle_initOpenGL(id, resolve, json);
         clients::get(id)->incrementCurrCounter();
 
@@ -264,32 +268,42 @@ void GPUTaskHandler::processNextRequest()
         clients::get(id)->incrementCurrCounter();
 
     } else if(method == "unloadGL") {
+<<<<<<< HEAD
         // TODO
+=======
+
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
         handle_closeOpenGL(id, resolve, json);
         clients::get(id)->incrementCurrCounter();
+
     }
 
-}
-
-
+<<<<<<< HEAD
 // Create client 
 void GPUTaskHandler::handle_createClient(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
     clients::get(id)->init(600, 600);
+=======
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
 }
-
 
 // Initialize OpenGL
 void GPUTaskHandler::handle_initOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
+<<<<<<< HEAD
     // record start time
     auto start = std::chrono::high_resolution_clock::now();
 
     json_t dummy;
+=======
+    json_t dummy;
+    clients::get(id)->initGL();
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
     emit onResolve(resolves::add([=]() {
         resolve(dummy);
         log() << "[GPU Task] resolve openProject " << id << std::endl;
     }));
+<<<<<<< HEAD
     clients::get(id)->initGL();
 
     // record end time
@@ -301,17 +315,23 @@ void GPUTaskHandler::handle_initOpenGL(const clid_t& id, const rply_t& resolve, 
           << " s\n"
           << std::endl;
 
+=======
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
 }
-
 
 // Request Frame
 void GPUTaskHandler::handle_requestFrame(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
+<<<<<<< HEAD
     // record start time
     auto start = std::chrono::high_resolution_clock::now();
     
     JsonValue scene;
     if (json.contains("params") && 
+=======
+    JsonValue scene;
+    if (json.contains("params") &&
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
         json["params"].isObject() &&
         json["params"].contains("scene"))
     {
@@ -321,6 +341,7 @@ void GPUTaskHandler::handle_requestFrame(const clid_t& id, const rply_t& resolve
     emit onResolve(resolves::add([=]() {
         resolve(params);
         log() << "[GPU Task] resolve requestFrame " << id << std::endl;
+<<<<<<< HEAD
 
     }));
     // record end time
@@ -334,6 +355,10 @@ void GPUTaskHandler::handle_requestFrame(const clid_t& id, const rply_t& resolve
 
 }
 
+=======
+    }));
+}
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
 
 // Close OpenGL
 void GPUTaskHandler::handle_closeOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json)
@@ -342,6 +367,7 @@ void GPUTaskHandler::handle_closeOpenGL(const clid_t& id, const rply_t& resolve,
     auto start = std::chrono::high_resolution_clock::now();
 
     // clients::get(clientId)->closeProject();
+<<<<<<< HEAD
     clients::get(id)->removeDataFromGPU();
 
     // record end time
@@ -352,6 +378,9 @@ void GPUTaskHandler::handle_closeOpenGL(const clid_t& id, const rply_t& resolve,
           << diff.count() 
           << " s\n"
           << std::endl;
+=======
+//    clients::get(id)->removeDataFromGPU();
+>>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
 }
 
 
