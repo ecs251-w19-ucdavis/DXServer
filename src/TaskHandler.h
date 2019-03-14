@@ -133,13 +133,6 @@ public:
 private:
 
    /**
-<<<<<<< HEAD
-   * Query database in GPU
-   * @param id
-   */
-    void handle_createClient(const clid_t& id, const rply_t& resolve, const json_t& json);
-    
-=======
     * Create client
     * Requset: OpenProject, initialize OpenGL, pass data to GPU
     * Request: RequestFrame
@@ -147,7 +140,6 @@ private:
     * Request: CloseProject, clean OpenGL
     */
 
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
    /**
     *
     * @param id
@@ -165,15 +157,10 @@ private:
     void handle_requestFrame(const clid_t& id, const rply_t& resolve, const json_t& json);
 
    /**
-<<<<<<< HEAD
-   * @param id
-   */
-=======
     * @param id
     * @param resolve
     * @param json
     */
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
     void handle_closeOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json);
 };
 

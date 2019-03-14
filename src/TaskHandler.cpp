@@ -140,7 +140,7 @@ void CPUTaskHandler::processNextRequest()
 void CPUTaskHandler::handle_queryDatabase(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
     // record start time
-    auto start = std::chrono::high_resolution_clock::now();
+//    auto start = std::chrono::high_resolution_clock::now();
 
     json_t output;
     // make a copy of the cached database if exists
@@ -152,20 +152,19 @@ void CPUTaskHandler::handle_queryDatabase(const clid_t& id, const rply_t& resolv
     }));
 
     // record end time
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = end-start;
-        
-    log() << "[GPU Task] resolve queryDatabase Time: "
-          << diff.count() 
-          << " s\n"
-          << std::endl;    
+//    auto end = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> diff = end-start;
+//    log() << "[GPU Task] resolve queryDatabase Time: "
+//          << diff.count()
+//          << " s\n"
+//          << std::endl;
 }
 
 // Get scene in CPU
 void CPUTaskHandler::handle_getScene(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
     // record start time
-    auto start = std::chrono::high_resolution_clock::now();
+//    auto start = std::chrono::high_resolution_clock::now();
 
     json_t output;
     output = std::move(clients::get(id)->getScene());
@@ -175,25 +174,21 @@ void CPUTaskHandler::handle_getScene(const clid_t& id, const rply_t& resolve, co
     }));
 
     // record end time
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = end-start;
-        
-    log() << "[GPU Task] resolve getScene Time: "
-          << diff.count() 
-          << " s\n"
-          << std::endl;
+//    auto end = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> diff = end-start;
+//    log() << "[GPU Task] resolve getScene Time: "
+//          << diff.count()
+//          << " s\n"
+//          << std::endl;
 
 }
 
 // Load data in CPU
 void CPUTaskHandler::handle_loadData(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
-<<<<<<< HEAD
     // record start time
-    auto start = std::chrono::high_resolution_clock::now();
+//    auto start = std::chrono::high_resolution_clock::now();
 
-=======
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
     std::string projFileName;
     if (json.contains("params") &&
         json["params"].isObject() &&
@@ -202,34 +197,22 @@ void CPUTaskHandler::handle_loadData(const clid_t& id, const rply_t& resolve, co
     {
         std::cout << "open project " << projFileName << std::endl;
         projFileName = json["params"]["fileName"].toString();
-<<<<<<< HEAD
     }
-    clients::get(id)->openProject(projFileName);
+    clients::get(id)->openProject(projFileName, 600, 600);
 
      // record end time
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = end-start;
-        
-    log() << "[GPU Task] resolve loadData Time: "
-          << diff.count() 
-          << " s\n"
-          << std::endl;   
-
-    
-=======
-        clients::get(id)->openProject(projFileName, 600, 600);
-    }
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
+//    auto end = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> diff = end-start;
+//    log() << "[GPU Task] resolve loadData Time: "
+//          << diff.count()
+//          << " s\n"
+//          << std::endl;
 }
 
 // Delete data after disconnection in CPU
 void CPUTaskHandler::handle_delData(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
-<<<<<<< HEAD
-    clients::get(id)->closeProject();
-=======
 //    clients::get(id)->closeProject();
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -249,16 +232,6 @@ void GPUTaskHandler::processNextRequest()
     std::string method = json.get("method", "").toString();
     if (method == "initGL") {
 
-<<<<<<< HEAD
-    if (method == "createClient") {
-
-        handle_createClient(id, resolve, json);
-        clients::get(id)->incrementCurrCounter();
-
-    } else if (method == "initGL") {
-
-=======
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
         handle_initOpenGL(id, resolve, json);
         clients::get(id)->incrementCurrCounter();
 
@@ -268,70 +241,44 @@ void GPUTaskHandler::processNextRequest()
         clients::get(id)->incrementCurrCounter();
 
     } else if(method == "unloadGL") {
-<<<<<<< HEAD
-        // TODO
-=======
 
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
         handle_closeOpenGL(id, resolve, json);
         clients::get(id)->incrementCurrCounter();
 
     }
 
-<<<<<<< HEAD
-// Create client 
-void GPUTaskHandler::handle_createClient(const clid_t& id, const rply_t& resolve, const json_t& json)
-{
-    clients::get(id)->init(600, 600);
-=======
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
 }
 
 // Initialize OpenGL
 void GPUTaskHandler::handle_initOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
-<<<<<<< HEAD
     // record start time
-    auto start = std::chrono::high_resolution_clock::now();
+//    auto start = std::chrono::high_resolution_clock::now();
 
     json_t dummy;
-=======
-    json_t dummy;
     clients::get(id)->initGL();
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
     emit onResolve(resolves::add([=]() {
         resolve(dummy);
         log() << "[GPU Task] resolve openProject " << id << std::endl;
     }));
-<<<<<<< HEAD
-    clients::get(id)->initGL();
 
     // record end time
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = end-start;
-        
-    log() << "[GPU Task] resolve initOpenGL Time: "
-          << diff.count() 
-          << " s\n"
-          << std::endl;
-
-=======
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
+//    auto end = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> diff = end-start;
+//    log() << "[GPU Task] resolve initOpenGL Time: "
+//          << diff.count()
+//          << " s\n"
+//          << std::endl;
 }
 
 // Request Frame
 void GPUTaskHandler::handle_requestFrame(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
-<<<<<<< HEAD
     // record start time
-    auto start = std::chrono::high_resolution_clock::now();
+//    auto start = std::chrono::high_resolution_clock::now();
     
     JsonValue scene;
-    if (json.contains("params") && 
-=======
-    JsonValue scene;
     if (json.contains("params") &&
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
         json["params"].isObject() &&
         json["params"].contains("scene"))
     {
@@ -341,46 +288,33 @@ void GPUTaskHandler::handle_requestFrame(const clid_t& id, const rply_t& resolve
     emit onResolve(resolves::add([=]() {
         resolve(params);
         log() << "[GPU Task] resolve requestFrame " << id << std::endl;
-<<<<<<< HEAD
-
     }));
+
     // record end time
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = end-start;
-        
-    log() << "[GPU Task] resolve requestFrame Time: "
-          << diff.count() 
-          << " s\n"
-          << std::endl;
+//    auto end = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> diff = end-start;
+//    log() << "[GPU Task] resolve requestFrame Time: "
+//          << diff.count()
+//          << " s\n"
+//          << std::endl;
 
 }
-
-=======
-    }));
-}
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
 
 // Close OpenGL
 void GPUTaskHandler::handle_closeOpenGL(const clid_t& id, const rply_t& resolve, const json_t& json)
 {
     // record start time
-    auto start = std::chrono::high_resolution_clock::now();
+//    auto start = std::chrono::high_resolution_clock::now();
 
-    // clients::get(clientId)->closeProject();
-<<<<<<< HEAD
-    clients::get(id)->removeDataFromGPU();
+//    clients::get(id)->removeDataFromGPU();
 
     // record end time
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = end-start;
-        
-    log() << "[GPU Task] resolve closeOpenGL Time: "
-          << diff.count() 
-          << " s\n"
-          << std::endl;
-=======
-//    clients::get(id)->removeDataFromGPU();
->>>>>>> 42243558cc35d2bf63e6dc761549c411fc2c0151
+//    auto end = std::chrono::high_resolution_clock::now();
+//    std::chrono::duration<double> diff = end-start;
+//    log() << "[GPU Task] resolve closeOpenGL Time: "
+//          << diff.count()
+//          << " s\n"
+//          << std::endl;
 }
 
 
