@@ -1,8 +1,30 @@
-# Daxian
+# DXServer
 
-[PTask paper](https://dl.acm.org/citation.cfm?id=2043579)
+## A Scalable Multi-Client Volume Visualization Server
 
-When you're happy like a fool, let it take you over
+### [Intro](https://docs.google.com/presentation/d/1qXWaEy7tCw9A6jymXJcniUHjlqITfiwI11qqwl1lh3A/edit?usp=sharing)
 
-When everything is out, you gotta take it in
+### Compile
+```  
+mkdir build/  
+cd build/   
+cmake ..  
+make  
+```
+
+### Run
+```
+cd nodejs/  
+node main.js
+```
+
+### Benchmark
+```
+cd nodejs/  
+node simulate.js  
+```
+
+### Have fun rendering!
+
+
 
