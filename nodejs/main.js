@@ -76,9 +76,6 @@ function MainLoop(socket) {
     socket.on('requestFrame', (params) => {
       engine.NotifyRequestFrame(params)
     })
-    socket.on('exchangeKey', (key) => {
-      engine.NotifyExchangeKey(key)
-    })
     socket.on('clientKey', (key) => {
       console.log('client key', key)
     })
