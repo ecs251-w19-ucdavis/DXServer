@@ -1,5 +1,7 @@
 # DXServer
 
+## This repository will be marked as deprecated after the end of WQ 2019.
+
 ## A Scalable Multi-Client Volume Visualization Server
 
 ### [Intro](https://docs.google.com/presentation/d/1qXWaEy7tCw9A6jymXJcniUHjlqITfiwI11qqwl1lh3A/edit?usp=sharing)
